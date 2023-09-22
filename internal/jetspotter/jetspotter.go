@@ -55,8 +55,8 @@ func GetAircraftInProximity(latitude string, longitude string, maxRange int) (ai
 	return flightData.AC, nil
 }
 
-// GetAircraftTypeInRange returns all aircraft of specified type within maxRange kilometers of the location.
-func GetAircraftTypeInRange(location Location, aircraftType string, maxRange int) (aircraft []Aircraft, err error) {
+// GetFiltererdAircraftInRange returns all aircraft of specified type within maxRange kilometers of the location.
+func GetFiltererdAircraftInRange(location Location, aircraftType string, maxRange int) (aircraft []Aircraft, err error) {
 	var flightData FlightData
 	miles := int(float32(maxRange) / 1.60934)
 	endpoint, err := url.JoinPath(baseURL,
