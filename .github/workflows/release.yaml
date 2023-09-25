@@ -58,7 +58,7 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v1
-        if: steps.semantic.outputs.new_release_published
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: jetspotter
         env:
