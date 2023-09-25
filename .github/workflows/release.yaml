@@ -63,6 +63,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: bin/jetspotter
+          asset_path: jetspotter
           asset_name: jetspotter
           asset_content_type: application/octet-stream
