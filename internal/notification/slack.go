@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"jetspotter/internal/jetspotter"
+	"log"
 	"net/http"
 	"os"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/jftuga/geodist"
 )
 
@@ -17,16 +19,24 @@ type SlackMessage struct {
 }
 
 type Block struct {
-	Type   string  `json:"type"`
-	Fields []Field `json:"fields,omitempty"`
+	Type     string  `json:"type,omitempty"`
+	Fields   []Field `json:"fields,omitempty"`
+	Title    *Title  `json:"title,omitempty"`
+	ImageURL string  `json:"image_url,omitempty"`
+	AltText  string  `json:"alt_text,omitempty"`
 }
 
+type Title struct {
+	Type  string `json:"type,omitempty"`
+	Text  string `json:"text,omitempty"`
+	Emoji bool   `json:"emoji,omitempty"`
+}
 type Field struct {
-	Type string `json:"type"`
-	Text string `json:"text"`
+	Type string `json:"type,omitempty"`
+	Text string `json:"text,omitempty"`
 }
 
-func buildMessage(aircraft []jetspotter.Aircraft, maxAmount int) SlackMessage {
+func buildMessage(aircraft []jetspotter.Aircraft, maxAmount int) (SlackMessage, error) {
 
 	var blocks []Block
 	blocks = append(blocks, Block{
@@ -77,20 +87,73 @@ func buildMessage(aircraft []jetspotter.Aircraft, maxAmount int) SlackMessage {
 			},
 		})
 
-		blocks = append(blocks, Block{
-			Type: "divider",
-		})
+		imageURL, err := getImageURL(fmt.Sprintf("https://www.planespotting.be/index.php?page=aircraft&registration=%s", ac.TailNumber))
+		if imageURL != "" {
+			blocks = append(blocks,
+				Block{
+					Type: "image",
+					Title: &Title{
+						Type:  "plain_text",
+						Text:  fmt.Sprintf("%s - %s", ac.Desc, ac.TailNumber),
+						Emoji: true,
+					},
+					ImageURL: imageURL,
+					AltText:  fmt.Sprintf("%s with registration number %s", ac.Desc, ac.TailNumber),
+				})
+		}
+
+		if err != nil {
+			return SlackMessage{}, err
+		}
+
+		blocks = append(blocks,
+			Block{
+				Type: "divider",
+			},
+		)
 	}
-	//				"text": "You have a new request:\n*<fakeLink.toEmployeeProfile.com|Fred Enriquez - New device request>*"
 
 	slackMessage := SlackMessage{Blocks: blocks}
-	return slackMessage
+	return slackMessage, nil
+}
+
+func getImageURL(URL string) (imageURL string, err error) {
+	req, err := http.NewRequest("GET", URL, nil)
+	if err != nil {
+		return "", err
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	if res.StatusCode != 200 {
+		return "", errors.New(fmt.Sprintf("Received status code %d", res.StatusCode))
+	}
+
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	doc.Find("meta[property='og:image']").Each(func(index int, element *goquery.Selection) {
+		if content, exists := element.Attr("content"); exists {
+			imageURL = content
+		}
+	})
+
+	return imageURL, nil
 }
 
 func SendSlackMessage(aircraft []jetspotter.Aircraft, maxAmount int) error {
 	webHookURL := os.Getenv("SLACK_WEBHOOK_URL")
+	slackMessage, err := buildMessage(aircraft, maxAmount)
+	if err != nil {
+		return err
+	}
 
-	data, err := json.Marshal(buildMessage(aircraft, maxAmount))
+	data, err := json.Marshal(slackMessage)
 	if err != nil {
 		return err
 	}
@@ -102,7 +165,7 @@ func SendSlackMessage(aircraft []jetspotter.Aircraft, maxAmount int) error {
 	}
 
 	if resp.StatusCode != 200 {
-		fmt.Printf("%s", string(data))
+		fmt.Printf("%s\n", string(data))
 		return errors.New(fmt.Sprintf("Received status code %v", resp.StatusCode))
 	}
 

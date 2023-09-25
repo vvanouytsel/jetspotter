@@ -15,8 +15,8 @@ func exitWithError(err error) {
 
 func main() {
 	// TODO read this from environment variables if defined
-	maxRangeKilometers := 50
-	maxAmountAircraftSlackMessage := 20
+	maxRangeKilometers := 40
+	maxAmountAircraftSlackMessage := 8
 	// aircraftType := aircraft.ALL.Identifier
 	aircraftType := aircraft.F16.Identifier
 
