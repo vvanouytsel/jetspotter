@@ -56,13 +56,10 @@ jobs:
           tag: ${{ steps.semantic.outputs.new_release_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+      - name: Release
+        uses: softprops/action-gh-release@v1
         if: steps.semantic.outputs.new_release_published
+        with:
+          files: jetspotter
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: jetspotter
-          asset_name: jetspotter
-          asset_content_type: application/octet-stream
