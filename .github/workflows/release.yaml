@@ -36,6 +36,9 @@ jobs:
         run: |
           go build -o jetspotter -ldflags "-linkmode external -extldflags -static" cmd/jetspotter/jetspotter.go
 
+      - name: Install conventional-changelog-conventionalcommits
+        run: npm install conventional-changelog-conventionalcommits
+
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v4
         id: semantic
