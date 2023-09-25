@@ -16,19 +16,28 @@ import (
 // Vars
 var (
 	baseURL  = "https://api.adsb.one/v2/point"
-	BullsEye = Location{
+	Bullseye = Location{
 		Latitude:  51.078395,
 		Longitude: 5.018769,
 	}
 )
 
-/* calculateDistance returns the rounded distance between two coordinates in kilometers */
+/* CalculateDistance returns the rounded distance between two coordinates in kilometers */
 func CalculateDistance(source geodist.Coord, destination geodist.Coord) int {
 	_, kilometers := geodist.HaversineDistance(source, destination)
 	return int(kilometers)
 }
 
-/* getAircraftInProximity returns all aircraft within a specified maxRange of a latitude/longitude point. */
+/* CalculateDistanceToBullseye returns the rounded distance between a source coordinate and a pre-defined bullseye */
+func CalculateDistanceToBullseye(source geodist.Coord) int {
+	_, kilometers := geodist.HaversineDistance(source, geodist.Coord{
+		Lat: Bullseye.Latitude,
+		Lon: Bullseye.Longitude,
+	})
+	return int(kilometers)
+}
+
+/* GetAircraftInProximity returns all aircraft within a specified maxRange of a latitude/longitude point. */
 func GetAircraftInProximity(latitude string, longitude string, maxRange int) (aircraft []Aircraft, err error) {
 	var flightData FlightData
 	endpoint, err := url.JoinPath(baseURL, latitude, longitude, strconv.Itoa(maxRange))
@@ -105,14 +114,14 @@ func filterAircraftByType(aircraft []Aircraft, aircraftType string) []Aircraft {
 
 // FormatAircraft prints an Aircraft in a readable manner.
 func FormatAircraft(aircraft Aircraft) string {
-	if aircraft.Flight == "" {
-		aircraft.Flight = "UNKNOWN"
+	if aircraft.Callsign == "" {
+		aircraft.Callsign = "UNKNOWN"
 	}
 
 	distance := CalculateDistance(
 		geodist.Coord{
-			Lat: BullsEye.Latitude,
-			Lon: BullsEye.Longitude,
+			Lat: Bullseye.Latitude,
+			Lon: Bullseye.Longitude,
 		},
 		geodist.Coord{
 			Lat: aircraft.Lat,
@@ -120,8 +129,17 @@ func FormatAircraft(aircraft Aircraft) string {
 		},
 	)
 
-	return fmt.Sprintf("Callsign: %s\nDescription: %s\nType: %s\nTail number: %s\nAltitude: %v\nDistance: %vkm\n",
-		aircraft.Flight, aircraft.Desc, aircraft.PlaneType, aircraft.TailNumber, aircraft.AltBaro, distance)
+	return fmt.Sprintf("Callsign: %s\n"+
+		"Description: %s\n"+
+		"Type: %s\n"+
+		"Tail number: %s\n"+
+		"Altitude: %vft\n"+
+		"Speed: %dkn\n"+
+		"Distance: %vkm\n"+
+		"URL: %s",
+		aircraft.Callsign, aircraft.Desc, aircraft.PlaneType,
+		aircraft.TailNumber, aircraft.AltBaro,
+		int(aircraft.GS), distance, fmt.Sprintf("https://globe.adsbexchange.com/?icao=%s\n", aircraft.ICAO))
 }
 
 // PrintAircraft prints a list of Aircraft in a readable manner.

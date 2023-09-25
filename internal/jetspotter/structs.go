@@ -12,9 +12,9 @@ type FlightData struct {
 }
 
 type Aircraft struct {
-	Hex         string        `json:"hex"`
+	ICAO        string        `json:"hex"`
 	Type        string        `json:"type"`
-	Flight      string        `json:"flight"`
+	Callsign    string        `json:"flight"`
 	TailNumber  string        `json:"r"`
 	PlaneType   string        `json:"t"`
 	Desc        string        `json:"desc"`

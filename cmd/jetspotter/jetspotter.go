@@ -16,10 +16,11 @@ func exitWithError(err error) {
 func main() {
 	// TODO read this from environment variables if defined
 	maxRangeKilometers := 50
-	aircraftType := aircraft.ALL.Identifier
-	// aircraftType := aircraft.F16.Identifier
+	maxAmountAircraftSlackMessage := 20
+	// aircraftType := aircraft.ALL.Identifier
+	aircraftType := aircraft.F16.Identifier
 
-	aircraft, err := jetspotter.GetFiltererdAircraftInRange(jetspotter.BullsEye, aircraftType, maxRangeKilometers)
+	aircraft, err := jetspotter.GetFiltererdAircraftInRange(jetspotter.Bullseye, aircraftType, maxRangeKilometers)
 	if err != nil {
 		exitWithError(err)
 	}
@@ -27,7 +28,7 @@ func main() {
 	jetspotter.PrintAircraft(aircraft)
 
 	if len(aircraft) > 0 {
-		notification.SendSlackMessage(aircraft)
+		err = notification.SendSlackMessage(aircraft, maxAmountAircraftSlackMessage)
 		if err != nil {
 			exitWithError(err)
 		}
