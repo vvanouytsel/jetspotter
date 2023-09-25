@@ -1,0 +1,60 @@
+name: 'Release'
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: [ubuntu-latest]
+    name: Tests
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      - name: Run tests
+        shell: bash
+        run: |
+          go test ./internal/... --count 1
+
+  release:
+    needs: [test]
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+      - uses: actions/checkout@v3
+
+      - name: Build
+        id: build
+        run: |
+          go build -o jetspotter -ldflags "-linkmode external -extldflags -static" cmd/jetspotter/jetspotter.go
+
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create the release
+        uses: ncipollo/release-action@v1
+        id: release
+        with:
+          artifacts: jetspotter
+          name: ${{ steps.semantic.outputs.new_release_version }}
+          body: ${{ steps.semantic.outputs.new_release_notes }}
+          tag: ${{ steps.semantic.outputs.new_release_version }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: bin/jetspotter
+          asset_name: jetspotter
+          asset_content_type: application/octet-stream

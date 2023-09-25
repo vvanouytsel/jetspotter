@@ -1,0 +1,133 @@
+---
+plugins:
+- - "@semantic-release/commit-analyzer"
+  - preset: conventionalcommits
+    releaseRules:
+    - breaking: true
+      release: major
+    - revert: true
+      release: patch
+    - type: feat
+      release: minor
+    - type: refactor
+      release: patch
+    - type: fix
+      release: patch
+    - type: revert
+      release: patch
+    presetConfig:
+      types:
+      - type: feat
+      - type: fix
+      - type: refactor
+      - type: revert
+      - type: chore
+      - type: ci
+      - type: docs
+      - type: style
+      - type: perf
+      - type: test
+    parserOpts:
+      noteKeywords:
+      - BREAKING CHANGE
+      - BREAKING CHANGES
+      - BREAKING
+- - "@semantic-release/release-notes-generator"
+  - preset: conventionalcommits
+    presetConfig:
+      types:
+      - type: feat
+        section: Features
+      - type: fix
+        section: Bug Fixes
+      - type: refactor
+        section: Refactor
+      - type: revert
+        section: Refactor
+      - type: chore
+        hidden: true
+      - type: ci
+        hidden: true
+      - type: docs
+        section: Documentation
+      - type: style
+        hidden: true
+      - type: perf
+        hidden: true
+      - type: test
+        hidden: true
+    parserOpts:
+      noteKeywords:
+      - BREAKING CHANGE
+      - BREAKING CHANGES
+      - BREAKING
+branches:
+- "+([0-9])?(.{+([0-9]),x}).x"
+- main
+- name: "*-beta"
+  prerelease: true
+---
+plugins:
+- - "@semantic-release/commit-analyzer"
+  - preset: conventionalcommits
+    releaseRules:
+    - breaking: true
+      release: major
+    - revert: true
+      release: patch
+    - type: feat
+      release: minor
+    - type: refactor
+      release: patch
+    - type: fix
+      release: patch
+    - type: revert
+      release: patch
+    presetConfig:
+      types:
+      - type: feat
+      - type: fix
+      - type: refactor
+      - type: revert
+      - type: chore
+      - type: ci
+      - type: docs
+      - type: style
+      - type: perf
+      - type: test
+    parserOpts:
+      noteKeywords:
+      - BREAKING CHANGE
+      - BREAKING CHANGES
+      - BREAKING
+- - "@semantic-release/release-notes-generator"
+  - preset: conventionalcommits
+    presetConfig:
+      types:
+      - type: feat
+        section: Features
+      - type: fix
+        section: Bug Fixes
+      - type: refactor
+        section: Refactor
+      - type: revert
+        section: Refactor
+      - type: chore
+        hidden: true
+      - type: ci
+        hidden: true
+      - type: docs
+        section: Documentation
+      - type: style
+        hidden: true
+      - type: perf
+        hidden: true
+      - type: test
+        hidden: true
+    parserOpts:
+      noteKeywords:
+      - BREAKING CHANGE
+      - BREAKING CHANGES
+      - BREAKING
+branches:
+- main

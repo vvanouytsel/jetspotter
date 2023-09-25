@@ -5,7 +5,7 @@ It is used to send notifications if a specified type of aircraft has been spotte
 
 ## Build
 
-TODO
+Pushing to master triggers the release [workflow](./workflows/release.yaml).
 
 ## Run
 
@@ -15,7 +15,9 @@ go run cmd/jetspotter/*
 
 ## Test
 
-TODO
+```bash
+go test -buildvcs=false ./internal/... -p 1 --count=1
+```
 
 ## Deploy
 
