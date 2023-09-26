@@ -40,6 +40,12 @@ jobs:
         run: |
           go build -o jetspotter -ldflags "-linkmode external -extldflags -static" cmd/jetspotter/jetspotter.go
 
+      - uses: actions/upload-artifact@v3
+        name: Upload artifact
+        with:
+          name: jetspotter
+          path: jetspotter
+
       - name: Install conventional-changelog-conventionalcommits
         run: npm install conventional-changelog-conventionalcommits
 
@@ -55,6 +61,11 @@ jobs:
     if: needs.build.outputs.new_release_version
     runs-on: [ubuntu-22.04]
     steps:
+      - uses: actions/download-artifact@v3
+        name: Download artifact
+        with:
+          name: jetspotter
+
       - name: Create the release
         uses: ncipollo/release-action@v1
         id: release
