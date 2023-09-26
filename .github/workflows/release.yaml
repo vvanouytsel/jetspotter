@@ -21,10 +21,13 @@ jobs:
         run: |
           go test ./internal/... --count 1
 
-  release:
-    name: Create release
+  build:
+    name: Build
     needs: [test]
     runs-on: [ubuntu-22.04]
+    outputs:
+      new_release_version: ${{ steps.check_semantic.outputs.new_release_version }}
+      new_release_notes: ${{ steps.check_semantic.outputs.new_release_published }}
     steps:
       - uses: actions/setup-go@v4
         with:
@@ -39,27 +42,24 @@ jobs:
       - name: Install conventional-changelog-conventionalcommits
         run: npm install conventional-changelog-conventionalcommits
 
-      - name: Semantic Release
+      - name: Check semantic release
         uses: cycjimmy/semantic-release-action@v4
-        id: semantic
+        id: check_semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  release:
+    name: Create release
+    needs: [build]
+    if: needs.build.outputs.new_release_version
+    runs-on: [ubuntu-22.04]
+    steps:
       - name: Create the release
         uses: ncipollo/release-action@v1
-        if: steps.semantic.outputs.new_release_published
         id: release
         with:
           artifacts: jetspotter
-          name: ${{ steps.semantic.outputs.new_release_version }}
-          body: ${{ steps.semantic.outputs.new_release_notes }}
-          tag: ${{ steps.semantic.outputs.new_release_version }}
+          name: ${{needs.build.outputs.new_release_version }}
+          body: ${{ needs.build.outputs.new_release_notes }}
+          tag: ${{ needs.build.outputs.new_release_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: jetspotter
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
