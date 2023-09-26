@@ -129,7 +129,8 @@ func getImageURL(URL string) (imageURL string, err error) {
 	}
 
 	if res.StatusCode != 200 {
-		return "", errors.New(fmt.Sprintf("Received status code %d", res.StatusCode))
+		fmt.Printf("Received status code %d for URL %s\n", res.StatusCode, URL)
+		return "", nil
 	}
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
