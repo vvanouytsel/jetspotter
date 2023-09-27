@@ -6,6 +6,7 @@ import (
 	"jetspotter/internal/jetspotter"
 	notification "jetspotter/internal/notification"
 	"os"
+	"strconv"
 )
 
 func exitWithError(err error) {
@@ -14,9 +15,12 @@ func exitWithError(err error) {
 }
 
 func main() {
-	// TODO read this from environment variables if defined
-	maxRangeKilometers := 40
 	maxAmountAircraftSlackMessage := 8
+	maxRangeKilometers, err := strconv.Atoi(jetspotter.GetEnvVariable("MAX_RANGE_KILOMETERS", "30"))
+	if err != nil {
+		exitWithError(err)
+	}
+
 	// aircraftType := aircraft.ALL.Identifier
 	aircraftType := aircraft.F16.Identifier
 

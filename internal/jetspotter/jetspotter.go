@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 
 	aircr "jetspotter/internal/aircraft"
@@ -151,4 +152,13 @@ func PrintAircraft(aircraft []Aircraft) {
 	for _, ac := range aircraft {
 		fmt.Println(FormatAircraft(ac))
 	}
+}
+
+// GetEnvVariable looks up a specified environment variable, if not set the specified default is used
+func GetEnvVariable(key, fallback string) string {
+	value, exists := os.LookupEnv(key)
+	if !exists {
+		value = fallback
+	}
+	return value
 }
