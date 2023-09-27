@@ -27,3 +27,4 @@ go test -buildvcs=false ./internal/... -p 1 --count=1
 The following environment variables have to be set:
 
 * SLACK_WEBHOOK_URL: The Webhook URL to send messages to Slack
+* AIRCRAFT_TYPE: The type of aircraft you want to spot, if not specified all types will be spotted

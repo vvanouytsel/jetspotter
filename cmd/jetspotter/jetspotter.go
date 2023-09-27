@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"jetspotter/internal/aircraft"
 	"jetspotter/internal/jetspotter"
 	notification "jetspotter/internal/notification"
 	"os"
@@ -21,9 +20,7 @@ func main() {
 		exitWithError(err)
 	}
 
-	// aircraftType := aircraft.ALL.Identifier
-	aircraftType := aircraft.F16.Identifier
-
+	aircraftType := jetspotter.GetEnvVariable("AIRCRAFT_TYPE", "ALL")
 	aircraft, err := jetspotter.GetFiltererdAircraftInRange(jetspotter.Bullseye, aircraftType, maxRangeKilometers)
 	if err != nil {
 		exitWithError(err)
