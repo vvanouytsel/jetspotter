@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"jetspotter/internal/configuration"
 	"jetspotter/internal/jetspotter"
 	"log"
 	"net/http"
@@ -36,7 +37,7 @@ type Field struct {
 	Text string `json:"text,omitempty"`
 }
 
-func buildMessage(aircraft []jetspotter.Aircraft, maxAmount int) (SlackMessage, error) {
+func buildMessage(aircraft []jetspotter.Aircraft, config configuration.Config) (SlackMessage, error) {
 
 	var blocks []Block
 	blocks = append(blocks, Block{
@@ -50,7 +51,7 @@ func buildMessage(aircraft []jetspotter.Aircraft, maxAmount int) (SlackMessage, 
 	})
 
 	for i, ac := range aircraft {
-		if i > maxAmount {
+		if i > config.MaxAircraftSlackMessage {
 			break
 		}
 
@@ -79,10 +80,13 @@ func buildMessage(aircraft []jetspotter.Aircraft, maxAmount int) (SlackMessage, 
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Distance:* %vkm", jetspotter.CalculateDistanceToBullseye(geodist.Coord{
-						Lat: ac.Lat,
-						Lon: ac.Lon,
-					})),
+					Text: fmt.Sprintf("*Distance:* %vkm", jetspotter.CalculateDistance(
+						geodist.Coord{
+							Lat: ac.Lat,
+							Lon: ac.Lon,
+						},
+						config.Location,
+					)),
 				},
 			},
 		})
@@ -147,9 +151,9 @@ func getImageURL(URL string) (imageURL string, err error) {
 	return imageURL, nil
 }
 
-func SendSlackMessage(aircraft []jetspotter.Aircraft, maxAmount int) error {
+func SendSlackMessage(aircraft []jetspotter.Aircraft, config configuration.Config) error {
 	webHookURL := os.Getenv("SLACK_WEBHOOK_URL")
-	slackMessage, err := buildMessage(aircraft, maxAmount)
+	slackMessage, err := buildMessage(aircraft, config)
 	if err != nil {
 		return err
 	}

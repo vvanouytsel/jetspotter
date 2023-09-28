@@ -65,8 +65,3 @@ type Aircraft struct {
 	Dst         float64       `json:"dst"`
 	Dir         float64       `json:"dir"`
 }
-
-type Location struct {
-	Latitude  float64
-	Longitude float64
-}

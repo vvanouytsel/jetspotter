@@ -6,35 +6,22 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 
 	aircr "jetspotter/internal/aircraft"
+	"jetspotter/internal/configuration"
 
 	"github.com/jftuga/geodist"
 )
 
 // Vars
 var (
-	baseURL  = "https://api.adsb.one/v2/point"
-	Bullseye = Location{
-		Latitude:  51.078395,
-		Longitude: 5.018769,
-	}
+	baseURL = "https://api.adsb.one/v2/point"
 )
 
 /* CalculateDistance returns the rounded distance between two coordinates in kilometers */
 func CalculateDistance(source geodist.Coord, destination geodist.Coord) int {
 	_, kilometers := geodist.HaversineDistance(source, destination)
-	return int(kilometers)
-}
-
-/* CalculateDistanceToBullseye returns the rounded distance between a source coordinate and a pre-defined bullseye */
-func CalculateDistanceToBullseye(source geodist.Coord) int {
-	_, kilometers := geodist.HaversineDistance(source, geodist.Coord{
-		Lat: Bullseye.Latitude,
-		Lon: Bullseye.Longitude,
-	})
 	return int(kilometers)
 }
 
@@ -66,12 +53,12 @@ func GetAircraftInProximity(latitude string, longitude string, maxRange int) (ai
 }
 
 // GetFiltererdAircraftInRange returns all aircraft of specified type within maxRange kilometers of the location.
-func GetFiltererdAircraftInRange(location Location, aircraftType string, maxRange int) (aircraft []Aircraft, err error) {
+func GetFiltererdAircraftInRange(location geodist.Coord, aircraftType string, maxRange int) (aircraft []Aircraft, err error) {
 	var flightData FlightData
 	miles := int(float32(maxRange) / 1.60934)
 	endpoint, err := url.JoinPath(baseURL,
-		strconv.FormatFloat(location.Latitude, 'f', -1, 64),
-		strconv.FormatFloat(location.Longitude, 'f', -1, 64),
+		strconv.FormatFloat(location.Lat, 'f', -1, 64),
+		strconv.FormatFloat(location.Lon, 'f', -1, 64),
 		strconv.Itoa(miles))
 	if err != nil {
 		return nil, err
@@ -114,16 +101,13 @@ func filterAircraftByType(aircraft []Aircraft, aircraftType string) []Aircraft {
 }
 
 // FormatAircraft prints an Aircraft in a readable manner.
-func FormatAircraft(aircraft Aircraft) string {
+func FormatAircraft(aircraft Aircraft, config configuration.Config) string {
 	if aircraft.Callsign == "" {
 		aircraft.Callsign = "UNKNOWN"
 	}
 
 	distance := CalculateDistance(
-		geodist.Coord{
-			Lat: Bullseye.Latitude,
-			Lon: Bullseye.Longitude,
-		},
+		config.Location,
 		geodist.Coord{
 			Lat: aircraft.Lat,
 			Lon: aircraft.Lon,
@@ -144,21 +128,12 @@ func FormatAircraft(aircraft Aircraft) string {
 }
 
 // PrintAircraft prints a list of Aircraft in a readable manner.
-func PrintAircraft(aircraft []Aircraft) {
+func PrintAircraft(aircraft []Aircraft, config configuration.Config) {
 	if len(aircraft) == 0 {
 		fmt.Println("No matching aircraft have been spotted.")
 	}
 
 	for _, ac := range aircraft {
-		fmt.Println(FormatAircraft(ac))
+		fmt.Println(FormatAircraft(ac, config))
 	}
-}
-
-// GetEnvVariable looks up a specified environment variable, if not set the specified default is used
-func GetEnvVariable(key, fallback string) string {
-	value, exists := os.LookupEnv(key)
-	if !exists {
-		value = fallback
-	}
-	return value
 }

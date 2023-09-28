@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"jetspotter/internal/configuration"
 	"jetspotter/internal/jetspotter"
 	notification "jetspotter/internal/notification"
 	"os"
-	"strconv"
 )
 
 func exitWithError(err error) {
@@ -14,22 +14,20 @@ func exitWithError(err error) {
 }
 
 func main() {
-	maxAmountAircraftSlackMessage := 8
-	maxRangeKilometers, err := strconv.Atoi(jetspotter.GetEnvVariable("MAX_RANGE_KILOMETERS", "30"))
+	config, err := configuration.GetConfig()
 	if err != nil {
 		exitWithError(err)
 	}
 
-	aircraftType := jetspotter.GetEnvVariable("AIRCRAFT_TYPE", "ALL")
-	aircraft, err := jetspotter.GetFiltererdAircraftInRange(jetspotter.Bullseye, aircraftType, maxRangeKilometers)
+	aircraft, err := jetspotter.GetFiltererdAircraftInRange(config.Location, config.AircraftType, config.MaxRangeKilometers)
 	if err != nil {
 		exitWithError(err)
 	}
 
-	jetspotter.PrintAircraft(aircraft)
+	jetspotter.PrintAircraft(aircraft, config)
 
 	if len(aircraft) > 0 {
-		err = notification.SendSlackMessage(aircraft, maxAmountAircraftSlackMessage)
+		err = notification.SendSlackMessage(aircraft, config)
 		if err != nil {
 			exitWithError(err)
 		}
