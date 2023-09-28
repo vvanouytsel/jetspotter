@@ -1,0 +1,16 @@
+site_name: JetSpotter
+repo_url: https://github.com/vvanouytsel/jetspotter
+repo_name: aws-saas-tenants
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
