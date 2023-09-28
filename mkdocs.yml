@@ -1,6 +1,6 @@
 site_name: JetSpotter
 repo_url: https://github.com/vvanouytsel/jetspotter
-repo_name: aws-saas-tenants
+repo_name: jetspotter
 theme:
   name: material
   icon:
