@@ -3,11 +3,13 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    
 
 jobs:
   build:
     name: Deploy documentation
-    runs-on: [ubuntu-22.04]
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout main
         uses: actions/checkout@v3
