@@ -12,11 +12,14 @@ jobs:
     runs-on: ubuntu-22.04
     name: Run tests
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-          cache: false
+      - name: Install dependencies
+        run: go get
+      - name: Build
+        run: go build -v ./...
       - name: Run tests
         shell: bash
         run: |

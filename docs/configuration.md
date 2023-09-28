@@ -2,6 +2,8 @@
 
 The following environment variables have to be set:
 
+TODO: make this dynamic
+
 * SLACK_WEBHOOK_URL: The Webhook URL to send messages to Slack
 * AIRCRAFT_TYPE: The [type of aircraft](./internal/aircraft/aircraft.go) you want to spot, if not specified all types will be spotted
 * LOCATION_LATITUDE: The latitude coordinate (e.g.: `51.16951182347571`)
