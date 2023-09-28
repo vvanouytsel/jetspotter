@@ -1,1 +1,1 @@
-# [Documentation]([docs/index.md](https://vvanouytsel.github.io/jetspotter/))
+# [Documentation](https://vvanouytsel.github.io/jetspotter/)
