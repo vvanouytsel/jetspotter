@@ -20,9 +20,5 @@
 # Go workspace file
 go.work
 
-
-# binary
-jetspotter
-
 # vscode
 .vscode
