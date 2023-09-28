@@ -3,7 +3,6 @@ package notification
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"jetspotter/internal/configuration"
 	"jetspotter/internal/jetspotter"
@@ -15,10 +14,12 @@ import (
 	"github.com/jftuga/geodist"
 )
 
+// SlackMessage is used to create a slack message
 type SlackMessage struct {
 	Blocks []Block `json:"blocks"`
 }
 
+// Block is a single block in a slack message
 type Block struct {
 	Type     string  `json:"type,omitempty"`
 	Fields   []Field `json:"fields,omitempty"`
@@ -27,11 +28,14 @@ type Block struct {
 	AltText  string  `json:"alt_text,omitempty"`
 }
 
+// Title is a tile in a block of a slack message
 type Title struct {
 	Type  string `json:"type,omitempty"`
 	Text  string `json:"text,omitempty"`
 	Emoji bool   `json:"emoji,omitempty"`
 }
+
+// Field is a field in a block of a slack message
 type Field struct {
 	Type string `json:"type,omitempty"`
 	Text string `json:"text,omitempty"`
@@ -151,6 +155,7 @@ func getImageURL(URL string) (imageURL string, err error) {
 	return imageURL, nil
 }
 
+// SendSlackMessage sends a slack message containing metadata of a list of aircraft
 func SendSlackMessage(aircraft []jetspotter.Aircraft, config configuration.Config) error {
 	webHookURL := os.Getenv("SLACK_WEBHOOK_URL")
 	slackMessage, err := buildMessage(aircraft, config)
@@ -171,7 +176,7 @@ func SendSlackMessage(aircraft []jetspotter.Aircraft, config configuration.Confi
 
 	if resp.StatusCode != 200 {
 		fmt.Printf("%s\n", string(data))
-		return errors.New(fmt.Sprintf("Received status code %v", resp.StatusCode))
+		return fmt.Errorf(fmt.Sprintf("Received status code %v", resp.StatusCode))
 	}
 
 	fmt.Println("A Slack notification has been sent!")

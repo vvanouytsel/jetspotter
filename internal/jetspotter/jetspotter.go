@@ -19,13 +19,13 @@ var (
 	baseURL = "https://api.adsb.one/v2/point"
 )
 
-/* CalculateDistance returns the rounded distance between two coordinates in kilometers */
+// CalculateDistance returns the rounded distance between two coordinates in kilometers
 func CalculateDistance(source geodist.Coord, destination geodist.Coord) int {
 	_, kilometers := geodist.HaversineDistance(source, destination)
 	return int(kilometers)
 }
 
-/* GetAircraftInProximity returns all aircraft within a specified maxRange of a latitude/longitude point. */
+// GetAircraftInProximity returns all aircraft within a specified maxRange of a latitude/longitude point
 func GetAircraftInProximity(latitude string, longitude string, maxRange int) (aircraft []Aircraft, err error) {
 	var flightData FlightData
 	endpoint, err := url.JoinPath(baseURL, latitude, longitude, strconv.Itoa(maxRange))
