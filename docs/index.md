@@ -17,6 +17,10 @@ Terminal output is always shown. Depending on the [configuration](configuration.
 ![JetSpotter slack notfication ](images/jetspotter-slack.png)
 ![JetSpotter slack notfication ](images/jetspotter-slack-2.png)
 
+## Releases
+
+Releases can be found on the [GitHub repository](https://github.com/vvanouytsel/jetspotter/releases)
+
 ## Build
 
 ```bash
