@@ -15,6 +15,7 @@ Terminal output is always shown. Depending on the [configuration](configuration.
 ### Slack
 
 ![JetSpotter slack notfication ](images/jetspotter-slack.png)
+![JetSpotter slack notfication ](images/jetspotter-slack-2.png)
 
 ## Build
 
