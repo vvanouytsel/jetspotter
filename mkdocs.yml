@@ -1,6 +1,8 @@
 site_name: JetSpotter
 repo_url: https://github.com/vvanouytsel/jetspotter
 repo_name: jetspotter
+plugins:
+  - include-markdown
 theme:
   name: material
   icon:

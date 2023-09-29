@@ -26,11 +26,10 @@ func main() {
 
 	jetspotter.PrintAircraft(aircraft, config)
 
-	if len(aircraft) > 0 {
+	if config.SlackWebHookURL != "" {
 		err = notification.SendSlackMessage(aircraft, config)
 		if err != nil {
 			exitWithError(err)
 		}
 	}
-
 }

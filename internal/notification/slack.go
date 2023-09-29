@@ -8,7 +8,6 @@ import (
 	"jetspotter/internal/jetspotter"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/jftuga/geodist"
@@ -157,7 +156,10 @@ func getImageURL(URL string) (imageURL string, err error) {
 
 // SendSlackMessage sends a slack message containing metadata of a list of aircraft
 func SendSlackMessage(aircraft []jetspotter.Aircraft, config configuration.Config) error {
-	webHookURL := os.Getenv("SLACK_WEBHOOK_URL")
+	if len(aircraft) < 1 {
+		return nil
+	}
+
 	slackMessage, err := buildMessage(aircraft, config)
 	if err != nil {
 		return err
@@ -168,7 +170,7 @@ func SendSlackMessage(aircraft []jetspotter.Aircraft, config configuration.Confi
 		return err
 	}
 
-	resp, err := http.Post(webHookURL, "application/json",
+	resp, err := http.Post(config.SlackWebHookURL, "application/json",
 		bytes.NewBuffer(data))
 	if err != nil {
 		return err

@@ -1,14 +1,16 @@
-# JetSpotter
+# Overview
 
 JetSpotter is a simple program that queries the ADS-B API.
 It is used to send notifications if a specified type of aircraft has been spotted within a specified range of a target location.
-If one or more jets have been spotted, a slack notification is sent. The slack notification contains some metadata about the aircraft, a picture fetched from [planespotting.be](www.planespotting.be) and a link to the [ADS-B exchange page](https://globe.adsbexchange.com) of that aircraft.
+If one or more jets have been spotted, a slack notification is sent. The slack notification contains some metadata about the aircraft, a picture fetched from <a href="https://www.planespotting.be" target="_blank">planespotting.be</a> and a link to the <a href="https://globe.adsbexchange.com" target="_blank">ADS-B exchange page</a> of that aircraft.
 
-![JetsSpotter slack notfication ](image/../images/jetspotter-slack.png)
+![JetSpotter slack notfication ](images/jetspotter-slack.png)
 
 ## Build
 
-Pushing to master triggers the release [workflow](.github/workflows/release.yaml).
+```bash
+go build -o jetspotter -ldflags "-linkmode external -extldflags -static" cmd/jetspotter/jetspotter.go
+```
 
 ## Run
 
@@ -19,5 +21,13 @@ go run cmd/jetspotter/*
 ## Test
 
 ```bash
-go test -buildvcs=false ./internal/... -p 1 --count=1
+make test
+```
+
+## Documentation
+
+Documentation for the configuration parameters can be generated.
+
+```bash
+make doc
 ```
