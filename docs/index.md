@@ -14,6 +14,9 @@ Terminal output is always shown. Depending on the [configuration](configuration.
 
 ### Slack
 
+Slack notifications are sent if the `SLACK_WEBHOOK_URL` is defined.
+Documentation how to set up notifications using incoming webhooks can be found in the [official slack documentation](https://api.slack.com/messaging/webhooks).
+
 ![JetSpotter slack notfication ](images/jetspotter-slack.png)
 ![JetSpotter slack notfication ](images/jetspotter-slack-2.png)
 
@@ -72,4 +75,15 @@ docker run -e LOCATION_LATITUDE=51.1697898378895 -e LOCATION_LONGITUDE=5.4701143
 
 # Binary
 LOCATION_LATITUDE=51.1697898378895 LOCATION_LONGITUDE=5.470114381971933 AIRCRAFT_TYPES=F16,A400 MAX_RANGE_KILOMETERS=100 ./jetspotter
+```
+
+Send a slack notification if one or more aircraft are spotted
+
+```bash
+# Docker
+docker run -e SLACK_WEBHOOK_URL=https://hooks.slack.com/services/XXX/YYY/ZZZ
+ ghcr.io/vvanouytsel/jetspotter:latest
+
+# Binary
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/XXX/YYY/ZZZ ./jetspotter
 ```
