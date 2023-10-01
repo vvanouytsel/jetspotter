@@ -69,6 +69,12 @@ var (
 		Description: "AIRBUS A-319",
 	}
 
+	// A400 ATLAS - A400
+	A400 = Type{
+		Identifier:  "A400",
+		Description: "A400 ATLAS",
+	}
+
 	// ALL ALL
 	ALL = Type{
 		Identifier:  "ALL",

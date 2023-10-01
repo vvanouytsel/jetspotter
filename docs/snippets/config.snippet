@@ -9,11 +9,13 @@ type Config struct {
 	// MAX_RANGE_KILOMETER 30
 	MaxRangeKilometers int
 
-	// Type of aircraft that you want to spot.
-	// A list of types is not yet supported, however using 'ALL' will disable the filter and show all aircraft.
+	// A comma seperated list of types that you want to spot
+	// If not set, 'ALL' will be used, which will disable the filter and show all aircraft within range.
 	// Full list can be found at https://www.icao.int/publications/doc8643/pages/search.aspx in 'Type Designator' column.
-	// AIRCRAFT_TYPE ALL
-	AircraftType string
+	// AIRCRAFT_TYPES ALL
+	// EXAMPLES
+	// AIRCRAFT_TYPES F16,F35
+	AircraftTypes []string
 
 	// Maximum amount of aircraft to show in a single slack message.
 	// Note that a single slack message only supports up to 50 'blocks' and each aircraft that we display has multiple blocks.

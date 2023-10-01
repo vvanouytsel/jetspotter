@@ -19,7 +19,7 @@ func main() {
 		exitWithError(err)
 	}
 
-	aircraft, err := jetspotter.GetFiltererdAircraftInRange(config.Location, config.AircraftType, config.MaxRangeKilometers)
+	aircraft, err := jetspotter.GetFiltererdAircraftInRange(config.Location, config.AircraftTypes, config.MaxRangeKilometers)
 	if err != nil {
 		exitWithError(err)
 	}

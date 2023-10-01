@@ -6,9 +6,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"slices"
 	"strconv"
 
-	aircr "jetspotter/internal/aircraft"
 	"jetspotter/internal/configuration"
 
 	"github.com/jftuga/geodist"
@@ -52,8 +52,8 @@ func GetAircraftInProximity(latitude string, longitude string, maxRange int) (ai
 	return flightData.AC, nil
 }
 
-// GetFiltererdAircraftInRange returns all aircraft of specified type within maxRange kilometers of the location.
-func GetFiltererdAircraftInRange(location geodist.Coord, aircraftType string, maxRange int) (aircraft []Aircraft, err error) {
+// GetFiltererdAircraftInRange returns all aircraft of specified types within maxRange kilometers of the location.
+func GetFiltererdAircraftInRange(location geodist.Coord, aircraftTypes []string, maxRange int) (aircraft []Aircraft, err error) {
 	var flightData FlightData
 	miles := int(float32(maxRange) / 1.60934)
 	endpoint, err := url.JoinPath(baseURL,
@@ -81,22 +81,25 @@ func GetFiltererdAircraftInRange(location geodist.Coord, aircraftType string, ma
 		return nil, err
 	}
 
-	if aircraftType == aircr.ALL.Identifier {
+	if slices.Contains(aircraftTypes, "ALL") {
 		return flightData.AC, nil
 	}
 
-	return filterAircraftByType(flightData.AC, aircraftType), nil
+	return filterAircraftByTypes(flightData.AC, aircraftTypes), nil
 }
 
-// filterAircraftByType returns a list of Aircraft that match the aircraftType.
-func filterAircraftByType(aircraft []Aircraft, aircraftType string) []Aircraft {
+// filterAircraftByTypes returns a list of Aircraft that match the aircraftTypes.
+func filterAircraftByTypes(aircraft []Aircraft, aircraftTypes []string) []Aircraft {
 	var filteredAircraft []Aircraft
 
 	for _, ac := range aircraft {
-		if ac.PlaneType == aircraftType || aircraftType == aircr.ALL.Identifier {
-			filteredAircraft = append(filteredAircraft, ac)
+		for _, aircraftType := range aircraftTypes {
+			if ac.PlaneType == aircraftType || aircraftType == "ALL" {
+				filteredAircraft = append(filteredAircraft, ac)
+			}
 		}
 	}
+
 	return filteredAircraft
 }
 

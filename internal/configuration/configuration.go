@@ -3,6 +3,7 @@ package configuration
 import (
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/jftuga/geodist"
 )
@@ -22,11 +23,13 @@ type Config struct {
 	// MAX_RANGE_KILOMETER 30
 	MaxRangeKilometers int
 
-	// Type of aircraft that you want to spot.
-	// A list of types is not yet supported, however using 'ALL' will disable the filter and show all aircraft.
+	// A comma seperated list of types that you want to spot
+	// If not set, 'ALL' will be used, which will disable the filter and show all aircraft within range.
 	// Full list can be found at https://www.icao.int/publications/doc8643/pages/search.aspx in 'Type Designator' column.
-	// AIRCRAFT_TYPE ALL
-	AircraftType string
+	// AIRCRAFT_TYPES ALL
+	// EXAMPLES
+	// AIRCRAFT_TYPES F16,F35
+	AircraftTypes []string
 
 	// Maximum amount of aircraft to show in a single slack message.
 	// Note that a single slack message only supports up to 50 'blocks' and each aircraft that we display has multiple blocks.
@@ -37,6 +40,16 @@ type Config struct {
 	// SLACK_WEBHOOK_URL ""
 	SlackWebHookURL string
 }
+
+// Environment variable names
+const (
+	SlackWebhookURL          = "SLACK_WEBHOOK_URL"
+	LocationLatitude         = "LOCATION_LATITUDE"
+	LocationLongitude        = "LOCATION_LONGITUDE"
+	MaxRangeKilometers       = "MAX_RANGE_KILOMETERS"
+	MaxAircrfaftSlackMessage = "MAX_AIRCRAFT_SLACK_MESSAGE"
+	AircraftTypes            = "AIRCRAFT_TYPES"
+)
 
 // getEnvVariable looks up a specified environment variable, if not set the specified default is used
 func getEnvVariable(key, fallback string) string {
@@ -50,29 +63,28 @@ func getEnvVariable(key, fallback string) string {
 // GetConfig attempts to read the configuration via environment variables and uses a default if the environment variable is not set
 func GetConfig() (config Config, err error) {
 
-	config.SlackWebHookURL = getEnvVariable("SLACK_WEBHOOK_URL", "")
+	config.SlackWebHookURL = getEnvVariable(SlackWebhookURL, "")
 
-	config.Location.Lat, err = strconv.ParseFloat(getEnvVariable("LOCATION_LATITUDE", "51.078395"), 64)
+	config.Location.Lat, err = strconv.ParseFloat(getEnvVariable(LocationLatitude, "51.078395"), 64)
 	if err != nil {
 		return Config{}, err
 	}
 
-	config.Location.Lon, err = strconv.ParseFloat(getEnvVariable("LOCATION_LONGITUDE", "5.018769"), 64)
+	config.Location.Lon, err = strconv.ParseFloat(getEnvVariable(LocationLongitude, "5.018769"), 64)
 	if err != nil {
 		return Config{}, err
 	}
 
-	config.MaxRangeKilometers, err = strconv.Atoi(getEnvVariable("MAX_RANGE_KILOMETERS", "30"))
+	config.MaxRangeKilometers, err = strconv.Atoi(getEnvVariable(MaxRangeKilometers, "30"))
 	if err != nil {
 		return Config{}, err
 	}
 
-	config.MaxAircraftSlackMessage, err = strconv.Atoi(getEnvVariable("MAX_AIRCRAFT_SLACK_MESSAGE", "8"))
+	config.MaxAircraftSlackMessage, err = strconv.Atoi(getEnvVariable(MaxAircrfaftSlackMessage, "8"))
 	if err != nil {
 		return Config{}, err
 	}
 
-	config.AircraftType = getEnvVariable("AIRCRAFT_TYPE", "ALL")
+	config.AircraftTypes = strings.Split(strings.ToUpper(strings.ReplaceAll(getEnvVariable(AircraftTypes, "ALL"), " ", "")), ",")
 	return config, nil
-
 }
