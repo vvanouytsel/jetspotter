@@ -97,5 +97,5 @@ jobs:
 
       - name: Build and push
         run: |
-          docker build -t ${{ env.REGISTRY }}:${{ needs.build.outputs.new_release_version }} .
+          docker build -t ${{ env.REGISTRY }}/${{ github.repository }}:${{ needs.build.outputs.new_release_version }} .
           docker push
