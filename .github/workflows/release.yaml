@@ -1,6 +1,7 @@
 name: 'Release'
 permissions:
   contents: write
+  packages: write
 on:
   workflow_dispatch:
   push:
@@ -71,7 +72,29 @@ jobs:
         id: release
         with:
           artifacts: jetspotter
-          name: ${{needs.build.outputs.new_release_version }}
+          name: ${{ needs.build.outputs.new_release_version }}
           body: ${{ needs.build.outputs.new_release_notes }}
           tag: ${{ needs.build.outputs.new_release_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [build]
+    env:
+      REGISTRY: ghcr.io
+    if: needs.build.outputs.new_release_version
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        run: |
+          docker build -t ${{ env.REGISTRY }}:${{ needs.build.outputs.new_release_version }}
+          docker push
