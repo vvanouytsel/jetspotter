@@ -97,6 +97,7 @@ jobs:
 
       - name: Build and push container image
         run: |
-          IMAGE="${{ env.REGISTRY }}/${{ github.repository }}:${{ needs.build.outputs.new_release_version }}"
-          docker build -t $IMAGE .
-          docker push $IMAGE
+          IMAGE="${{ env.REGISTRY }}/${{ github.repository }}"
+          docker build -t ${IMAGE}:${{ needs.build.outputs.new_release_version }} -t ${IMAGE}:latest .
+          docker push ${IMAGE}:${{ needs.build.outputs.new_release_version }}
+          docker push ${IMAGE}:latest
