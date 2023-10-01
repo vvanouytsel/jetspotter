@@ -19,7 +19,11 @@ Terminal output is always shown. Depending on the [configuration](configuration.
 
 ## Releases
 
-Releases can be found on the [GitHub repository](https://github.com/vvanouytsel/jetspotter/releases)
+Releases can be found on the [GitHub repository](https://github.com/vvanouytsel/jetspotter/releases).
+
+## Container images
+
+[Container images](https://github.com/vvanouytsel/jetspotter/pkgs/container/jetspotter) are also created for each release.
 
 ## Build
 
@@ -45,4 +49,27 @@ Documentation for the configuration parameters can be generated.
 
 ```bash
 make doc
+```
+
+## Examples
+
+Run jetspotter without extra parameters.
+
+```bash
+# Docker
+docker run ghcr.io/vvanouytsel/jetspotter:latest
+
+# Binary
+./jetspotter
+```
+
+Only show F16 and A400 aircraft within 100 kilometers of Kleine-Brogel airbase.
+
+```bash
+# Docker
+docker run -e LOCATION_LATITUDE=51.1697898378895 -e LOCATION_LONGITUDE=5.470114381971933 -e AIRCRAFT_TYPES=F16,A400 -e MAX_RANGE_KILOMETERS=100 ghcr.io/vvanouytsel/jetspotter:latest
+
+
+# Binary
+LOCATION_LATITUDE=51.1697898378895 LOCATION_LONGITUDE=5.470114381971933 AIRCRAFT_TYPES=F16,A400 MAX_RANGE_KILOMETERS=100 ./jetspotter
 ```
