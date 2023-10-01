@@ -16,7 +16,7 @@ Terminal output is always shown. Depending on the [configuration](configuration.
 
 ### Slack
 
-Slack notifications are sent if the `SLACK_WEBHOOK_URL` is defined.
+Slack notifications are sent if the `SLACK_WEBHOOK_URL` environment variable is defined.
 Documentation how to set up notifications using incoming webhooks can be found in the [official slack documentation](https://api.slack.com/messaging/webhooks).
 
 ![JetSpotter slack notfication ](images/jetspotter-slack.png)
