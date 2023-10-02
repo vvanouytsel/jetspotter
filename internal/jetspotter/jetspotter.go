@@ -212,6 +212,7 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.Speed = int(ac.GS)
 		acOutput.TailNumber = ac.TailNumber
 		acOutput.Type = ac.PlaneType
+		acOutput.ICAO = ac.ICAO
 		acOutput.URL = fmt.Sprintf("https://globe.adsbexchange.com/?icao=%s\n", ac.ICAO)
 		acOutput.CloudCoverage = getCloudCoverage(*weather, acOutput.Altitude)
 
