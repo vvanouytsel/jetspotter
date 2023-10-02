@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"sort"
 	"strconv"
 	"time"
 
@@ -172,8 +173,8 @@ func validateFields(aircraft Aircraft) Aircraft {
 		aircraft.Callsign = "UNKNOWN"
 	}
 
-	if aircraft.AltBaro == "groundft" || aircraft.AltBaro == "ground" {
-		aircraft.AltBaro = 0
+	if aircraft.AltBaro == "groundft" || aircraft.AltBaro == "ground" || aircraft.AltBaro == nil {
+		aircraft.AltBaro = float64(0)
 	}
 
 	altitudeBarometricFloat := aircraft.AltBaro.(float64)
@@ -217,4 +218,13 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutputs = append(acOutputs, acOutput)
 	}
 	return acOutputs, nil
+}
+
+// SortByDistance sorts a slice of aircraft to show the closest aircraft first
+func SortByDistance(aircraft []AircraftOutput) []AircraftOutput {
+	sort.Slice(aircraft, func(i, j int) bool {
+		return aircraft[i].Distance < aircraft[j].Distance
+	})
+
+	return aircraft
 }

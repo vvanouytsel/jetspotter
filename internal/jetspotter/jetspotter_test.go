@@ -135,3 +135,26 @@ func TestConvertFeetToMeters(t *testing.T) {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
 	}
 }
+
+func TestSortAircraftByDistance(t *testing.T) {
+	aircraft := []AircraftOutput{
+		{
+			Callsign: "APEX11",
+			Distance: 120,
+		},
+		{
+			Callsign: "APEX12",
+			Distance: 60,
+		},
+		{
+			Callsign: "APEX13",
+			Distance: 10,
+		},
+	}
+
+	sortedAircraft := SortByDistance(aircraft)
+
+	if sortedAircraft[0].Callsign != "APEX13" || sortedAircraft[1].Callsign != "APEX12" || sortedAircraft[2].Callsign != "APEX11" {
+		t.Fatal("List is not sorted by distance")
+	}
+}

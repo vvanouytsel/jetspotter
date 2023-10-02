@@ -14,12 +14,13 @@ func exitWithError(err error) {
 }
 
 func sendNotifications(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
+	sortedAircraft := jetspotter.SortByDistance(aircraft)
 	// CLI
-	jetspotter.PrintAircraft(aircraft, config)
+	jetspotter.PrintAircraft(sortedAircraft, config)
 
 	// Slack
 	if config.SlackWebHookURL != "" {
-		err := notification.SendSlackMessage(aircraft, config)
+		err := notification.SendSlackMessage(sortedAircraft, config)
 		if err != nil {
 			return err
 		}
