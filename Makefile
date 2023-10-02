@@ -1,4 +1,5 @@
-DOC_TEMPLATE = docs/snippets/config.snippet
+CONFIG_SNIPPET = docs/snippets/config.snippet
+OUTPUT_SNIPPET = docs/snippets/output.snippet
 .PHONY: run documentation
 
 build: 
@@ -11,8 +12,10 @@ test:
 
 doc:
 	@echo "Generating documentation..."
-	go doc -u configuration.Config | sed -n '/type Config struct {/,/}/p' > ${DOC_TEMPLATE}
-	@cat ${DOC_TEMPLATE}
+	go doc -u configuration.Config | sed -n '/type Config struct {/,/}/p' > ${CONFIG_SNIPPET}
+	go doc -u jetspotter.AircraftOutput | sed -n '/type AircraftOutput struct {/,/}/p' > ${OUTPUT_SNIPPET}
+	@cat ${CONFIG_SNIPPET}
+	@cat ${OUTPUT_SNIPPET}
 
 docker-build:
 	@echo "Building docker image with tag 'dev'..."

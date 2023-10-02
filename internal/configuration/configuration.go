@@ -14,8 +14,8 @@ import (
 // ENV_VARIABLE_NAME DEFAULT_VALUE
 type Config struct {
 	// Latitude and Longitude coordinates of the location you want to use.
-	// LOCATION_LATITUDE 51.078395
-	// LOCATION_LONGITUDE 5.018769
+	// LOCATION_LATITUDE 51.17348
+	// LOCATION_LONGITUDE 5.45921
 	Location geodist.Coord
 
 	// Maximum range in kilometers from the location that you want aircraft to be spotted.
@@ -65,12 +65,12 @@ func GetConfig() (config Config, err error) {
 
 	config.SlackWebHookURL = getEnvVariable(SlackWebhookURL, "")
 
-	config.Location.Lat, err = strconv.ParseFloat(getEnvVariable(LocationLatitude, "51.078395"), 64)
+	config.Location.Lat, err = strconv.ParseFloat(getEnvVariable(LocationLatitude, "51.17348"), 64)
 	if err != nil {
 		return Config{}, err
 	}
 
-	config.Location.Lon, err = strconv.ParseFloat(getEnvVariable(LocationLongitude, "5.018769"), 64)
+	config.Location.Lon, err = strconv.ParseFloat(getEnvVariable(LocationLongitude, "5.45921"), 64)
 	if err != nil {
 		return Config{}, err
 	}
