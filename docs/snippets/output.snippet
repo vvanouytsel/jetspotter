@@ -1,0 +1,32 @@
+type AircraftOutput struct {
+	// Aircraft Type Designator number, basically the unique identifier of an aircraft
+	ICAO string
+
+	// Callsign or flight name of the aircraft, if not set 'NONE' is used
+	Callsign string
+
+	// Description of the aircraft
+	Description string
+
+	// Type of the aircraft
+	Type string
+
+	// Tail number of the aircraft
+	TailNumber string
+
+	// Alitude of the aircraft in feet
+	Altitude float64
+
+	// Speed in knots
+	Speed int
+
+	// Distance between the specified location and the location of the aircraft in kilometers
+	// Height is not taken into consideration
+	Distance int
+
+	// URL to track the aircraft using the ADS-B website
+	URL string
+
+	// Percentage of cloud coverage, lower cloud coverage means that you have more chance to spot the aircraft
+	CloudCoverage int
+}

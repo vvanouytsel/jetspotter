@@ -10,7 +10,6 @@ import (
 	"net/http"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/jftuga/geodist"
 )
 
 // SlackMessage is used to create a slack message
@@ -40,7 +39,7 @@ type Field struct {
 	Text string `json:"text,omitempty"`
 }
 
-func buildMessage(aircraft []jetspotter.Aircraft, config configuration.Config) (SlackMessage, error) {
+func buildMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) (SlackMessage, error) {
 
 	var blocks []Block
 	blocks = append(blocks, Block{
@@ -67,7 +66,7 @@ func buildMessage(aircraft []jetspotter.Aircraft, config configuration.Config) (
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Type:* %s", ac.PlaneType),
+					Text: fmt.Sprintf("*Type:* %s", ac.Type),
 				},
 				{
 					Type: "mrkdwn",
@@ -75,21 +74,19 @@ func buildMessage(aircraft []jetspotter.Aircraft, config configuration.Config) (
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Speed:* %dkn", int(ac.GS)),
+					Text: fmt.Sprintf("*Speed:* %dkn | %dkm/h", ac.Speed, jetspotter.ConvertKnotsToKilometersPerHour(ac.Speed)),
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Altitude:* %vft", ac.AltBaro),
+					Text: fmt.Sprintf("*Altitude:* %vft | %dm", ac.Altitude, jetspotter.ConvertFeetToMeters(ac.Altitude)),
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Distance:* %vkm", jetspotter.CalculateDistance(
-						geodist.Coord{
-							Lat: ac.Lat,
-							Lon: ac.Lon,
-						},
-						config.Location,
-					)),
+					Text: fmt.Sprintf("*Distance:* %dkm", ac.Distance),
+				},
+				{
+					Type: "mrkdwn",
+					Text: fmt.Sprintf("*Cloud coverage:* %d%%", ac.CloudCoverage),
 				},
 			},
 		})
@@ -101,11 +98,11 @@ func buildMessage(aircraft []jetspotter.Aircraft, config configuration.Config) (
 					Type: "image",
 					Title: &Title{
 						Type:  "plain_text",
-						Text:  fmt.Sprintf("%s - %s", ac.Desc, ac.TailNumber),
+						Text:  fmt.Sprintf("%s - %s", ac.Description, ac.TailNumber),
 						Emoji: true,
 					},
 					ImageURL: imageURL,
-					AltText:  fmt.Sprintf("%s with registration number %s", ac.Desc, ac.TailNumber),
+					AltText:  fmt.Sprintf("%s with registration number %s", ac.Description, ac.TailNumber),
 				})
 		}
 
@@ -155,7 +152,7 @@ func getImageURL(URL string) (imageURL string, err error) {
 }
 
 // SendSlackMessage sends a slack message containing metadata of a list of aircraft
-func SendSlackMessage(aircraft []jetspotter.Aircraft, config configuration.Config) error {
+func SendSlackMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
 	if len(aircraft) < 1 {
 		return nil
 	}
