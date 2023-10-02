@@ -62,7 +62,7 @@ func buildMessage(aircraft []jetspotter.AircraftOutput, config configuration.Con
 			Fields: []Field{
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Callsign:* <https://globe.adsbexchange.com/?icao=%s| %s>", ac.ICAO, ac.Callsign),
+					Text: fmt.Sprintf("*Callsign:* <%s| %s>", ac.URL, ac.Callsign),
 				},
 				{
 					Type: "mrkdwn",
