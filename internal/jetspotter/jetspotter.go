@@ -195,7 +195,6 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		return nil, err
 	}
 
-	// Wrap these checks in a function
 	for _, ac := range aircraft {
 		ac = validateFields(ac)
 
