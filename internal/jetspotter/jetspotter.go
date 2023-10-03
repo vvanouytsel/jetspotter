@@ -121,7 +121,7 @@ func FormatAircraft(aircraft AircraftOutput, config configuration.Config) string
 		"Speed: %dkn | %dkm/h\n"+
 		"Distance: %dkm\n"+
 		"Cloud coverage: %d%%\n"+
-		"URL: %s",
+		"URL: %s\n",
 		aircraft.Callsign, aircraft.Description, aircraft.Type,
 		aircraft.TailNumber, int(aircraft.Altitude), ConvertFeetToMeters(aircraft.Altitude),
 		aircraft.Speed, ConvertKnotsToKilometersPerHour(aircraft.Speed), aircraft.Distance, aircraft.CloudCoverage, aircraft.URL)
@@ -213,7 +213,7 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.TailNumber = ac.TailNumber
 		acOutput.Type = ac.PlaneType
 		acOutput.ICAO = ac.ICAO
-		acOutput.URL = fmt.Sprintf("https://globe.adsbexchange.com/?icao=%s\n", ac.ICAO)
+		acOutput.URL = fmt.Sprintf("https://globe.adsbexchange.com/?icao=%s", ac.ICAO)
 		acOutput.CloudCoverage = getCloudCoverage(*weather, acOutput.Altitude)
 
 		acOutputs = append(acOutputs, acOutput)
