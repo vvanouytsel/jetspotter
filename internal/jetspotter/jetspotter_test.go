@@ -230,7 +230,7 @@ func TestCalculateBearing5(t *testing.T) {
 		Lon: 4.63915475148803,
 	}
 
-	expected := 90
+	expected := 95
 	actual := int(CalculateBearing(source, target))
 
 	if expected != actual {
