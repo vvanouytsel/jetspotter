@@ -109,7 +109,7 @@ jobs:
     steps:
       - name: Send alert to slack
         id: slack
-        if: failure()
+        if: always() && !success()
         uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: 'C05URKA9NNB'
