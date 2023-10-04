@@ -112,39 +112,6 @@ func filterAircraftByTypes(aircraft []AircraftOutput, config configuration.Confi
 	return filteredAircraft
 }
 
-// FormatAircraft prints an Aircraft in a readable manner.
-func FormatAircraft(aircraft AircraftOutput, config configuration.Config) string {
-
-	return fmt.Sprintf("Callsign: %s\n"+
-		"Description: %s\n"+
-		"Type: %s\n"+
-		"Tail number: %s\n"+
-		"Altitude: %dft | %dm\n"+
-		"Speed: %dkn | %dkm/h\n"+
-		"Distance: %dkm\n"+
-		"Cloud coverage: %d%%\n"+
-		"Bearing from location: %.0f°\n"+
-		"Bearing from aircraft: %.0f°\n"+
-		"Heading: %.0f°\n"+
-		"URL: %s\n",
-		aircraft.Callsign, aircraft.Description, aircraft.Type,
-		aircraft.TailNumber, int(aircraft.Altitude), ConvertFeetToMeters(aircraft.Altitude),
-		aircraft.Speed, ConvertKnotsToKilometersPerHour(aircraft.Speed),
-		aircraft.Distance, aircraft.CloudCoverage, aircraft.BearingFromLocation,
-		aircraft.BearingFromAircraft, aircraft.Heading, aircraft.URL)
-}
-
-// PrintAircraft prints a list of Aircraft in a readable manner.
-func PrintAircraft(aircraft []AircraftOutput, config configuration.Config) {
-	if len(aircraft) == 0 {
-		fmt.Println("No matching aircraft have been spotted.")
-	}
-
-	for _, ac := range aircraft {
-		fmt.Println(FormatAircraft(ac, config))
-	}
-}
-
 // ConvertKnotsToKilometersPerHour well converts knots to kilometers per hour...
 func ConvertKnotsToKilometersPerHour(knots int) int {
 	return int(float64(knots) * 1.852)

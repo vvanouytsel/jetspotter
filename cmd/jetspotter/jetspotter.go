@@ -16,7 +16,7 @@ func exitWithError(err error) {
 func sendNotifications(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
 	sortedAircraft := jetspotter.SortByDistance(aircraft)
 	// CLI
-	jetspotter.PrintAircraft(sortedAircraft, config)
+	notification.PrintAircraft(sortedAircraft, config)
 
 	// Slack
 	if config.SlackWebHookURL != "" {
