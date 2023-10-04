@@ -105,11 +105,11 @@ jobs:
   notification:
     name: Send notification on failure
     needs: [build, release, image]
+    if: failure()
     runs-on: ubuntu-latest
     steps:
       - name: Send alert to slack
         id: slack
-        if: always() && !success()
         uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: 'C05URKA9NNB'
