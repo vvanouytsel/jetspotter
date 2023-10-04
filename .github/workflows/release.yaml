@@ -101,3 +101,19 @@ jobs:
           docker build -t ${IMAGE}:${{ needs.build.outputs.new_release_version }} -t ${IMAGE}:latest .
           docker push ${IMAGE}:${{ needs.build.outputs.new_release_version }}
           docker push ${IMAGE}:latest
+
+  notification:
+    name: Send notification on failure
+    needs: [build, release, image]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send alert to slack
+        id: slack
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: 'C05URKA9NNB'
+          slack-message: 'Failed build: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_GOOSE }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
