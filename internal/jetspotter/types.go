@@ -115,4 +115,13 @@ type AircraftOutput struct {
 
 	// Percentage of cloud coverage, lower cloud coverage means that you have more chance to spot the aircraft
 	CloudCoverage int
+
+	// Bearing from your location to the aircraft
+	BearingFromLocation float64
+
+	// Bearing from the aircraft to your location
+	BearingFromAircraft float64
+
+	// Heading of the aircraft
+	Heading float64
 }

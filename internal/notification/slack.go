@@ -66,10 +66,6 @@ func buildMessage(aircraft []jetspotter.AircraftOutput, config configuration.Con
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Type:* %s", ac.Description),
-				},
-				{
-					Type: "mrkdwn",
 					Text: fmt.Sprintf("*Tail number:* %s", ac.TailNumber),
 				},
 				{
@@ -86,7 +82,23 @@ func buildMessage(aircraft []jetspotter.AircraftOutput, config configuration.Con
 				},
 				{
 					Type: "mrkdwn",
+					Text: fmt.Sprintf("*Bearing from location:* %.0f°", ac.BearingFromLocation),
+				},
+				{
+					Type: "mrkdwn",
+					Text: fmt.Sprintf("*Heading:* %.0f°", ac.Heading),
+				},
+				{
+					Type: "mrkdwn",
+					Text: fmt.Sprintf("*Bearing from aircraft:* %.0f°", ac.BearingFromAircraft),
+				},
+				{
+					Type: "mrkdwn",
 					Text: fmt.Sprintf("*Cloud coverage:* %d%%", ac.CloudCoverage),
+				},
+				{
+					Type: "mrkdwn",
+					Text: fmt.Sprintf("*Type:* %s", ac.Description),
 				},
 			},
 		})

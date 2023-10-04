@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"net/url"
 	"slices"
@@ -20,6 +21,7 @@ import (
 // Vars
 var (
 	baseURL = "https://api.adsb.one/v2/point"
+	// baseURL = "https://api.airplanes.live/v2/point"
 )
 
 // CalculateDistance returns the rounded distance between two coordinates in kilometers
@@ -121,10 +123,15 @@ func FormatAircraft(aircraft AircraftOutput, config configuration.Config) string
 		"Speed: %dkn | %dkm/h\n"+
 		"Distance: %dkm\n"+
 		"Cloud coverage: %d%%\n"+
+		"Bearing from location: %.0f°\n"+
+		"Bearing from aircraft: %.0f°\n"+
+		"Heading: %.0f°\n"+
 		"URL: %s\n",
 		aircraft.Callsign, aircraft.Description, aircraft.Type,
 		aircraft.TailNumber, int(aircraft.Altitude), ConvertFeetToMeters(aircraft.Altitude),
-		aircraft.Speed, ConvertKnotsToKilometersPerHour(aircraft.Speed), aircraft.Distance, aircraft.CloudCoverage, aircraft.URL)
+		aircraft.Speed, ConvertKnotsToKilometersPerHour(aircraft.Speed),
+		aircraft.Distance, aircraft.CloudCoverage, aircraft.BearingFromLocation,
+		aircraft.BearingFromAircraft, aircraft.Heading, aircraft.URL)
 }
 
 // PrintAircraft prints a list of Aircraft in a readable manner.
@@ -197,23 +204,21 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 
 	for _, ac := range aircraft {
 		ac = validateFields(ac)
+		aircraftLocation := geodist.Coord{Lat: ac.Lat, Lon: ac.Lon}
 
 		acOutput.Altitude = ac.AltBaro.(float64)
 		acOutput.Callsign = ac.Callsign
 		acOutput.Description = ac.Desc
-		acOutput.Distance = CalculateDistance(
-			config.Location,
-			geodist.Coord{
-				Lat: ac.Lat,
-				Lon: ac.Lon,
-			},
-		)
+		acOutput.Distance = CalculateDistance(config.Location, aircraftLocation)
 		acOutput.Speed = int(ac.GS)
 		acOutput.TailNumber = ac.TailNumber
 		acOutput.Type = ac.PlaneType
 		acOutput.ICAO = ac.ICAO
+		acOutput.Heading = ac.MagHeading
 		acOutput.URL = fmt.Sprintf("https://globe.adsbexchange.com/?icao=%s", ac.ICAO)
 		acOutput.CloudCoverage = getCloudCoverage(*weather, acOutput.Altitude)
+		acOutput.BearingFromLocation = CalculateBearing(config.Location, aircraftLocation)
+		acOutput.BearingFromAircraft = CalculateBearing(aircraftLocation, config.Location)
 
 		acOutputs = append(acOutputs, acOutput)
 	}
@@ -227,4 +232,27 @@ func SortByDistance(aircraft []AircraftOutput) []AircraftOutput {
 	})
 
 	return aircraft
+}
+
+// CalculateBearing returns the bearing from the source to the target
+func CalculateBearing(source geodist.Coord, target geodist.Coord) float64 {
+	y := math.Sin(toRadians(target.Lon-source.Lon)) * math.Cos(toRadians(target.Lat))
+	x := math.Cos(toRadians(source.Lat))*math.Sin(toRadians(target.Lat)) - math.Sin(toRadians(source.Lat))*math.Cos(toRadians(target.Lat))*math.Cos(toRadians(target.Lon-source.Lon))
+
+	bearing := math.Atan2(y, x)
+	bearing = (toDegrees(bearing) + 360)
+
+	if bearing >= 360 {
+		bearing -= 360
+	}
+
+	return bearing
+}
+
+func toRadians(degrees float64) float64 {
+	return degrees * (math.Pi / 180)
+}
+
+func toDegrees(rad float64) float64 {
+	return rad * (180 / math.Pi)
 }
