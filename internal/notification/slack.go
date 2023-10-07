@@ -1,15 +1,9 @@
 package notification
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"jetspotter/internal/configuration"
 	"jetspotter/internal/jetspotter"
-	"log"
-	"net/http"
-
-	"github.com/PuerkitoBio/goquery"
 )
 
 // SlackMessage is used to create a slack message
@@ -39,7 +33,7 @@ type Field struct {
 	Text string `json:"text,omitempty"`
 }
 
-func buildMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) (SlackMessage, error) {
+func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) (SlackMessage, error) {
 
 	var blocks []Block
 	blocks = append(blocks, Block{
@@ -47,7 +41,7 @@ func buildMessage(aircraft []jetspotter.AircraftOutput, config configuration.Con
 		Fields: []Field{
 			{
 				Type: "mrkdwn",
-				Text: ":jet: A jet has been spotted! :jet:",
+				Text: ":airplane: A jet has been spotted! :airplane:",
 			},
 		},
 	})
@@ -62,7 +56,7 @@ func buildMessage(aircraft []jetspotter.AircraftOutput, config configuration.Con
 			Fields: []Field{
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Callsign:* <%s|%s>", ac.URL, ac.Callsign),
+					Text: fmt.Sprintf("*Callsign:* <%s|%s>", ac.TrackerURL, ac.Callsign),
 				},
 				{
 					Type: "mrkdwn",
@@ -103,7 +97,7 @@ func buildMessage(aircraft []jetspotter.AircraftOutput, config configuration.Con
 			},
 		})
 
-		imageURL, err := getImageURL(fmt.Sprintf("https://www.planespotting.be/index.php?page=aircraft&registration=%s", ac.TailNumber))
+		imageURL := ac.PlaneSpotterURL
 		if imageURL != "" {
 			blocks = append(blocks,
 				Block{
@@ -118,10 +112,6 @@ func buildMessage(aircraft []jetspotter.AircraftOutput, config configuration.Con
 				})
 		}
 
-		if err != nil {
-			return SlackMessage{}, err
-		}
-
 		blocks = append(blocks,
 			Block{
 				Type: "divider",
@@ -133,63 +123,18 @@ func buildMessage(aircraft []jetspotter.AircraftOutput, config configuration.Con
 	return slackMessage, nil
 }
 
-func getImageURL(URL string) (imageURL string, err error) {
-	req, err := http.NewRequest("GET", URL, nil)
-	if err != nil {
-		return "", err
-	}
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-
-	if res.StatusCode != 200 {
-		fmt.Printf("Received status code %d for URL %s\n", res.StatusCode, URL)
-		return "", nil
-	}
-
-	doc, err := goquery.NewDocumentFromReader(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	doc.Find("meta[property='og:image']").Each(func(index int, element *goquery.Selection) {
-		if content, exists := element.Attr("content"); exists {
-			imageURL = content
-		}
-	})
-
-	return imageURL, nil
-}
-
 // SendSlackMessage sends a slack message containing metadata of a list of aircraft
 func SendSlackMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
-	if len(aircraft) < 1 {
-		return nil
+	message, err := buildSlackMessage(aircraft, config)
+	notification := Notification{
+		Message:    message,
+		Type:       Slack,
+		WebHookURL: config.SlackWebHookURL,
 	}
 
-	slackMessage, err := buildMessage(aircraft, config)
+	err = SendMessage(aircraft, notification)
 	if err != nil {
 		return err
 	}
-
-	data, err := json.Marshal(slackMessage)
-	if err != nil {
-		return err
-	}
-
-	resp, err := http.Post(config.SlackWebHookURL, "application/json",
-		bytes.NewBuffer(data))
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != 200 {
-		fmt.Printf("%s\n", string(data))
-		return fmt.Errorf(fmt.Sprintf("Received status code %v", resp.StatusCode))
-	}
-
-	fmt.Println("A Slack notification has been sent!")
 	return nil
 }

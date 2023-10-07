@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"jetspotter/internal/configuration"
 	"jetspotter/internal/jetspotter"
-	notification "jetspotter/internal/notification"
+	"jetspotter/internal/notification"
 	"os"
 )
 
@@ -15,12 +15,26 @@ func exitWithError(err error) {
 
 func sendNotifications(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
 	sortedAircraft := jetspotter.SortByDistance(aircraft)
+
+	if len(aircraft) < 1 {
+		fmt.Println("No matching aircraft have been spotted.")
+		return nil
+	}
+
 	// CLI
 	notification.PrintAircraft(sortedAircraft, config)
 
 	// Slack
 	if config.SlackWebHookURL != "" {
 		err := notification.SendSlackMessage(sortedAircraft, config)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Discord
+	if config.DiscordWebHookURL != "" {
+		err := notification.SendDiscordMessage(sortedAircraft, config)
 		if err != nil {
 			return err
 		}

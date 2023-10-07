@@ -39,11 +39,21 @@ type Config struct {
 	// Webhook used to send notifications to Slack. If not set, no messages will be sent to Slack.
 	// SLACK_WEBHOOK_URL ""
 	SlackWebHookURL string
+
+	// Webhook used to send notifications to Discord. If not set, no messages will be sent to Discord.
+	// DISCORD_WEBHOOK_URL ""
+	DiscordWebHookURL string
+
+	// Discord notifications use an embed color based on the alitute of the aircraft.
+	// DISCORD_COLOR_ALTITUDE "true"
+	DiscordColorAltitude string
 }
 
 // Environment variable names
 const (
 	SlackWebhookURL          = "SLACK_WEBHOOK_URL"
+	DiscordWebhookURL        = "DISCORD_WEBHOOK_URL"
+	DiscordColorAltitude     = "DISCORD_COLOR_ALTITUDE"
 	LocationLatitude         = "LOCATION_LATITUDE"
 	LocationLongitude        = "LOCATION_LONGITUDE"
 	MaxRangeKilometers       = "MAX_RANGE_KILOMETERS"
@@ -64,6 +74,10 @@ func getEnvVariable(key, fallback string) string {
 func GetConfig() (config Config, err error) {
 
 	config.SlackWebHookURL = getEnvVariable(SlackWebhookURL, "")
+
+	config.DiscordWebHookURL = getEnvVariable(DiscordWebhookURL, "")
+
+	config.DiscordColorAltitude = getEnvVariable(DiscordColorAltitude, "true")
 
 	config.Location.Lat, err = strconv.ParseFloat(getEnvVariable(LocationLatitude, "51.17348"), 64)
 	if err != nil {
@@ -87,4 +101,5 @@ func GetConfig() (config Config, err error) {
 
 	config.AircraftTypes = strings.Split(strings.ToUpper(strings.ReplaceAll(getEnvVariable(AircraftTypes, "ALL"), " ", "")), ",")
 	return config, nil
+
 }

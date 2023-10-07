@@ -20,20 +20,18 @@ func FormatAircraft(aircraft jetspotter.AircraftOutput, config configuration.Con
 		"Bearing from location: %.0f°\n"+
 		"Bearing from aircraft: %.0f°\n"+
 		"Heading: %.0f°\n"+
-		"URL: %s\n",
+		"TrackerURL: %s\n"+
+		"ImageURL: %s\n",
+
 		aircraft.Callsign, aircraft.Description, aircraft.Type,
 		aircraft.TailNumber, int(aircraft.Altitude), jetspotter.ConvertFeetToMeters(aircraft.Altitude),
 		aircraft.Speed, jetspotter.ConvertKnotsToKilometersPerHour(aircraft.Speed),
 		aircraft.Distance, aircraft.CloudCoverage, aircraft.BearingFromLocation,
-		aircraft.BearingFromAircraft, aircraft.Heading, aircraft.URL)
+		aircraft.BearingFromAircraft, aircraft.Heading, aircraft.TrackerURL, aircraft.PlaneSpotterURL)
 }
 
 // PrintAircraft prints a list of Aircraft in a readable manner.
 func PrintAircraft(aircraft []jetspotter.AircraftOutput, config configuration.Config) {
-	if len(aircraft) == 0 {
-		fmt.Println("No matching aircraft have been spotted.")
-	}
-
 	for _, ac := range aircraft {
 		fmt.Println(FormatAircraft(ac, config))
 	}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"net/http"
 	"net/url"
@@ -15,6 +16,7 @@ import (
 	"jetspotter/internal/configuration"
 	"jetspotter/internal/weather"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/jftuga/geodist"
 )
 
@@ -182,10 +184,11 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.Type = ac.PlaneType
 		acOutput.ICAO = ac.ICAO
 		acOutput.Heading = ac.Track
-		acOutput.URL = fmt.Sprintf("https://globe.adsbexchange.com/?icao=%s", ac.ICAO)
+		acOutput.TrackerURL = fmt.Sprintf("https://globe.adsbexchange.com/?icao=%s", ac.ICAO)
 		acOutput.CloudCoverage = getCloudCoverage(*weather, acOutput.Altitude)
 		acOutput.BearingFromLocation = CalculateBearing(config.Location, aircraftLocation)
 		acOutput.BearingFromAircraft = CalculateBearing(aircraftLocation, config.Location)
+		acOutput.PlaneSpotterURL = getImageURL(fmt.Sprintf("https://www.planespotting.be/index.php?page=aircraft&registration=%s", ac.TailNumber))
 
 		acOutputs = append(acOutputs, acOutput)
 	}
@@ -222,4 +225,35 @@ func toRadians(degrees float64) float64 {
 
 func toDegrees(rad float64) float64 {
 	return rad * (180 / math.Pi)
+}
+
+// getImageURL queries the planespotter website to fetch an image link
+func getImageURL(URL string) (imageURL string) {
+	req, err := http.NewRequest("GET", URL, nil)
+	if err != nil {
+		return ""
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return ""
+	}
+
+	if res.StatusCode != 200 {
+		fmt.Printf("Received status code %d for URL %s\n", res.StatusCode, URL)
+		return ""
+	}
+
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	doc.Find("meta[property='og:image']").Each(func(index int, element *goquery.Selection) {
+		if content, exists := element.Attr("content"); exists {
+			imageURL = content
+		}
+	})
+
+	return imageURL
 }

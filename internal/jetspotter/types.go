@@ -110,8 +110,11 @@ type AircraftOutput struct {
 	// Height is not taken into consideration
 	Distance int
 
-	// URL to track the aircraft using the ADS-B website
-	URL string
+	// TrackerURL is to URL track the aircraft using the ADS-B website
+	TrackerURL string
+
+	// PlaneSpotterURL is the URL for the planespotter page of that aircraft
+	PlaneSpotterURL string
 
 	// Percentage of cloud coverage, lower cloud coverage means that you have more chance to spot the aircraft
 	CloudCoverage int

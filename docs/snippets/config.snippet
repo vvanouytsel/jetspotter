@@ -25,4 +25,12 @@ type Config struct {
 	// Webhook used to send notifications to Slack. If not set, no messages will be sent to Slack.
 	// SLACK_WEBHOOK_URL ""
 	SlackWebHookURL string
+
+	// Webhook used to send notifications to Discord. If not set, no messages will be sent to Discord.
+	// DISCORD_WEBHOOK_URL ""
+	DiscordWebHookURL string
+
+	// Discord notifications use an embed color based on the alitute of the aircraft.
+	// DISCORD_COLOR_ALTITUDE "true"
+	DiscordColorAltitude string
 }

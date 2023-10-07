@@ -12,15 +12,28 @@ Terminal output is always shown. Depending on the [configuration](configuration.
 
 ### Terminal
 
-![JetSpotter CLI output ](images/jetspotter-cli.png)
+![CLI output ](images/jetspotter-terminal-1.png)
 
 ### Slack
 
 Slack notifications are sent if the `SLACK_WEBHOOK_URL` environment variable is defined.
 Documentation how to set up notifications using incoming webhooks can be found in the [official slack documentation](https://api.slack.com/messaging/webhooks).
 
-![JetSpotter slack notfication ](images/jetspotter-slack.png)
-![JetSpotter slack notfication ](images/jetspotter-slack-2.png)
+![Slack notfication ](images/jetspotter-slack-1.png)
+
+### Discord
+
+Discord notifications are sent if the `DISCORD_WEBHOOK_URL` environment variable is defined.
+Documentation how to set up notifications using incoming webhooks can be found in the [official discord documentation](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks).
+
+By default the color of the embed message is related to the altitude of the aircraft. The color scheme is the same as on the [ADS-B exchange map](https://globe.adsbexchange.com/). This feature can be disabled in the [configuration](configuration.md) to use the same static color for every embed message.
+
+If the altitude color feature is enabled:
+![Discord notfication ](images/jetspotter-discord-1.png)
+![Altitude color scale ](images/jetspotter-color-scale.png)
+
+If the altitude color feature is disabled:
+![Discord notfication ](images/jetspotter-discord-2.png)
 
 ## Releases
 
@@ -88,4 +101,15 @@ docker run -e SLACK_WEBHOOK_URL=https://hooks.slack.com/services/XXX/YYY/ZZZ
 
 # Binary
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/XXX/YYY/ZZZ ./jetspotter
+```
+
+Send a discord notification if one or more aircraft are spotted
+
+```bash
+# Docker
+docker run -e DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/XXXXXX/YYYYYY
+ ghcr.io/vvanouytsel/jetspotter:latest
+
+# Binary
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/XXXXXX/YYYYYY ./jetspotter
 ```
