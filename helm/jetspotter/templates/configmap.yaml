@@ -8,6 +8,6 @@ data:
   LOCATION_LONGITUDE: {{ .Values.jetspotter.location.longitude | quote }}
   FETCH_INTERVAL:  {{ .Values.jetspotter.fetchInterval | quote }}
   MAX_RANGE_KILOMETERS: {{ .Values.jetspotter.maxRangeKilometers | quote }}
-  AIRCRAFT_TYPES: {{ .Values.jetspotter.aircraft_types | join "," }}
+  AIRCRAFT_TYPES: {{ .Values.jetspotter.aircraftTypes | join "," }}
   MAX_AIRCRAFT_SLACK_MESSAGE: {{ .Values.slack.maxAircraftPerMessage | quote }}
   DISCORD_COLOR_ALTITUDE: {{ .Values.discord.colorAltitude | quote }}

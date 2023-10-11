@@ -10,7 +10,7 @@ jetspotter:
   # A comma seperated list of types that you want to spot
   #  If not set, 'ALL' will be used, which will disable the filter and show all aircraft within range.
   # Full list can be found at https://www.icao.int/publications/doc8643/pages/search.aspx in 'Type Designator' column.
-  aircraft_types:
+  aircraftTypes:
     - ALL
     # - F16
     # - A400
