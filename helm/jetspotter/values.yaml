@@ -1,0 +1,44 @@
+jetspotter:
+  # Latitude and Longitude coordinates of the location you want to use.
+  location:
+    latitude: 51.17348
+    longitude: 5.45921
+  # Interval in seconds between fetching aircraft, minimum is 60 due to API rate limiting.
+  fetchInterval: 60
+  #  Maximum range in kilometers from the location that you want aircraft to be spotted.
+  maxRangeKilometers: 30
+  # A comma seperated list of types that you want to spot
+  #  If not set, 'ALL' will be used, which will disable the filter and show all aircraft within range.
+  # Full list can be found at https://www.icao.int/publications/doc8643/pages/search.aspx in 'Type Designator' column.
+  aircraft_types:
+    - ALL
+    # - F16
+    # - A400
+
+slack:
+  # Webhook used to send notifications to Slack. If not set, no messages will be sent to Slack.
+  webhook: ""
+  # Maximum amount of aircraft to show in a single slack message.
+  # Note that a single slack message only supports up to 50 'blocks' and each aircraft that we display has multiple blocks.
+  maxAircraftPerMessage: 8
+
+discord:
+  # Webhook used to send notifications to Discord. If not set, no messages will be sent to Discord.
+  webhook: ""
+  # Discord notifications use an embed color based on the alitute of the aircraft.
+  colorAltitude: "true"
+
+image:
+  repository: ghcr.io/vvanouytsel/jetspotter
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+imagePullSecrets: []
+
+resources: 
+  limits:
+    memory: 512Mi
+  requests:
+    cpu: 50m
+    memory: 128Mi

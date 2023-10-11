@@ -19,8 +19,8 @@ doc:
 
 docker-build:
 	@echo "Building docker image with tag 'dev'..."
-	docker build -t jetspotter:dev .
+	docker build -t ghcr.io/vvanouytsel/jetspotter:dev .
 
 docker-run: docker-build
 	@echo "Running docker container with tag 'dev'..."
-	docker run jetspotter:dev
+	docker run ghcr.io/vvanouytsel/jetspotter:dev

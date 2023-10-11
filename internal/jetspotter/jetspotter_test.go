@@ -10,6 +10,42 @@ import (
 )
 
 var (
+	jets = []Aircraft{
+		{
+			ICAO:      "ABC",
+			Callsign:  "JACKAL51",
+			PlaneType: "F16",
+		},
+		{
+			ICAO:      "DEF",
+			Callsign:  "XSG432",
+			PlaneType: "CESSNA",
+		},
+		{
+			ICAO:      "HAH",
+			Callsign:  "VIKING11",
+			PlaneType: "F18",
+		},
+	}
+
+	alreadySpottedAircraft = []Aircraft{
+		{
+			ICAO:      "DEF",
+			Callsign:  "XSG432",
+			PlaneType: "CESSNA",
+		},
+		{
+			ICAO:      "ZZZ",
+			Callsign:  "TIGER31",
+			PlaneType: "F16",
+		},
+	}
+
+	jackal51Aircraft = Aircraft{
+		ICAO:      "ABC",
+		Callsign:  "JACKAL51",
+		PlaneType: "F16",
+	}
 	planes = []AircraftOutput{
 		{
 			Callsign:    "APEX11",
@@ -235,5 +271,107 @@ func TestCalculateBearing5(t *testing.T) {
 
 	if expected != actual {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+	}
+}
+
+func TestNewlySpotted(t *testing.T) {
+
+	newAircaft := Aircraft{
+		ICAO:     "ZYX",
+		Type:     "A400",
+		Callsign: "NEW11",
+	}
+	expected := true
+	actual := newlySpotted(newAircaft, jets)
+
+	if expected != actual {
+		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+	}
+}
+
+func TestAlreadySpotted(t *testing.T) {
+
+	expected := false
+	actual := newlySpotted(jackal51Aircraft, jets)
+
+	if expected != actual {
+		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+	}
+}
+
+func TestAlreadySpottedAircraftAreFiltered(t *testing.T) {
+
+	aircraft := []Aircraft{
+		{
+			ICAO:      "VVO",
+			Callsign:  "DEMON81",
+			PlaneType: "F16",
+		},
+		{
+			ICAO:      "DEF",
+			Callsign:  "LDS431",
+			PlaneType: "CESSNA",
+		},
+		{
+			ICAO:      "RPQ",
+			Callsign:  "JESTER41",
+			PlaneType: "F18",
+		},
+	}
+
+	alreadySpottedAircraft := []Aircraft{
+		{
+			ICAO:      "DEF",
+			Callsign:  "LDS431",
+			PlaneType: "CESSNA",
+		},
+		{
+			ICAO:      "X123",
+			Callsign:  "GOOSE11",
+			PlaneType: "F22",
+		},
+	}
+
+	expectedNewlySpotted := []Aircraft{
+		{
+			ICAO:      "VVO",
+			Callsign:  "DEMON81",
+			PlaneType: "F16",
+		},
+		{
+			ICAO:      "RPQ",
+			Callsign:  "JESTER41",
+			PlaneType: "F18",
+		},
+	}
+
+	expectedSpottedAircraft := []Aircraft{
+		{
+			ICAO:      "DEF",
+			Callsign:  "LDS431",
+			PlaneType: "CESSNA",
+		},
+		{
+			ICAO:      "VVO",
+			Callsign:  "DEMON81",
+			PlaneType: "F16",
+		},
+		{
+			ICAO:      "RPQ",
+			Callsign:  "JESTER41",
+			PlaneType: "F18",
+		},
+	}
+
+	actualNewlySpottedAircraft, actualSpottedAircraft := validateAircraft(aircraft, &alreadySpottedAircraft)
+
+	if !reflect.DeepEqual(expectedNewlySpotted, actualNewlySpottedAircraft) {
+		t.Fatalf("expected '%v' to be the same as '%v' in the newly spotted list",
+			expectedNewlySpotted, actualNewlySpottedAircraft)
+	}
+
+	if !reflect.DeepEqual(expectedSpottedAircraft, actualSpottedAircraft) {
+		t.Fatalf("expected '%v' to be the same as '%v' in the already spotted list",
+			expectedSpottedAircraft, actualSpottedAircraft)
 	}
 }

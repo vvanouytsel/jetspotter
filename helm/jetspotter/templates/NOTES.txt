@@ -1,0 +1,1 @@
+{{ .Release.Name }} has been installed in namespace {{ .Release.Namespace }}

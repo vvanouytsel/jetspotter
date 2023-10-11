@@ -59,8 +59,8 @@ func GetAircraftInProximity(latitude string, longitude string, maxRange int) (ai
 	return flightData.AC, nil
 }
 
-// GetFiltererdAircraftInRange returns all aircraft of specified types within maxRange kilometers of the location.
-func GetFiltererdAircraftInRange(config configuration.Config) (aircraft []AircraftOutput, err error) {
+// getFiltererdAircraftInRange returns all aircraft of specified types within maxRange kilometers of the location.
+func getFiltererdAircraftInRange(config configuration.Config) (aircraft []Aircraft, err error) {
 	var flightData FlightData
 	miles := int(float32(config.MaxRangeKilometers) / 1.60934)
 	endpoint, err := url.JoinPath(baseURL,
@@ -88,7 +88,64 @@ func GetFiltererdAircraftInRange(config configuration.Config) (aircraft []Aircra
 		return nil, err
 	}
 
-	acOutputs, err := CreateAircraftOutput(flightData.AC, config)
+	return flightData.AC, nil
+}
+
+// newlySpotted returns true if the aircraft has not been spotted during the last interval.
+func newlySpotted(aircraft Aircraft, spottedAircraft []Aircraft) bool {
+	return !containsAircraft(aircraft, spottedAircraft)
+}
+
+// containsAircraft checks if the aircraft exists in the list of aircraft.
+func containsAircraft(aircraft Aircraft, aircraftList []Aircraft) bool {
+	for _, ac := range aircraftList {
+		if ac.ICAO == aircraft.ICAO {
+			return true
+		}
+	}
+	return false
+}
+
+// updateSpottedAircraft removed the previously spotted aircraft that are no longer in range.
+func updateSpottedAircraft(alreadySpottedAircraft, filteredAircraft []Aircraft) (aircraft []Aircraft) {
+	for _, ac := range alreadySpottedAircraft {
+		if containsAircraft(ac, filteredAircraft) {
+			aircraft = append(aircraft, ac)
+		}
+	}
+
+	return aircraft
+}
+
+// validateAircraft returns a list of aircraft that have not yet been spotted and
+// a list of aircraft that are already spotted, aircraft that were previously spotted but haven't been spotted
+// in the last attempt are removed from the already spotted list.
+// In practice this means that if an aircraft leaves the spotting range, it is removed from the already spotted list
+// and thus the next time they appear in range, a notification will be sent for that aircraft.
+func validateAircraft(allFilteredAircraft []Aircraft, alreadySpottedAircraft *[]Aircraft) (newlySpottedAircraft, updatedSpottedAircraft []Aircraft) {
+	for _, ac := range allFilteredAircraft {
+		if newlySpotted(ac, *alreadySpottedAircraft) {
+			newlySpottedAircraft = append(newlySpottedAircraft, ac)
+			*alreadySpottedAircraft = append(*alreadySpottedAircraft, ac)
+		}
+	}
+
+	*alreadySpottedAircraft = updateSpottedAircraft(*alreadySpottedAircraft, allFilteredAircraft)
+	return newlySpottedAircraft, *alreadySpottedAircraft
+}
+
+// HandleAircraft return a list of aircraft that have been filtered by range and type.
+// Aircraft that have been spotted are removed from the list.
+func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Config) (aircraft []AircraftOutput, err error) {
+	var newlySpottedAircraft []Aircraft
+	allFilteredAircraft, err := getFiltererdAircraftInRange(config)
+	if err != nil {
+		return nil, err
+	}
+
+	newlySpottedAircraft, *alreadySpottedAircraft = validateAircraft(allFilteredAircraft, alreadySpottedAircraft)
+
+	acOutputs, err := CreateAircraftOutput(newlySpottedAircraft, config)
 	if err != nil {
 		return nil, err
 	}
@@ -184,12 +241,12 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.Type = ac.PlaneType
 		acOutput.ICAO = ac.ICAO
 		acOutput.Heading = ac.Track
-		acOutput.TrackerURL = fmt.Sprintf("https://globe.adsbexchange.com/?icao=%s", ac.ICAO)
+		acOutput.TrackerURL = fmt.Sprintf("https://globe.adsbexchange.com/?icao=%v&SiteLat=%f&SiteLon=%f",
+			ac.ICAO, config.Location.Lat, config.Location.Lon)
 		acOutput.CloudCoverage = getCloudCoverage(*weather, acOutput.Altitude)
 		acOutput.BearingFromLocation = CalculateBearing(config.Location, aircraftLocation)
 		acOutput.BearingFromAircraft = CalculateBearing(aircraftLocation, config.Location)
 		acOutput.PlaneSpotterURL = getImageURL(fmt.Sprintf("https://www.planespotting.be/index.php?page=aircraft&registration=%s", ac.TailNumber))
-
 		acOutputs = append(acOutputs, acOutput)
 	}
 	return acOutputs, nil
@@ -240,7 +297,7 @@ func getImageURL(URL string) (imageURL string) {
 	}
 
 	if res.StatusCode != 200 {
-		fmt.Printf("Received status code %d for URL %s\n", res.StatusCode, URL)
+		log.Printf("Received status code %d for URL %s\n", res.StatusCode, URL)
 		return ""
 	}
 

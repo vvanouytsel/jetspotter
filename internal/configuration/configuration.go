@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -47,6 +48,10 @@ type Config struct {
 	// Discord notifications use an embed color based on the alitute of the aircraft.
 	// DISCORD_COLOR_ALTITUDE "true"
 	DiscordColorAltitude string
+
+	// Interval in seconds between fetching aircraft, minimum is 60 due to API rate limiting.
+	// FETCH_INTERVAL 60
+	FetchInterval int
 }
 
 // Environment variable names
@@ -59,6 +64,7 @@ const (
 	MaxRangeKilometers       = "MAX_RANGE_KILOMETERS"
 	MaxAircrfaftSlackMessage = "MAX_AIRCRAFT_SLACK_MESSAGE"
 	AircraftTypes            = "AIRCRAFT_TYPES"
+	FetchInterval            = "FETCH_INTERVAL"
 )
 
 // getEnvVariable looks up a specified environment variable, if not set the specified default is used
@@ -72,12 +78,16 @@ func getEnvVariable(key, fallback string) string {
 
 // GetConfig attempts to read the configuration via environment variables and uses a default if the environment variable is not set
 func GetConfig() (config Config, err error) {
+	defaultFetchInterval := 60
 
 	config.SlackWebHookURL = getEnvVariable(SlackWebhookURL, "")
-
 	config.DiscordWebHookURL = getEnvVariable(DiscordWebhookURL, "")
-
 	config.DiscordColorAltitude = getEnvVariable(DiscordColorAltitude, "true")
+	config.FetchInterval, err = strconv.Atoi(getEnvVariable(FetchInterval, strconv.Itoa(defaultFetchInterval)))
+	if err != nil || config.FetchInterval < 60 {
+		log.Printf("%v is not supported, defaulting to %d", config.FetchInterval, defaultFetchInterval)
+		config.FetchInterval = defaultFetchInterval
+	}
 
 	config.Location.Lat, err = strconv.ParseFloat(getEnvVariable(LocationLatitude, "51.17348"), 64)
 	if err != nil {

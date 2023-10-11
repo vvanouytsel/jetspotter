@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"jetspotter/internal/configuration"
 	"jetspotter/internal/jetspotter"
+	"log"
 )
 
 // FormatAircraft prints an Aircraft in a readable manner.
@@ -30,8 +31,9 @@ func FormatAircraft(aircraft jetspotter.AircraftOutput, config configuration.Con
 		aircraft.BearingFromAircraft, aircraft.Heading, aircraft.TrackerURL, aircraft.PlaneSpotterURL)
 }
 
-// PrintAircraft prints a list of Aircraft in a readable manner.
-func PrintAircraft(aircraft []jetspotter.AircraftOutput, config configuration.Config) {
+// SendTerminalMessage prints a list of Aircraft in a readable manner.
+func SendTerminalMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) {
+	log.Println("🛫 A jet has been spotted! 🛫")
 	for _, ac := range aircraft {
 		fmt.Println(FormatAircraft(ac, config))
 	}

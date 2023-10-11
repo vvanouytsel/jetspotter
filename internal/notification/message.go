@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"jetspotter/internal/jetspotter"
+	"log"
 	"net/http"
 )
 
@@ -37,10 +38,10 @@ func SendMessage(aircraft []jetspotter.AircraftOutput, notification Notification
 	}
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
-		fmt.Printf("%s\n", string(data))
+		log.Printf("%s\n", string(data))
 		return fmt.Errorf(fmt.Sprintf("Received status code %v", resp.StatusCode))
 	}
 
-	fmt.Printf("A %s notification has been sent!\n", notification.Type)
+	log.Printf("A %s notification has been sent!\n", notification.Type)
 	return nil
 }

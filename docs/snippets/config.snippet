@@ -33,4 +33,8 @@ type Config struct {
 	// Discord notifications use an embed color based on the alitute of the aircraft.
 	// DISCORD_COLOR_ALTITUDE "true"
 	DiscordColorAltitude string
+
+	// Interval in seconds between fetching aircraft, minimum is 60 due to API rate limiting.
+	// FETCH_INTERVAL 60
+	FetchInterval int
 }
