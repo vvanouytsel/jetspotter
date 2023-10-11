@@ -105,7 +105,7 @@ jobs:
       - name: Package and push helm chart
         run: |
           helm package helm/jetspotter --version ${{ needs.build.outputs.new_release_version }} --app-version ${{ needs.build.outputs.new_release_version }} 
-          helm push jetspotter-${{ needs.build.outputs.new_release_version }} oci://${{ env.REGISTRY }}/${{ github.repository }}-chart
+          helm push jetspotter-${{ needs.build.outputs.new_release_version }}.tgz oci://${{ env.REGISTRY }}/${{ github.repository }}-chart
 
   notification:
     name: Send notification on failure
