@@ -18,6 +18,7 @@ doc:
 	go doc -u jetspotter.AircraftOutput | sed -n '/type AircraftOutput struct {/,/}/p' > ${OUTPUT_SNIPPET}
 	@cat ${OUTPUT_SNIPPET}
 	@echo "# Overview\n" > helm/jetspotter/README.md
+	@ echo "[![GitHub repository](https://img.shields.io/badge/GitHub-jetspotter-green)](https://github.com/vvanouytsel/jetspotter)\n" >> helm/jetspotter/README.md
 	@cat ${OVERVIEW_SNIPPET} >> helm/jetspotter/README.md
 	@cat helm/jetspotter/README.md
 
