@@ -383,3 +383,11 @@ func TestImageAPI(t *testing.T) {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
 	}
 }
+
+func TestGetHighestValue(t *testing.T) {
+	expected := 14
+	actual := getHighestValue(0, 8, 14, 3, 12)
+	if expected != actual {
+		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+	}
+}

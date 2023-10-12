@@ -194,10 +194,22 @@ func getCloudCoverage(weather weather.WeatherData, altitudeInFeet float64) (clou
 	case altitudeInMeters < 3000:
 		return weather.Hourly.CloudcoverLow[hourUTC]
 	case altitudeInMeters >= 3000 && altitudeInMeters < 8000:
-		return weather.Hourly.CloudcoverMid[hourUTC]
+		return getHighestValue(weather.Hourly.CloudcoverLow[hourUTC], weather.Hourly.CloudcoverMid[hourUTC])
 	default:
-		return weather.Hourly.CloudcoverHigh[hourUTC]
+		return getHighestValue(weather.Hourly.CloudcoverLow[hourUTC],
+			weather.Hourly.CloudcoverMid[hourUTC],
+			weather.Hourly.CloudcoverHigh[hourUTC])
 	}
+}
+
+func getHighestValue(numbers ...int) (highest int) {
+	highest = 0
+	for _, v := range numbers {
+		if v > highest {
+			highest = v
+		}
+	}
+	return highest
 }
 
 func validateFields(aircraft Aircraft) Aircraft {
