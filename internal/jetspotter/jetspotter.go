@@ -236,7 +236,7 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.Description = ac.Desc
 		acOutput.Distance = CalculateDistance(config.Location, aircraftLocation)
 		acOutput.Speed = int(ac.GS)
-		acOutput.Registration = ac.TailNumber
+		acOutput.Registration = ac.Registration
 		acOutput.Type = ac.PlaneType
 		acOutput.ICAO = ac.ICAO
 		acOutput.Heading = ac.Track
@@ -246,7 +246,7 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.BearingFromLocation = CalculateBearing(config.Location, aircraftLocation)
 		acOutput.BearingFromAircraft = CalculateBearing(aircraftLocation, config.Location)
 		acOutput.ImageThumbnailURL = getImageURL(ac.ICAO)
-		acOutput.JetPhotosURL = fmt.Sprintf("https://www.jetphotos.com/registration/%s", ac.TailNumber)
+		acOutput.JetPhotosURL = fmt.Sprintf("https://www.jetphotos.com/registration/%s", ac.Registration)
 		acOutputs = append(acOutputs, acOutput)
 	}
 	return acOutputs, nil

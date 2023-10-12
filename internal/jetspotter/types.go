@@ -21,7 +21,7 @@ type Aircraft struct {
 	// Callsign or flight name of the aircraft, if not set 'NONE' is used
 	Callsign string `json:"flight"`
 	// Tail number of the aircraft
-	TailNumber string `json:"r"`
+	Registration string `json:"r"`
 	// Type of the aircraft
 	PlaneType string `json:"t"`
 	Desc      string `json:"desc"`
