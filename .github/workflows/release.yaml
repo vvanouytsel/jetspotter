@@ -94,13 +94,17 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build and push container image
-        run: |
-          IMAGE="${{ env.REGISTRY }}/${{ github.repository }}"
-          docker build -t ${IMAGE}:${{ needs.build.outputs.new_release_version }} -t ${IMAGE}:latest .
-          docker push ${IMAGE}:${{ needs.build.outputs.new_release_version }}
-          docker push ${IMAGE}:latest
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:latest,${{ env.REGISTRY }}/${{ github.repository }}:${{ needs.build.outputs.new_release_version }}
 
       - name: Package and push helm chart
         run: |
