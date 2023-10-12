@@ -1,6 +1,6 @@
 # Overview
 
-[![GitHub repository](https://img.shields.io/badge/GitHub-jetspotter-green)](https://github.com/vvanouytsel/jetspotter)
+[![GitHub repository](https://img.shields.io/badge/GitHub-jetspotter-green?logo=github)](https://github.com/vvanouytsel/jetspotter)
 
 Jetspotter is a simple program that queries the ADS-B API.
 It is used to send notifications if a specified type of aircraft has been spotted within a specified range of a target location.
