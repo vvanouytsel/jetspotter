@@ -15,6 +15,12 @@ jetspotter:
     # - F16
     # - A400
 
+deployment:
+  # Annotations to be added to the deployment
+  annotations: {}
+#     myKey: myValue
+#     anotherKey: anotherValue
+
 slack:
   # Webhook used to send notifications to Slack. If not set, no messages will be sent to Slack.
   webhook: ""

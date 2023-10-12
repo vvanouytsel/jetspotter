@@ -11,6 +11,12 @@ spec:
       {{- include "jetspotter.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      {{- if .Values.deployment.annotations }}
+      annotations:
+        {{- range $key, $value := .Values.deployment.annotations }}
+        {{ $key }}: {{ $value }}
+        {{- end }}
+      {{- end }}
       labels:
         {{- include "jetspotter.selectorLabels" . | nindent 8 }}
     spec:
