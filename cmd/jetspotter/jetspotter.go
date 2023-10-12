@@ -62,6 +62,11 @@ func main() {
 
 	var alreadySpottedAircraft []jetspotter.Aircraft
 	for {
+
+		if len(alreadySpottedAircraft) == 1 {
+			log.Printf("%d aircraft is skipped, since it is already spotted.\n", len(alreadySpottedAircraft))
+		}
+
 		if len(alreadySpottedAircraft) > 0 {
 			log.Printf("%d aircraft are skipped, since they are already spotted.\n", len(alreadySpottedAircraft))
 		}
