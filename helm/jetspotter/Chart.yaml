@@ -1,6 +1,6 @@
 apiVersion: v2
 name: jetspotter
-description: A Helm chart for JetSpotter
+description: A Helm chart for jetspotter
 
 # A chart can be either an 'application' or a 'library' chart.
 #

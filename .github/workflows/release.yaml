@@ -123,13 +123,13 @@ jobs:
         with:
           payload: |
             {
-              "text": "JetSpotter failed build",
+              "text": "Jetspotter failed build",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|GitHub action> for JetSpotter failed"
+                    "text": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|GitHub action> for jetspotter failed"
                   }
                 }
               ]
