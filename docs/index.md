@@ -34,41 +34,7 @@ If the altitude color feature is enabled:
 If the altitude color feature is disabled:
 ![Discord notfication ](images/jetspotter-discord-2.png)
 
-## Releases
-
-Releases can be found on the [GitHub repository](https://github.com/vvanouytsel/jetspotter/releases).
-
-## Container images
-
-[Container images](https://github.com/vvanouytsel/jetspotter/pkgs/container/jetspotter) are also created for each release.
-
-## Build
-
-```bash
-go build -o jetspotter -ldflags "-linkmode external -extldflags -static" cmd/jetspotter/jetspotter.go
-```
-
-## Run
-
-```bash
-go run cmd/jetspotter/*
-```
-
-## Test
-
-```bash
-make test
-```
-
-## Documentation
-
-Documentation for the configuration parameters can be generated.
-
-```bash
-make doc
-```
-
-## Examples
+## Getting started
 
 Run jetspotter without extra parameters.
 
@@ -111,4 +77,38 @@ docker run -e DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/XXXXXX/YYYYYY
 
 # Binary
 DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/XXXXXX/YYYYYY ./jetspotter
+```
+
+## Helm
+
+Helm charts are available in the oci registry.
+
+```bash
+helm install -n jetspotter --create-namespace oci://ghcr.io/vvanouytsel/jetspotter-chart/jetspotter
+```
+
+## Releases
+
+Releases can be found on the [GitHub repository](https://github.com/vvanouytsel/jetspotter/releases).
+
+## Container images
+
+[Container images](https://github.com/vvanouytsel/jetspotter/pkgs/container/jetspotter) are also created for each release.
+
+## Build
+
+```bash
+go build -o jetspotter -ldflags "-linkmode external -extldflags -static" cmd/jetspotter/jetspotter.go
+```
+
+## Run
+
+```bash
+go run cmd/jetspotter/*
+```
+
+## Test
+
+```bash
+make test
 ```
