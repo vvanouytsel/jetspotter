@@ -11,8 +11,8 @@ type AircraftOutput struct {
 	// Type of the aircraft
 	Type string
 
-	// Tail number of the aircraft
-	TailNumber string
+	// Registration number of the aircraft
+	Registration string
 
 	// Alitude of the aircraft in feet
 	Altitude float64
@@ -27,8 +27,11 @@ type AircraftOutput struct {
 	// TrackerURL is to URL track the aircraft using the ADS-B website
 	TrackerURL string
 
-	// PlaneSpotterURL is the URL for the planespotter page of that aircraft
-	PlaneSpotterURL string
+	// ImageThumbnailURL is the URL for the thumbnail of the aircraft
+	ImageThumbnailURL string
+
+	// JetPhotosURL is the URL showing the jetphotos page of the aircraft
+	JetPhotosURL string
 
 	// Percentage of cloud coverage, lower cloud coverage means that you have more chance to spot the aircraft
 	CloudCoverage int

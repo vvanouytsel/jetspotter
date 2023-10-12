@@ -60,7 +60,7 @@ func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Tail number:* %s", ac.TailNumber),
+					Text: fmt.Sprintf("*Registration:* <%s|%s>", ac.JetPhotosURL, ac.Registration),
 				},
 				{
 					Type: "mrkdwn",
@@ -97,18 +97,18 @@ func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 			},
 		})
 
-		imageURL := ac.PlaneSpotterURL
+		imageURL := ac.ImageThumbnailURL
 		if imageURL != "" {
 			blocks = append(blocks,
 				Block{
 					Type: "image",
 					Title: &Title{
 						Type:  "plain_text",
-						Text:  fmt.Sprintf("%s - %s", ac.Description, ac.TailNumber),
+						Text:  fmt.Sprintf("%s - %s", ac.Description, ac.Registration),
 						Emoji: true,
 					},
 					ImageURL: imageURL,
-					AltText:  fmt.Sprintf("%s with registration number %s", ac.Description, ac.TailNumber),
+					AltText:  fmt.Sprintf("%s with registration number %s", ac.Description, ac.Registration),
 				})
 		}
 

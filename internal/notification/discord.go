@@ -78,8 +78,8 @@ func buildDiscordMessage(aircraft []jetspotter.AircraftOutput, config configurat
 					Inline: true,
 				},
 				{
-					Name:   "Tail number",
-					Value:  ac.TailNumber,
+					Name:   "Registration",
+					Value:  fmt.Sprintf("[%s](%s)", ac.Registration, ac.JetPhotosURL),
 					Inline: true,
 				},
 				{
@@ -131,7 +131,7 @@ func buildDiscordMessage(aircraft []jetspotter.AircraftOutput, config configurat
 			embed.Color = darkBlue
 		}
 
-		imageURL := ac.PlaneSpotterURL
+		imageURL := ac.ImageThumbnailURL
 		if imageURL != "" {
 			embed.Thumbnail = &discordgo.MessageEmbedThumbnail{
 				URL: imageURL,

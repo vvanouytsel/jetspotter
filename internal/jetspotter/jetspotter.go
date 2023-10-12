@@ -16,7 +16,6 @@ import (
 	"jetspotter/internal/configuration"
 	"jetspotter/internal/weather"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/jftuga/geodist"
 )
 
@@ -237,7 +236,7 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.Description = ac.Desc
 		acOutput.Distance = CalculateDistance(config.Location, aircraftLocation)
 		acOutput.Speed = int(ac.GS)
-		acOutput.TailNumber = ac.TailNumber
+		acOutput.Registration = ac.TailNumber
 		acOutput.Type = ac.PlaneType
 		acOutput.ICAO = ac.ICAO
 		acOutput.Heading = ac.Track
@@ -246,7 +245,8 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.CloudCoverage = getCloudCoverage(*weather, acOutput.Altitude)
 		acOutput.BearingFromLocation = CalculateBearing(config.Location, aircraftLocation)
 		acOutput.BearingFromAircraft = CalculateBearing(aircraftLocation, config.Location)
-		acOutput.PlaneSpotterURL = getImageURL(fmt.Sprintf("https://www.planespotting.be/index.php?page=aircraft&registration=%s", ac.TailNumber))
+		acOutput.ImageThumbnailURL = getImageURL(ac.ICAO)
+		acOutput.JetPhotosURL = fmt.Sprintf("https://www.jetphotos.com/registration/%s", ac.TailNumber)
 		acOutputs = append(acOutputs, acOutput)
 	}
 	return acOutputs, nil
@@ -284,8 +284,9 @@ func toDegrees(rad float64) float64 {
 	return rad * (180 / math.Pi)
 }
 
-// getImageURL queries the planespotter website to fetch an image link
-func getImageURL(URL string) (imageURL string) {
+// getImageURL uses the hexdb API to fetch a thumbnail image of the aircraft
+func getImageURL(ICAO string) (imageURL string) {
+	URL := fmt.Sprintf("https://hexdb.io/hex-image-thumb?hex=%s", ICAO)
 	req, err := http.NewRequest("GET", URL, nil)
 	if err != nil {
 		return ""
@@ -301,16 +302,11 @@ func getImageURL(URL string) (imageURL string) {
 		return ""
 	}
 
-	doc, err := goquery.NewDocumentFromReader(res.Body)
+	hexDbString, err := io.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Could not read body for image: %v", err)
+		return ""
 	}
 
-	doc.Find("meta[property='og:image']").Each(func(index int, element *goquery.Selection) {
-		if content, exists := element.Attr("content"); exists {
-			imageURL = content
-		}
-	})
-
-	return imageURL
+	return "https:" + string(hexDbString)
 }

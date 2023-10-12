@@ -375,3 +375,11 @@ func TestAlreadySpottedAircraftAreFiltered(t *testing.T) {
 			expectedSpottedAircraft, actualSpottedAircraft)
 	}
 }
+
+func TestImageAPI(t *testing.T) {
+	expected := "https://cdn.jetphotos.com/400/5/620836_1694436988.jpg"
+	actual := getImageURL("aac136")
+	if expected != actual {
+		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+	}
+}
