@@ -2,6 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "jetspotter.fullname" . }}
+  {{- if .Values.deployment.annotations }}
+  annotations:
+    {{- range $key, $value := .Values.deployment.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
   labels:
     {{- include "jetspotter.labels" . | nindent 4 }}
 spec:
@@ -11,12 +17,6 @@ spec:
       {{- include "jetspotter.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- if .Values.deployment.annotations }}
-      annotations:
-        {{- range $key, $value := .Values.deployment.annotations }}
-        {{ $key }}: {{ $value }}
-        {{- end }}
-      {{- end }}
       labels:
         {{- include "jetspotter.selectorLabels" . | nindent 8 }}
     spec:
