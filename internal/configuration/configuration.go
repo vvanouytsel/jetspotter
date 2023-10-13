@@ -85,8 +85,7 @@ func GetConfig() (config Config, err error) {
 	config.DiscordColorAltitude = getEnvVariable(DiscordColorAltitude, "true")
 	config.FetchInterval, err = strconv.Atoi(getEnvVariable(FetchInterval, strconv.Itoa(defaultFetchInterval)))
 	if err != nil || config.FetchInterval < 60 {
-		log.Printf("%v is not supported, defaulting to %d", config.FetchInterval, defaultFetchInterval)
-		config.FetchInterval = defaultFetchInterval
+		log.Printf("Fetch interval of %ds detected. You might hit rate limits, consider using the default of %ds instead.", config.FetchInterval, defaultFetchInterval)
 	}
 
 	config.Location.Lat, err = strconv.ParseFloat(getEnvVariable(LocationLatitude, "51.17348"), 64)
