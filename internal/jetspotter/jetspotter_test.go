@@ -46,26 +46,26 @@ var (
 		Callsign:  "JACKAL51",
 		PlaneType: "F16",
 	}
-	planes = []AircraftOutput{
+	planes = []Aircraft{
 		{
-			Callsign:    "APEX11",
-			Type:        aircraft.F16.Identifier,
-			Description: aircraft.F16.Description,
+			Callsign:  "APEX11",
+			PlaneType: aircraft.F16.Identifier,
+			Desc:      aircraft.F16.Description,
 		},
 		{
-			Callsign:    "APEX12",
-			Type:        aircraft.F16.Identifier,
-			Description: aircraft.F16.Description,
+			Callsign:  "APEX12",
+			PlaneType: aircraft.F16.Identifier,
+			Desc:      aircraft.F16.Description,
 		},
 		{
-			Callsign:    "XSG123",
-			Type:        aircraft.B77L.Identifier,
-			Description: aircraft.B77L.Description,
+			Callsign:  "XSG123",
+			PlaneType: aircraft.B77L.Identifier,
+			Desc:      aircraft.B77L.Description,
 		},
 		{
-			Callsign:    "GRZLY11",
-			Type:        aircraft.A400.Identifier,
-			Description: aircraft.A400.Description,
+			Callsign:  "GRZLY11",
+			PlaneType: aircraft.A400.Identifier,
+			Desc:      aircraft.A400.Description,
 		},
 	}
 
@@ -91,23 +91,23 @@ var (
 )
 
 func TestFilterAircraftByTypeF16(t *testing.T) {
-	expected := []AircraftOutput{
+	expected := []Aircraft{
 		{
-			Callsign:    "APEX11",
-			Type:        aircraft.F16.Identifier,
-			Description: aircraft.F16.Description,
+			Callsign:  "APEX11",
+			PlaneType: aircraft.F16.Identifier,
+			Desc:      aircraft.F16.Description,
 		},
 		{
-			Callsign:    "APEX12",
-			Type:        aircraft.F16.Identifier,
-			Description: aircraft.F16.Description,
+			Callsign:  "APEX12",
+			PlaneType: aircraft.F16.Identifier,
+			Desc:      aircraft.F16.Description,
 		},
 	}
 
 	config := configuration.Config{
 		AircraftTypes: []string{aircraft.F16.Identifier},
 	}
-	actual := filterAircraftByTypes(planes, config)
+	actual := filterAircraftByTypes(planes, config.AircraftTypes)
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
@@ -119,7 +119,7 @@ func TestFilterAircraftByTypeALL(t *testing.T) {
 		AircraftTypes: []string{aircraft.ALL.Identifier},
 	}
 	expected := planes
-	actual := filterAircraftByTypes(planes, config)
+	actual := filterAircraftByTypes(planes, config.AircraftTypes)
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
@@ -146,28 +146,28 @@ func TestCalculateDistance(t *testing.T) {
 }
 
 func TestFilterAircraftByTypes(t *testing.T) {
-	expected := []AircraftOutput{
+	expected := []Aircraft{
 		{
-			Callsign:    "APEX11",
-			Type:        aircraft.F16.Identifier,
-			Description: aircraft.F16.Description,
+			Callsign:  "APEX11",
+			PlaneType: aircraft.F16.Identifier,
+			Desc:      aircraft.F16.Description,
 		},
 		{
-			Callsign:    "APEX12",
-			Type:        aircraft.F16.Identifier,
-			Description: aircraft.F16.Description,
+			Callsign:  "APEX12",
+			PlaneType: aircraft.F16.Identifier,
+			Desc:      aircraft.F16.Description,
 		},
 		{
-			Callsign:    "GRZLY11",
-			Type:        aircraft.A400.Identifier,
-			Description: aircraft.A400.Description,
+			Callsign:  "GRZLY11",
+			PlaneType: aircraft.A400.Identifier,
+			Desc:      aircraft.A400.Description,
 		},
 	}
 
 	config := configuration.Config{
 		AircraftTypes: []string{aircraft.F16.Identifier, aircraft.A400.Identifier},
 	}
-	actual := filterAircraftByTypes(planes, config)
+	actual := filterAircraftByTypes(planes, config.AircraftTypes)
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
@@ -387,6 +387,14 @@ func TestImageAPI(t *testing.T) {
 func TestGetHighestValue(t *testing.T) {
 	expected := 14
 	actual := getHighestValue(0, 8, 14, 3, 12)
+	if expected != actual {
+		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+	}
+}
+
+func TestConvertKilometersToMiles(t *testing.T) {
+	expected := 12
+	actual := convertKilometersToMiles(20)
 	if expected != actual {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
 	}

@@ -31,40 +31,18 @@ func CalculateDistance(source geodist.Coord, destination geodist.Coord) int {
 	return int(kilometers)
 }
 
-// GetAircraftInProximity returns all aircraft within a specified maxRange of a latitude/longitude point
-func GetAircraftInProximity(latitude string, longitude string, maxRange int) (aircraft []Aircraft, err error) {
-	var flightData FlightData
-	endpoint, err := url.JoinPath(baseURL, latitude, longitude, strconv.Itoa(maxRange))
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest("GET", endpoint, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer res.Body.Close()
-	body, _ := io.ReadAll(res.Body)
-	err = json.Unmarshal(body, &flightData)
-	if err != nil {
-		return nil, err
-	}
-
-	return flightData.AC, nil
+// convertKilometersToMiles converts kilometers into miles. The miles are rounded.
+func convertKilometersToMiles(kilometers float64) int {
+	return int(kilometers / 1.60934)
 }
 
-// getFiltererdAircraftInRange returns all aircraft of specified types within maxRange kilometers of the location.
-func getFiltererdAircraftInRange(config configuration.Config) (aircraft []Aircraft, err error) {
+// getAllAircraftInRange returns all aircraft within maxRange kilometers of the location.
+func getAllAircraftInRange(location geodist.Coord, maxRangeKilometers int) (aircraft []Aircraft, err error) {
 	var flightData FlightData
-	miles := int(float32(config.MaxRangeKilometers) / 1.60934)
+	miles := convertKilometersToMiles(float64(maxRangeKilometers))
 	endpoint, err := url.JoinPath(baseURL,
-		strconv.FormatFloat(config.Location.Lat, 'f', -1, 64),
-		strconv.FormatFloat(config.Location.Lon, 'f', -1, 64),
+		strconv.FormatFloat(location.Lat, 'f', -1, 64),
+		strconv.FormatFloat(location.Lon, 'f', -1, 64),
 		strconv.Itoa(miles))
 	if err != nil {
 		return nil, err
@@ -137,12 +115,14 @@ func validateAircraft(allFilteredAircraft []Aircraft, alreadySpottedAircraft *[]
 // Aircraft that have been spotted are removed from the list.
 func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Config) (aircraft []AircraftOutput, err error) {
 	var newlySpottedAircraft []Aircraft
-	allFilteredAircraft, err := getFiltererdAircraftInRange(config)
+
+	allAircraftInRange, err := getAllAircraftInRange(config.Location, config.MaxRangeKilometers)
 	if err != nil {
 		return nil, err
 	}
 
-	newlySpottedAircraft, *alreadySpottedAircraft = validateAircraft(allFilteredAircraft, alreadySpottedAircraft)
+	filteredAircraftInRange := filterAircraftByTypes(allAircraftInRange, config.AircraftTypes)
+	newlySpottedAircraft, *alreadySpottedAircraft = validateAircraft(filteredAircraftInRange, alreadySpottedAircraft)
 
 	acOutputs, err := CreateAircraftOutput(newlySpottedAircraft, config)
 	if err != nil {
@@ -152,16 +132,16 @@ func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Con
 	if slices.Contains(config.AircraftTypes, "ALL") {
 		return acOutputs, nil
 	}
-	return filterAircraftByTypes(acOutputs, config), nil
+	return acOutputs, nil
 }
 
 // filterAircraftByTypes returns a list of Aircraft that match the aircraftTypes.
-func filterAircraftByTypes(aircraft []AircraftOutput, config configuration.Config) []AircraftOutput {
-	var filteredAircraft []AircraftOutput
+func filterAircraftByTypes(aircraft []Aircraft, types []string) []Aircraft {
+	var filteredAircraft []Aircraft
 
 	for _, ac := range aircraft {
-		for _, aircraftType := range config.AircraftTypes {
-			if ac.Type == aircraftType || aircraftType == "ALL" {
+		for _, aircraftType := range types {
+			if ac.PlaneType == aircraftType || aircraftType == "ALL" {
 				filteredAircraft = append(filteredAircraft, ac)
 			}
 		}
