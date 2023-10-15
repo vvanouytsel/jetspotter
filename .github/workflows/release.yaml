@@ -46,7 +46,7 @@ jobs:
           GOARCH: ${{ matrix.architecture }}
         id: build
         run: |
-          go build -o jetspotter -ldflags "-linkmode external -extldflags -static" cmd/jetspotter/jetspotter.go
+          go build -o jetspotter cmd/jetspotter/jetspotter.go
 
       - uses: actions/upload-artifact@v3
         name: Upload artifact
@@ -72,13 +72,13 @@ jobs:
       - uses: actions/download-artifact@v3
         name: Download artifact
         with:
-          name: jetspotter
+          path: .
 
       - name: Create the release
         uses: ncipollo/release-action@v1
         id: release
         with:
-          artifacts: jetspotter
+          artifacts: jetspotter-*
           name: ${{ needs.build.outputs.new_release_version }}
           body: ${{ needs.build.outputs.new_release_notes }}
           tag: ${{ needs.build.outputs.new_release_version }}
