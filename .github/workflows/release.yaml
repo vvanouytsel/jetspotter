@@ -84,7 +84,7 @@ jobs:
         uses: ncipollo/release-action@v1
         id: release
         with:
-          artifacts: artifacts/jetspotter-*
+          artifacts: artifacts/jetspotter-*/*
           name: ${{ needs.check.outputs.new_release_version }}
           body: ${{ needs.check.outputs.new_release_notes }}
           tag: ${{ needs.check.outputs.new_release_version }}
