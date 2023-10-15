@@ -31,9 +31,6 @@ jobs:
       matrix:
         os: [darwin, linux, windows]
         architecture: [arm64, amd64]
-    outputs:
-      new_release_version: ${{ steps.check_semantic.outputs.new_release_version }}
-      new_release_notes: ${{ steps.check_semantic.outputs.new_release_notes }}
     steps:
       - uses: actions/setup-go@v4
         with:
@@ -54,6 +51,13 @@ jobs:
           name: "jetspotter-${{ matrix.os }}-${{ matrix.architecture }}"
           path: jetspotter
 
+  check:
+    needs: [build]
+    runs-on: ubuntu-22.04
+    outputs:
+      new_release_version: ${{ steps.check_semantic.outputs.new_release_version }}
+      new_release_notes: ${{ steps.check_semantic.outputs.new_release_notes }}
+    steps:
       - name: Install conventional-changelog-conventionalcommits
         run: npm install conventional-changelog-conventionalcommits
 
@@ -65,8 +69,8 @@ jobs:
 
   release:
     name: Create release
-    needs: [build]
-    if: needs.build.outputs.new_release_version
+    needs: [check]
+    if: needs.check.outputs.new_release_version
     runs-on: [ubuntu-22.04]
     steps:
       - run: mkdir artifacts
@@ -80,18 +84,18 @@ jobs:
         id: release
         with:
           artifacts: artifacts/jetspotter-*
-          name: ${{ needs.build.outputs.new_release_version }}
-          body: ${{ needs.build.outputs.new_release_notes }}
-          tag: ${{ needs.build.outputs.new_release_version }}
+          name: ${{ needs.check.outputs.new_release_version }}
+          body: ${{ needs.check.outputs.new_release_notes }}
+          tag: ${{ needs.check.outputs.new_release_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
   image:
     name: Push container image and helm chart
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [check]
     env:
       REGISTRY: ghcr.io
-    if: needs.build.outputs.new_release_version
+    if: needs.check.outputs.new_release_version
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -112,12 +116,12 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}:latest,${{ env.REGISTRY }}/${{ github.repository }}:${{ needs.build.outputs.new_release_version }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:latest,${{ env.REGISTRY }}/${{ github.repository }}:${{ needs.check.outputs.new_release_version }}
 
       - name: Package and push helm chart
         run: |
-          helm package helm/jetspotter --version ${{ needs.build.outputs.new_release_version }} --app-version ${{ needs.build.outputs.new_release_version }} 
-          helm push jetspotter-${{ needs.build.outputs.new_release_version }}.tgz oci://${{ env.REGISTRY }}/${{ github.repository }}-chart
+          helm package helm/jetspotter --version ${{ needs.check.outputs.new_release_version }} --app-version ${{ needs.check.outputs.new_release_version }} 
+          helm push jetspotter-${{ needs.check.outputs.new_release_version }}.tgz oci://${{ env.REGISTRY }}/${{ github.repository }}-chart
 
   notification:
     name: Send notification on failure
