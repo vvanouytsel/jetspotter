@@ -44,15 +44,16 @@ jobs:
           GOARCH: ${{ matrix.architecture }}
         id: build
         run: |
-          go build -o jetspotter cmd/jetspotter/jetspotter.go
+          go build -o jetspotter-${{ matrix.os }}-${{ matrix.architecture }} cmd/jetspotter/jetspotter.go
 
       - uses: actions/upload-artifact@v3
         name: Upload artifact
         with:
           name: "jetspotter-${{ matrix.os }}-${{ matrix.architecture }}"
-          path: jetspotter
+          path: jetspotter-${{ matrix.os }}-${{ matrix.architecture }}
 
   check:
+    name: Check release required
     needs: [build]
     runs-on: ubuntu-22.04
     outputs:
@@ -79,6 +80,8 @@ jobs:
         name: Download artifact
         with:
           path: artifacts
+
+      - run: ls -ltr artifacts/jetspotter-*/*
 
       - name: Create the release
         uses: ncipollo/release-action@v1
