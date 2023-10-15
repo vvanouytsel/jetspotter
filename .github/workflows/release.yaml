@@ -35,6 +35,7 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: '1.21'
+
       - uses: actions/checkout@v3
 
       - name: Build
@@ -58,9 +59,9 @@ jobs:
       new_release_version: ${{ steps.check_semantic.outputs.new_release_version }}
       new_release_notes: ${{ steps.check_semantic.outputs.new_release_notes }}
     steps:
+      - uses: actions/checkout@v3
       - name: Install conventional-changelog-conventionalcommits
         run: npm install conventional-changelog-conventionalcommits
-
       - name: Check semantic release
         uses: cycjimmy/semantic-release-action@v4
         id: check_semantic
