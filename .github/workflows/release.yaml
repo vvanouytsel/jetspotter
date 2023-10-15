@@ -69,16 +69,19 @@ jobs:
     if: needs.build.outputs.new_release_version
     runs-on: [ubuntu-22.04]
     steps:
+      - run: mkdir artifacts
       - uses: actions/download-artifact@v3
         name: Download artifact
         with:
-          path: .
+          path: artifacts
+
+      - run: ls -l artifacts
 
       - name: Create the release
         uses: ncipollo/release-action@v1
         id: release
         with:
-          artifacts: jetspotter-*
+          artifacts: /jetspotter-*
           name: ${{ needs.build.outputs.new_release_version }}
           body: ${{ needs.build.outputs.new_release_notes }}
           tag: ${{ needs.build.outputs.new_release_version }}
