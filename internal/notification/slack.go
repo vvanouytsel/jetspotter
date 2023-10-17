@@ -60,7 +60,7 @@ func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Registration:* <%s|%s>", ac.JetPhotosURL, ac.Registration),
+					Text: fmt.Sprintf("*Registration:* <%s|%s>", ac.ImageURL, ac.Registration),
 				},
 				{
 					Type: "mrkdwn",
@@ -126,6 +126,10 @@ func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 // SendSlackMessage sends a slack message containing metadata of a list of aircraft
 func SendSlackMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
 	message, err := buildSlackMessage(aircraft, config)
+	if err != nil {
+		return err
+	}
+
 	notification := Notification{
 		Message:    message,
 		Type:       Slack,

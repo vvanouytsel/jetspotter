@@ -25,6 +25,10 @@ const (
 // SendDiscordMessage sends a discord message containing metadata of a list of aircraft
 func SendDiscordMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
 	message, err := buildDiscordMessage(aircraft, config)
+	if err != nil {
+		return err
+	}
+
 	notification := Notification{
 		Message:    message,
 		Type:       Discord,
@@ -79,7 +83,7 @@ func buildDiscordMessage(aircraft []jetspotter.AircraftOutput, config configurat
 				},
 				{
 					Name:   "Registration",
-					Value:  fmt.Sprintf("[%s](%s)", ac.Registration, ac.JetPhotosURL),
+					Value:  fmt.Sprintf("[%s](%s)", ac.Registration, ac.ImageURL),
 					Inline: true,
 				},
 				{

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"math"
 	"net/http"
 	"net/url"
@@ -14,6 +13,7 @@ import (
 	"time"
 
 	"jetspotter/internal/configuration"
+	"jetspotter/internal/planespotter"
 	"jetspotter/internal/weather"
 
 	"github.com/jftuga/geodist"
@@ -165,7 +165,7 @@ func ConvertFeetToMeters(feet float64) int {
 // low    -> 0m up to 3000m
 // medium -> 3000m up to 8000m
 // high   -> above 8000m
-func getCloudCoverage(weather weather.WeatherData, altitudeInFeet float64) (cloudCoveragePercentage int) {
+func getCloudCoverage(weather weather.Data, altitudeInFeet float64) (cloudCoveragePercentage int) {
 
 	altitudeInMeters := ConvertFeetToMeters(altitudeInFeet)
 	hourUTC := (time.Now().Hour())
@@ -222,6 +222,7 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 	for _, ac := range aircraft {
 		ac = validateFields(ac)
 		aircraftLocation := geodist.Coord{Lat: ac.Lat, Lon: ac.Lon}
+		image := planespotter.GetImageFromAPI(ac.ICAO)
 
 		acOutput.Altitude = ac.AltBaro.(float64)
 		acOutput.Callsign = ac.Callsign
@@ -237,8 +238,8 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.CloudCoverage = getCloudCoverage(*weather, acOutput.Altitude)
 		acOutput.BearingFromLocation = CalculateBearing(config.Location, aircraftLocation)
 		acOutput.BearingFromAircraft = CalculateBearing(aircraftLocation, config.Location)
-		acOutput.ImageThumbnailURL = getImageURL(ac.ICAO)
-		acOutput.JetPhotosURL = fmt.Sprintf("https://www.jetphotos.com/registration/%s", ac.Registration)
+		acOutput.ImageThumbnailURL = image.ThumbnailLarge.Src
+		acOutput.ImageURL = image.Link
 		acOutputs = append(acOutputs, acOutput)
 	}
 	return acOutputs, nil
@@ -274,31 +275,4 @@ func toRadians(degrees float64) float64 {
 
 func toDegrees(rad float64) float64 {
 	return rad * (180 / math.Pi)
-}
-
-// getImageURL uses the hexdb API to fetch a thumbnail image of the aircraft
-func getImageURL(ICAO string) (imageURL string) {
-	URL := fmt.Sprintf("https://hexdb.io/hex-image-thumb?hex=%s", ICAO)
-	req, err := http.NewRequest("GET", URL, nil)
-	if err != nil {
-		return ""
-	}
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return ""
-	}
-
-	if res.StatusCode != 200 {
-		log.Printf("Received status code %d for URL %s\n", res.StatusCode, URL)
-		return ""
-	}
-
-	hexDbString, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Printf("Could not read body for image: %v", err)
-		return ""
-	}
-
-	return "https:" + string(hexDbString)
 }

@@ -28,19 +28,6 @@ var (
 		},
 	}
 
-	alreadySpottedAircraft = []Aircraft{
-		{
-			ICAO:      "DEF",
-			Callsign:  "XSG432",
-			PlaneType: "CESSNA",
-		},
-		{
-			ICAO:      "ZZZ",
-			Callsign:  "TIGER31",
-			PlaneType: "F16",
-		},
-	}
-
 	jackal51Aircraft = Aircraft{
 		ICAO:      "ABC",
 		Callsign:  "JACKAL51",
@@ -373,14 +360,6 @@ func TestAlreadySpottedAircraftAreFiltered(t *testing.T) {
 	if !reflect.DeepEqual(expectedSpottedAircraft, actualSpottedAircraft) {
 		t.Fatalf("expected '%v' to be the same as '%v' in the already spotted list",
 			expectedSpottedAircraft, actualSpottedAircraft)
-	}
-}
-
-func TestImageAPI(t *testing.T) {
-	expected := "https://cdn.jetphotos.com/400/5/620836_1694436988.jpg"
-	actual := getImageURL("aac136")
-	if expected != actual {
-		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
 	}
 }
 

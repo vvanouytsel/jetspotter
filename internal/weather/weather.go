@@ -9,6 +9,7 @@ import (
 	"github.com/jftuga/geodist"
 )
 
+// HourlyUnits represents the cloud cover units per hour
 type HourlyUnits struct {
 	Time           string `json:"time"`
 	CloudcoverLow  string `json:"cloudcover_low"`
@@ -16,6 +17,7 @@ type HourlyUnits struct {
 	CloudcoverHigh string `json:"cloudcover_high"`
 }
 
+// HourlyData represents the cloud cover data per hour
 type HourlyData struct {
 	Time           []string `json:"time"`
 	CloudcoverLow  []int    `json:"cloudcover_low"`
@@ -23,7 +25,8 @@ type HourlyData struct {
 	CloudcoverHigh []int    `json:"cloudcover_high"`
 }
 
-type WeatherData struct {
+// Data represents the data of the weather
+type Data struct {
 	Latitude         float64     `json:"latitude"`
 	Longitude        float64     `json:"longitude"`
 	GenerationTimeMs float64     `json:"generationtime_ms"`
@@ -40,7 +43,7 @@ const (
 )
 
 // GetCloudForecast gets the cloud forecast for every hour of the current day based on a specified location
-func GetCloudForecast(location geodist.Coord) (weather *WeatherData, err error) {
+func GetCloudForecast(location geodist.Coord) (weather *Data, err error) {
 
 	weatherCloudURL := weatherBaseURL + fmt.Sprintf("latitude=%.6f&longitude=%.6f&hourly=cloudcover_low,cloudcover_mid,cloudcover_high&windspeed_unit=kn&timezone=GMT&forecast_days=1",
 		location.Lat, location.Lon)
