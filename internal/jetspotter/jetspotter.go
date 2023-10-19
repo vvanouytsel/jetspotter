@@ -233,7 +233,7 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.Type = ac.PlaneType
 		acOutput.ICAO = ac.ICAO
 		acOutput.Heading = ac.Track
-		acOutput.TrackerURL = fmt.Sprintf("https://globe.adsbexchange.com/?icao=%v&SiteLat=%f&SiteLon=%f",
+		acOutput.TrackerURL = fmt.Sprintf("https://globe.adsbexchange.com/?icao=%v&SiteLat=%f&SiteLon=%f&zoom=11&enableLabels&extendedLabels=1&noIsolation",
 			ac.ICAO, config.Location.Lat, config.Location.Lon)
 		acOutput.CloudCoverage = getCloudCoverage(*weather, acOutput.Altitude)
 		acOutput.BearingFromLocation = CalculateBearing(config.Location, aircraftLocation)
