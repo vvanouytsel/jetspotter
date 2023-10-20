@@ -222,7 +222,7 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 	for _, ac := range aircraft {
 		ac = validateFields(ac)
 		aircraftLocation := geodist.Coord{Lat: ac.Lat, Lon: ac.Lon}
-		image := planespotter.GetImageFromAPI(ac.ICAO)
+		image := planespotter.GetImageFromAPI(ac.ICAO, ac.Registration)
 
 		acOutput.Altitude = ac.AltBaro.(float64)
 		acOutput.Callsign = ac.Callsign

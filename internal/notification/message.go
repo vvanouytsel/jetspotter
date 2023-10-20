@@ -23,6 +23,23 @@ const (
 	Slack = "Slack"
 )
 
+// Format whether to display a hyperlink for the registration or not
+func formatRegistration(ac jetspotter.AircraftOutput, notificationType string) string {
+	if ac.ImageURL == "" {
+		return ac.Registration
+	}
+
+	if notificationType == Discord {
+		return fmt.Sprintf("[%s](%s)", ac.Registration, ac.ImageURL)
+	}
+
+	if notificationType == Slack {
+		return fmt.Sprintf("*Registration:* <%s|%s>", ac.ImageURL, ac.Registration)
+	}
+
+	return ac.Registration
+}
+
 // SendMessage sends a message to a notification platform
 func SendMessage(aircraft []jetspotter.AircraftOutput, notification Notification) error {
 

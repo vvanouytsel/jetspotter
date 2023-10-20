@@ -60,7 +60,7 @@ func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Registration:* <%s|%s>", ac.ImageURL, ac.Registration),
+					Text: formatRegistration(ac, Slack),
 				},
 				{
 					Type: "mrkdwn",

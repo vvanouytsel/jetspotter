@@ -83,7 +83,7 @@ func buildDiscordMessage(aircraft []jetspotter.AircraftOutput, config configurat
 				},
 				{
 					Name:   "Registration",
-					Value:  fmt.Sprintf("[%s](%s)", ac.Registration, ac.ImageURL),
+					Value:  formatRegistration(ac, Discord),
 					Inline: true,
 				},
 				{
