@@ -34,6 +34,12 @@ discord:
   # Discord notifications use an embed color based on the alitute of the aircraft.
   colorAltitude: "true"
 
+gotify:
+  # URL to send gotify notification to
+  url: ""
+  # Token to authenticate with gotify server
+  token: ""
+
 image:
   repository: ghcr.io/vvanouytsel/jetspotter
   pullPolicy: IfNotPresent

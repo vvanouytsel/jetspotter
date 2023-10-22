@@ -64,31 +64,31 @@ func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Speed:* %dkn | %dkm/h", ac.Speed, jetspotter.ConvertKnotsToKilometersPerHour(ac.Speed)),
+					Text: fmt.Sprintf("*Speed:* %s", printSpeed(ac)),
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Altitude:* %vft | %dm", ac.Altitude, jetspotter.ConvertFeetToMeters(ac.Altitude)),
+					Text: fmt.Sprintf("*Altitude:* %s", printAltitude(ac)),
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Distance:* %dkm", ac.Distance),
+					Text: fmt.Sprintf("*Distance:* %s", printDistance(ac)),
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Bearing from location:* %.0f°", ac.BearingFromLocation),
+					Text: fmt.Sprintf("*Bearing from location:* %s", printBearingFromLocation(ac)),
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Heading:* %.0f°", ac.Heading),
+					Text: fmt.Sprintf("*Heading:* %s", printHeading(ac)),
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Bearing from aircraft:* %.0f°", ac.BearingFromAircraft),
+					Text: fmt.Sprintf("*Bearing from aircraft:* %s", printBearingFromAircraft(ac)),
 				},
 				{
 					Type: "mrkdwn",
-					Text: fmt.Sprintf("*Cloud coverage:* %d%%", ac.CloudCoverage),
+					Text: fmt.Sprintf("*Cloud coverage:* %s", printCloudCoverage(ac)),
 				},
 				{
 					Type: "mrkdwn",
@@ -131,9 +131,9 @@ func SendSlackMessage(aircraft []jetspotter.AircraftOutput, config configuration
 	}
 
 	notification := Notification{
-		Message:    message,
-		Type:       Slack,
-		WebHookURL: config.SlackWebHookURL,
+		Message: message,
+		Type:    Slack,
+		URL:     config.SlackWebHookURL,
 	}
 
 	err = SendMessage(aircraft, notification)

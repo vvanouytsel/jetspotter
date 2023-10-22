@@ -37,4 +37,12 @@ type Config struct {
 	// Interval in seconds between fetching aircraft, minimum is 60 due to API rate limiting.
 	// FETCH_INTERVAL 60
 	FetchInterval int
+
+	// Token to authenticate with the gotify server.
+	// GOTIFY_TOKEN ""
+	GotifyToken string
+
+	// URL of the gotify server.
+	// GOTIFY_URL ""
+	GotifyURL string
 }
