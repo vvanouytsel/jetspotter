@@ -30,9 +30,9 @@ func SendDiscordMessage(aircraft []jetspotter.AircraftOutput, config configurati
 	}
 
 	notification := Notification{
-		Message:    message,
-		Type:       Discord,
-		WebHookURL: config.DiscordWebHookURL,
+		Message: message,
+		Type:    Discord,
+		URL:     config.DiscordWebHookURL,
 	}
 
 	err = SendMessage(aircraft, notification)
@@ -83,42 +83,42 @@ func buildDiscordMessage(aircraft []jetspotter.AircraftOutput, config configurat
 				},
 				{
 					Name:   "Registration",
-					Value:  formatRegistration(ac, Discord),
+					Value:  formatRegistration(ac, Markdown),
 					Inline: true,
 				},
 				{
 					Name:   "Speed",
-					Value:  fmt.Sprintf("%dkn | %dkm/h", ac.Speed, jetspotter.ConvertKnotsToKilometersPerHour(ac.Speed)),
+					Value:  printSpeed(ac),
 					Inline: true,
 				},
 				{
 					Name:   "Altitude",
-					Value:  fmt.Sprintf("%vft | %dm", ac.Altitude, jetspotter.ConvertFeetToMeters(ac.Altitude)),
+					Value:  printAltitude(ac),
 					Inline: true,
 				},
 				{
 					Name:   "Distance",
-					Value:  fmt.Sprintf("%dkm", ac.Distance),
+					Value:  printDistance(ac),
 					Inline: true,
 				},
 				{
 					Name:   "Bearing from location",
-					Value:  fmt.Sprintf("%.0f°", ac.BearingFromLocation),
+					Value:  printBearingFromLocation(ac),
 					Inline: true,
 				},
 				{
 					Name:   "Heading",
-					Value:  fmt.Sprintf("%.0f°", ac.Heading),
+					Value:  printHeading(ac),
 					Inline: true,
 				},
 				{
 					Name:   "Bearing from aircraft",
-					Value:  fmt.Sprintf("%.0f°", ac.BearingFromAircraft),
+					Value:  printBearingFromAircraft(ac),
 					Inline: true,
 				},
 				{
 					Name:   "Cloud coverage",
-					Value:  fmt.Sprintf("%d%%", ac.CloudCoverage),
+					Value:  printCloudCoverage(ac),
 					Inline: true,
 				},
 				{

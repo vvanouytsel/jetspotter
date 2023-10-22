@@ -34,6 +34,12 @@ If the altitude color feature is enabled:
 If the altitude color feature is disabled:
 ![Discord notfication ](images/jetspotter-discord-2.png)
 
+### Gotify
+
+Gotify notifications are sent if the `GOTIFY_URL` and `GOTIFY_TOKEN` environment variables are defined.
+
+![Gotify notification](images/jetspotter-gotify-1.png)
+
 ## Getting started
 
 Run jetspotter without extra parameters.
@@ -77,6 +83,17 @@ docker run -e DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/XXXXXX/YYYYYY
 
 # Binary
 DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/XXXXXX/YYYYYY ./jetspotter
+```
+
+Send a gotify notification if one or more aircraft are spotted
+
+```bash
+# Docker
+docker run -e GOTIFY_URL=http://my-gotify-server:85 -e GOTIFY_TOKEN=XXXX
+ ghcr.io/vvanouytsel/jetspotter:latest
+
+# Binary
+GOTIFY_URL=http://my-gotify-server:85 GOTIFY_TOKEN=XXXX ./jetspotter
 ```
 
 ## Helm

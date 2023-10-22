@@ -52,6 +52,14 @@ type Config struct {
 	// Interval in seconds between fetching aircraft, minimum is 60 due to API rate limiting.
 	// FETCH_INTERVAL 60
 	FetchInterval int
+
+	// Token to authenticate with the gotify server.
+	// GOTIFY_TOKEN ""
+	GotifyToken string
+
+	// URL of the gotify server.
+	// GOTIFY_URL ""
+	GotifyURL string
 }
 
 // Environment variable names
@@ -65,6 +73,8 @@ const (
 	MaxAircrfaftSlackMessage = "MAX_AIRCRAFT_SLACK_MESSAGE"
 	AircraftTypes            = "AIRCRAFT_TYPES"
 	FetchInterval            = "FETCH_INTERVAL"
+	GotifyURL                = "GOTIFY_URL"
+	GotifyToken              = "GOTIFY_TOKEN"
 )
 
 // getEnvVariable looks up a specified environment variable, if not set the specified default is used
@@ -80,6 +90,8 @@ func getEnvVariable(key, fallback string) string {
 func GetConfig() (config Config, err error) {
 	defaultFetchInterval := 60
 
+	config.GotifyToken = getEnvVariable(GotifyToken, "")
+	config.GotifyURL = getEnvVariable(GotifyURL, "")
 	config.SlackWebHookURL = getEnvVariable(SlackWebhookURL, "")
 	config.DiscordWebHookURL = getEnvVariable(DiscordWebhookURL, "")
 	config.DiscordColorAltitude = getEnvVariable(DiscordColorAltitude, "true")

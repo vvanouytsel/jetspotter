@@ -39,6 +39,14 @@ func sendNotifications(aircraft []jetspotter.AircraftOutput, config configuratio
 		}
 	}
 
+	// Gotify
+	if config.GotifyURL != "" && config.GotifyToken != "" {
+		err := notification.SendGotifyMessage(sortedAircraft, config)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
