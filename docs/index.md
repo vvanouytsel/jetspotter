@@ -42,6 +42,28 @@ Gotify notifications are sent if the `GOTIFY_URL` and `GOTIFY_TOKEN` environment
 
 ## Getting started
 
+### Windows
+
+Download the latest [release](https://github.com/vvanouytsel/jetspotter/releases) that matches your architecture and operating system. If you don't know, then you probably need `jetspotter-windows-amd64`.
+
+Rename the file and add `.exe` as extension. The full name of the file should be `jetspotter-windows-amd64.exe`
+By default Windows does not show any file extension. You can enable this by clicking on `View` and checking the `File name extensions` box.
+
+![Windows extension ](images/windows1.png)
+
+Open `Windows PowerShell` and navigate to the directory of the `jetspotter-windows-amd64.exe` file using the `cd` command.
+
+```sh
+# Most likely it is stored in your Downloads folder
+cd ~\Downloads
+```
+
+Specify the configuration variables of your choice and run the application.
+
+![Windows jetspotter ](images/windows2.png)
+
+### Examples
+
 Run jetspotter without extra parameters.
 
 ```bash
