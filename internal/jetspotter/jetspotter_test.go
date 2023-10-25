@@ -372,8 +372,8 @@ func TestGetHighestValue(t *testing.T) {
 }
 
 func TestConvertKilometersToMiles(t *testing.T) {
-	expected := 12
-	actual := convertKilometersToMiles(20)
+	expected := 10
+	actual := convertKilometersToNauticalMiles(20)
 	if expected != actual {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
 	}

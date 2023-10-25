@@ -31,15 +31,15 @@ func CalculateDistance(source geodist.Coord, destination geodist.Coord) int {
 	return int(kilometers)
 }
 
-// convertKilometersToMiles converts kilometers into miles. The miles are rounded.
-func convertKilometersToMiles(kilometers float64) int {
-	return int(kilometers / 1.60934)
+// convertKilometersToNauticalMiles converts kilometers into miles. The miles are rounded.
+func convertKilometersToNauticalMiles(kilometers float64) int {
+	return int(kilometers / 1.852)
 }
 
 // getAllAircraftInRange returns all aircraft within maxRange kilometers of the location.
 func getAllAircraftInRange(location geodist.Coord, maxRangeKilometers int) (aircraft []Aircraft, err error) {
 	var flightData FlightData
-	miles := convertKilometersToMiles(float64(maxRangeKilometers))
+	miles := convertKilometersToNauticalMiles(float64(maxRangeKilometers))
 	endpoint, err := url.JoinPath(baseURL,
 		strconv.FormatFloat(location.Lat, 'f', -1, 64),
 		strconv.FormatFloat(location.Lon, 'f', -1, 64),
