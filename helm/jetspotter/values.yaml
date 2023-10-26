@@ -33,7 +33,6 @@ metrics:
   # Create a serviceMonitor object for prometheus-operator
   serviceMonitor:
     enabled: false
-    prometheusInstance: default
     interval: 60s
     scrapeTimeout: 30s
     labels: {}
