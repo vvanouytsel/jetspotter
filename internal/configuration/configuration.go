@@ -60,6 +60,10 @@ type Config struct {
 	// URL of the gotify server.
 	// GOTIFY_URL ""
 	GotifyURL string
+
+	// Port where metrics will be exposed on
+	// METRICS_PORT "7070"
+	MetricsPort string
 }
 
 // Environment variable names
@@ -75,6 +79,7 @@ const (
 	FetchInterval            = "FETCH_INTERVAL"
 	GotifyURL                = "GOTIFY_URL"
 	GotifyToken              = "GOTIFY_TOKEN"
+	MetricsPort              = "METRICS_PORT"
 )
 
 // getEnvVariable looks up a specified environment variable, if not set the specified default is used
@@ -95,6 +100,7 @@ func GetConfig() (config Config, err error) {
 	config.SlackWebHookURL = getEnvVariable(SlackWebhookURL, "")
 	config.DiscordWebHookURL = getEnvVariable(DiscordWebhookURL, "")
 	config.DiscordColorAltitude = getEnvVariable(DiscordColorAltitude, "true")
+	config.MetricsPort = getEnvVariable(MetricsPort, "7070")
 	config.FetchInterval, err = strconv.Atoi(getEnvVariable(FetchInterval, strconv.Itoa(defaultFetchInterval)))
 	if err != nil || config.FetchInterval < 60 {
 		log.Printf("Fetch interval of %ds detected. You might hit rate limits, consider using the default of %ds instead.", config.FetchInterval, defaultFetchInterval)
@@ -122,5 +128,4 @@ func GetConfig() (config Config, err error) {
 
 	config.AircraftTypes = strings.Split(strings.ToUpper(strings.ReplaceAll(getEnvVariable(AircraftTypes, "ALL"), " ", "")), ",")
 	return config, nil
-
 }
