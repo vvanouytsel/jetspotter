@@ -7,3 +7,7 @@
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/jetspotter)](https://artifacthub.io/packages/search?repo=jetspotter)
 
 ## [Documentation](https://vvanouytsel.github.io/jetspotter/)
+
+## Stargazers
+
+[![Stargazers](https://starchart.cc/vvanouytsel/jetspotter.svg)](https://starchart.cc/vvanouytsel/jetspotter)

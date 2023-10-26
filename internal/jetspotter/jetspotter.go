@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"jetspotter/internal/configuration"
+	"jetspotter/internal/metrics"
 	"jetspotter/internal/planespotter"
 	"jetspotter/internal/weather"
 
@@ -121,10 +122,11 @@ func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Con
 		return nil, err
 	}
 
-	filteredAircraftInRange := filterAircraftByTypes(allAircraftInRange, config.AircraftTypes)
-	newlySpottedAircraft, *alreadySpottedAircraft = validateAircraft(filteredAircraftInRange, alreadySpottedAircraft)
+	newlySpottedAircraft, *alreadySpottedAircraft = validateAircraft(allAircraftInRange, alreadySpottedAircraft)
+	filteredAircraftInRange := filterAircraftByTypes(newlySpottedAircraft, config.AircraftTypes)
+	incrementMetrics(newlySpottedAircraft)
 
-	acOutputs, err := CreateAircraftOutput(newlySpottedAircraft, config)
+	acOutputs, err := CreateAircraftOutput(filteredAircraftInRange, config)
 	if err != nil {
 		return nil, err
 	}
@@ -133,6 +135,12 @@ func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Con
 		return acOutputs, nil
 	}
 	return acOutputs, nil
+}
+
+func incrementMetrics(aircraft []Aircraft) {
+	for _, ac := range aircraft {
+		metrics.IncrementAircraftSpotted(ac.Desc)
+	}
 }
 
 // filterAircraftByTypes returns a list of Aircraft that match the aircraftTypes.

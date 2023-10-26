@@ -3,6 +3,7 @@ package main
 import (
 	"jetspotter/internal/configuration"
 	"jetspotter/internal/jetspotter"
+	"jetspotter/internal/metrics"
 	"jetspotter/internal/notification"
 	"log"
 	"time"
@@ -16,7 +17,7 @@ func sendNotifications(aircraft []jetspotter.AircraftOutput, config configuratio
 	sortedAircraft := jetspotter.SortByDistance(aircraft)
 
 	if len(aircraft) < 1 {
-		log.Println("No new matching aircraft has been spotted.")
+		log.Println("No new matching aircraft have been spotted.")
 		return nil
 	}
 
@@ -62,24 +63,28 @@ func jetspotterHandler(alreadySpottedAircraft *[]jetspotter.Aircraft, config con
 	}
 }
 
+func HandleJetspotter(config configuration.Config) {
+	var alreadySpottedAircraft []jetspotter.Aircraft
+	for {
+		jetspotterHandler(&alreadySpottedAircraft, config)
+		time.Sleep(time.Duration(config.FetchInterval) * time.Second)
+	}
+}
+
+func HandleMetrics(config configuration.Config) {
+	go func() {
+		err := metrics.HandleMetrics(config)
+		if err != nil {
+			exitWithError(err)
+		}
+	}()
+}
+
 func main() {
 	config, err := configuration.GetConfig()
 	if err != nil {
 		exitWithError(err)
 	}
-
-	var alreadySpottedAircraft []jetspotter.Aircraft
-	for {
-
-		switch len(alreadySpottedAircraft) {
-		case 0:
-		case 1:
-			log.Printf("%d aircraft is skipped, since it is already spotted.\n", len(alreadySpottedAircraft))
-		default:
-			log.Printf("%d aircraft are skipped, since they are already spotted.\n", len(alreadySpottedAircraft))
-		}
-		jetspotterHandler(&alreadySpottedAircraft, config)
-		time.Sleep(time.Duration(config.FetchInterval) * time.Second)
-	}
-
+	HandleMetrics(config)
+	HandleJetspotter(config)
 }
