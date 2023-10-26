@@ -32,7 +32,7 @@ metrics:
   port: 7070
   # Create a serviceMonitor object for prometheus-operator
   serviceMonitor:
-    enabled: true
+    enabled: false
     prometheusInstance: default
     interval: 60s
     scrapeTimeout: 30s
