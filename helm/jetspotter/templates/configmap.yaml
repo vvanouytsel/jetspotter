@@ -12,3 +12,4 @@ data:
   MAX_AIRCRAFT_SLACK_MESSAGE: {{ .Values.slack.maxAircraftPerMessage | quote }}
   DISCORD_COLOR_ALTITUDE: {{ .Values.discord.colorAltitude | quote }}
   GOTIFY_URL: {{ .Values.gotify.url }}
+  METRICS_PORT: {{ .Values.metrics.port | quote }}

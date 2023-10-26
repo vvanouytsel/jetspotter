@@ -21,6 +21,25 @@ deployment:
     # myKey: myValue
     # anotherKey: anotherValue
 
+service:
+  # Annotations to be added to the service
+  annotations: {}
+    # myKey: myValue
+    # anotherKey: anotherValue
+
+metrics:
+  # Port to expose metrics on
+  port: 7070
+  # Create a serviceMonitor object for prometheus-operator
+  serviceMonitor:
+    enabled: true
+    prometheusInstance: default
+    interval: 60s
+    scrapeTimeout: 30s
+    labels: {}
+    annotations: {}
+    endpointAdditionalProperties: {}
+
 slack:
   # Webhook used to send notifications to Slack. If not set, no messages will be sent to Slack.
   webhook: ""

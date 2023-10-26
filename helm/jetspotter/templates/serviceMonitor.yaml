@@ -1,0 +1,28 @@
+{{- if .Values.metrics.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "jetspotter.fullname" . }}
+  labels:
+    {{- include "jetspotter.labels" . | nindent 4 }}
+    {{- with .Values.metrics.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- if .Values.metrics.serviceMonitor.annotations }}
+  annotations:
+    {{- with .Values.metrics.serviceMonitor.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}
+spec:
+  selector:
+    {{- include "jetspotter.selectorLabels" . | nindent 4 }}
+  endpoints:
+  - targetPort: {{ .Values.metrics.port }}
+    path: "/metrics"
+    interval: {{ .Values.metrics.serviceMonitor.interval }}
+    scrapeTimeout: {{ .Values.metrics.serviceMonitor.scrapeTimeout }}
+    {{- with .Values.metrics.serviceMonitor.endpointAdditionalProperties }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}

@@ -26,6 +26,9 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
+          ports:
+          - name: metrics
+            port: {{ .Values.metrics.port }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:

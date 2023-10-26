@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Service
+metadata:
+  name: {{ include "jetspotter.fullname" . }}
+  {{- if .Values.service.annotations }}
+  annotations:
+    {{- range $key, $value := .Values.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+  labels:
+    {{- include "jetspotter.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: {{ .Values.metrics.port }}
+      targetPort: metrics
+      name: metrics
+  selector:
+    {{- include "jetspotter.selectorLabels" . | nindent 4 }}
