@@ -40,6 +40,12 @@ Gotify notifications are sent if the `GOTIFY_URL` and `GOTIFY_TOKEN` environment
 
 ![Gotify notification](images/jetspotter-gotify-1.png)
 
+### Grafana
+
+Prometheus and Grafana can be leveraged to create dashboards.
+
+![Dashboard](images/jetspotter-grafana-1.png)
+
 ## Getting started
 
 ### Windows

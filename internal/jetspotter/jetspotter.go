@@ -139,7 +139,7 @@ func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Con
 
 func incrementMetrics(aircraft []Aircraft) {
 	for _, ac := range aircraft {
-		metrics.IncrementAircraftSpotted(ac.Desc)
+		metrics.IncrementAircraftSpotted(ac.PlaneType, ac.Desc)
 	}
 }
 

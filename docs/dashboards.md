@@ -1,4 +1,4 @@
-# Metrics
+# Dashboards
 
 Metrics are exposed via `$ADDRESS:7070/metrics`. All `jetspotter` specific metrics are prefixed with `jetspotter_`. These are usefull if you want to monitor how much aircraft per type are spotted at your location.
 
@@ -19,3 +19,6 @@ jetspotter_aircraft_spotted_total{type="BOEING 767-300"} 1
 jetspotter_aircraft_spotted_total{type="BOEING 777-200"} 2
 jetspotter_aircraft_spotted_total{type="DASSAULT Falcon 7X"} 1
 ```
+
+Grafana can be used to create fancy dashboards.
+![Dashboard](images/jetspotter-grafana-1.png)
