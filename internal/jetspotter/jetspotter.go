@@ -124,7 +124,11 @@ func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Con
 
 	newlySpottedAircraft, *alreadySpottedAircraft = validateAircraft(allAircraftInRange, alreadySpottedAircraft)
 	filteredAircraftInRange := filterAircraftByTypes(newlySpottedAircraft, config.AircraftTypes)
-	incrementMetrics(newlySpottedAircraft)
+	newlySpottedAircraftOutput, err := CreateAircraftOutput(newlySpottedAircraft, config)
+	if err != nil {
+		return nil, err
+	}
+	incrementMetrics(newlySpottedAircraftOutput)
 
 	acOutputs, err := CreateAircraftOutput(filteredAircraftInRange, config)
 	if err != nil {
@@ -137,9 +141,36 @@ func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Con
 	return acOutputs, nil
 }
 
-func incrementMetrics(aircraft []Aircraft) {
+func getAltitudeBucket(altitude float64) string {
+	switch {
+	case altitude > 0 && altitude < 2500:
+		return "2500"
+	case altitude > 2500 && altitude <= 5000:
+		return "5000"
+	case altitude > 5000 && altitude <= 10000:
+		return "10000"
+	case altitude > 10000 && altitude <= 15000:
+		return "15000"
+	case altitude > 15000 && altitude <= 20000:
+		return "20000"
+	case altitude > 20000 && altitude <= 25000:
+		return "25000"
+	case altitude > 25000 && altitude <= 30000:
+		return "30000"
+	case altitude > 30000 && altitude <= 35000:
+		return "35000"
+	case altitude > 35000 && altitude <= 40000:
+		return "40000"
+	case altitude > 40000:
+		return "40000+"
+	default:
+		return "0"
+	}
+}
+
+func incrementMetrics(aircraft []AircraftOutput) {
 	for _, ac := range aircraft {
-		metrics.IncrementAircraftSpotted(ac.PlaneType, ac.Desc)
+		metrics.IncrementAircraftSpotted(ac.Type, ac.Description, getAltitudeBucket(ac.Altitude))
 	}
 }
 

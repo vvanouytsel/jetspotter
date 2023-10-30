@@ -15,13 +15,13 @@ var aircraftSpotted = promauto.NewCounterVec(prometheus.CounterOpts{
 	Name: "jetspotter_aircraft_spotted_total",
 	Help: "The total number of spotted aircraft.",
 },
-	[]string{"type", "description"},
+	[]string{"type", "description", "altitude"},
 )
 
 // IncrementAircraftSpotted increments the counter of spotted aircraft
-func IncrementAircraftSpotted(aircrafType, description string) {
+func IncrementAircraftSpotted(aircrafType, description, altitudeBucket string) {
 	go func() {
-		aircraftSpotted.WithLabelValues(aircrafType, description).Add(1)
+		aircraftSpotted.WithLabelValues(aircrafType, description, altitudeBucket).Add(1)
 	}()
 }
 
