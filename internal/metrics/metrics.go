@@ -15,13 +15,22 @@ var aircraftSpotted = promauto.NewCounterVec(prometheus.CounterOpts{
 	Name: "jetspotter_aircraft_spotted_total",
 	Help: "The total number of spotted aircraft.",
 },
-	[]string{"type", "description", "altitude"},
+	[]string{"type", "description"},
 )
 
-// IncrementAircraftSpotted increments the counter of spotted aircraft
-func IncrementAircraftSpotted(aircrafType, description, altitudeBucket string) {
+var aircraftAltitude = promauto.NewHistogramVec(prometheus.HistogramOpts{
+	Name:    "jetspotter_aircraft_altitude_feet",
+	Help:    "The altitude the jet is flying at.",
+	Buckets: []float64{0, 2500, 5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000},
+},
+	[]string{"type", "description"},
+)
+
+// IncrementMetrics handles the metrics that need to be incremented
+func IncrementMetrics(aircrafType, description string, altitude float64) {
 	go func() {
-		aircraftSpotted.WithLabelValues(aircrafType, description, altitudeBucket).Add(1)
+		aircraftSpotted.WithLabelValues(aircrafType, description).Inc()
+		aircraftAltitude.WithLabelValues(aircrafType, description).Observe(altitude)
 	}()
 }
 
