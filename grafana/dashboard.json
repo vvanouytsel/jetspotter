@@ -70,7 +70,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "Total amount of jets spotted",
+      "description": "Total jets spotted in time range",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -90,12 +90,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
+        "h": 9,
         "w": 3,
         "x": 0,
         "y": 0
       },
-      "id": 2,
+      "id": 6,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -117,20 +117,15 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
-          "disableTextWrap": false,
           "editorMode": "code",
-          "exemplar": false,
-          "expr": "sum(jetspotter_aircraft_spotted_total)",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
+          "expr": "sum(round(increase(jetspotter_aircraft_spotted_total{description=~\"$aircraft_description\",service=\"$service\"}[$__range])))",
           "instant": false,
-          "legendFormat": "Jets spotted",
+          "legendFormat": "__auto",
           "range": true,
-          "refId": "A",
-          "useBackend": false
+          "refId": "A"
         }
       ],
-      "title": "Jets all time",
+      "title": "Jets spotted",
       "transparent": true,
       "type": "stat"
     },
@@ -139,7 +134,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "Distribution by aircraft type since the beginning of the metrics",
+      "description": "Jets by type in time range",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -152,17 +147,39 @@
               "viz": false
             }
           },
-          "mappings": []
+          "mappings": [],
+          "unit": "none"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byValue",
+              "options": {
+                "op": "eq",
+                "reducer": "lastNotNull",
+                "value": 0
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 10,
+        "h": 9,
         "w": 8,
         "x": 3,
         "y": 0
       },
-      "id": 4,
+      "id": 5,
       "options": {
         "displayLabels": [],
         "legend": {
@@ -183,7 +200,7 @@
         },
         "tooltip": {
           "mode": "single",
-          "sort": "none"
+          "sort": "asc"
         }
       },
       "targets": [
@@ -195,19 +212,19 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "jetspotter_aircraft_spotted_total",
+          "expr": "sum by (type,description) (round(increase(jetspotter_aircraft_spotted_total{description=~\"$aircraft_description\", service=\"$service\"}[$__range])))",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
           "instant": false,
           "interval": "",
-          "legendFormat": "{{type}}",
+          "legendFormat": "{{description}}",
           "range": true,
           "refId": "A",
           "useBackend": false
         }
       ],
-      "title": "Jets all time",
+      "title": "Jets by type",
       "transparent": true,
       "type": "piechart"
     },
@@ -216,7 +233,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "Total jets spotted by type",
+      "description": "Total jets that have been spotted in the specified time range",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -229,7 +246,7 @@
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 18,
+            "fillOpacity": 0,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
@@ -237,7 +254,7 @@
               "viz": false
             },
             "insertNulls": false,
-            "lineInterpolation": "stepAfter",
+            "lineInterpolation": "linear",
             "lineStyle": {
               "fill": "solid"
             },
@@ -325,19 +342,19 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "round(increase(jetspotter_aircraft_spotted_total[10m]))",
+          "expr": "sum(round(increase(jetspotter_aircraft_spotted_total{description=~\"$aircraft_description\",service=\"$service\"}[5m])))",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
           "instant": false,
           "interval": "",
-          "legendFormat": "{{type}}",
+          "legendFormat": "{{description}}",
           "range": true,
           "refId": "A",
           "useBackend": false
         }
       ],
-      "title": "Jets last 10 minutes",
+      "title": "Jets spotted",
       "transparent": true,
       "type": "timeseries"
     },
@@ -346,7 +363,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "Total jets spotted over the last hour",
+      "description": "Total amount of jets spotted",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -366,12 +383,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 10,
         "w": 3,
         "x": 0,
-        "y": 10
+        "y": 9
       },
-      "id": 3,
+      "id": 2,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -393,15 +410,20 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "round(sum(rate(jetspotter_aircraft_spotted_total[60m]) * 3600 ))",
+          "exemplar": false,
+          "expr": "sum(jetspotter_aircraft_spotted_total{description=~\"$aircraft_description\", service=\"$service\"})",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
           "instant": false,
           "legendFormat": "Jets spotted",
           "range": true,
-          "refId": "A"
+          "refId": "A",
+          "useBackend": false
         }
       ],
-      "title": "Jets last hour",
+      "title": "Jets all time",
       "transparent": true,
       "type": "stat"
     },
@@ -410,7 +432,7 @@
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
       },
-      "description": "Distribution by aircraft type in the last hour",
+      "description": "Distribution by aircraft type since the beginning of the metrics",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -423,39 +445,17 @@
               "viz": false
             }
           },
-          "mappings": [],
-          "unit": "none"
+          "mappings": []
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byValue",
-              "options": {
-                "op": "gte",
-                "reducer": "allIsZero",
-                "value": 0
-              }
-            },
-            "properties": [
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "legend": true,
-                  "tooltip": true,
-                  "viz": true
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 10,
         "w": 8,
         "x": 3,
-        "y": 10
+        "y": 9
       },
-      "id": 5,
+      "id": 4,
       "options": {
         "displayLabels": [],
         "legend": {
@@ -475,8 +475,8 @@
           "values": false
         },
         "tooltip": {
-          "mode": "multi",
-          "sort": "asc"
+          "mode": "single",
+          "sort": "none"
         }
       },
       "targets": [
@@ -488,29 +488,75 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "round(increase(jetspotter_aircraft_spotted_total[60m]))",
+          "expr": "sum by (description, type) (jetspotter_aircraft_spotted_total{description=~\"$aircraft_description\", service=\"$service\"})",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
           "instant": false,
           "interval": "",
-          "legendFormat": "{{type}}",
+          "legendFormat": "{{description}}",
           "range": true,
           "refId": "A",
           "useBackend": false
         }
       ],
-      "title": "Jets last hour",
+      "title": "Jets all time",
       "transparent": true,
       "type": "piechart"
     }
   ],
-  "refresh": false,
+  "refresh": "",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": [],
+  "tags": [
+    "jetspotter"
+  ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": ".*",
+        "current": {},
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "definition": "label_values(jetspotter_aircraft_spotted_total,description)",
+        "description": "The type of aircraft",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Aircraft type",
+        "multi": true,
+        "name": "aircraft_description",
+        "options": [],
+        "query": {
+          "query": "label_values(jetspotter_aircraft_spotted_total,description)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 4,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "definition": "label_values(jetspotter_aircraft_spotted_total,service)",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "service",
+        "options": [],
+        "query": {
+          "query": "label_values(jetspotter_aircraft_spotted_total,service)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
   },
   "time": {
     "from": "now-1h",
@@ -520,6 +566,6 @@
   "timezone": "browser",
   "title": "Jetspotter Overview",
   "uid": "a2cc5e8c-e294-470a-a9fe-6d82711e1cca",
-  "version": 5,
+  "version": 35,
   "weekStart": ""
 }
