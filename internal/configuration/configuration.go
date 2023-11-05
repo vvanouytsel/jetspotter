@@ -30,6 +30,8 @@ type Config struct {
 	// AIRCRAFT_TYPES ALL
 	// EXAMPLES
 	// AIRCRAFT_TYPES F16,F35
+	// To spot all military aircraft, you can use MILITARY. You currently cannot combine MILITARY with another aircraft type.
+	// AIRCRAFT_TYPES MILITARY
 	AircraftTypes []string
 
 	// Maximum amount of aircraft to show in a single slack message.

@@ -6,6 +6,7 @@ import (
 	"jetspotter/internal/metrics"
 	"jetspotter/internal/notification"
 	"log"
+	"slices"
 	"time"
 )
 
@@ -64,6 +65,14 @@ func jetspotterHandler(alreadySpottedAircraft *[]jetspotter.Aircraft, config con
 }
 
 func HandleJetspotter(config configuration.Config) {
+	if slices.Contains(config.AircraftTypes, "MILITARY") {
+		log.Printf("Spotting all military aircraft within %d kilometers.", config.MaxRangeKilometers)
+	} else if slices.Contains(config.AircraftTypes, "ALL") {
+		log.Printf("Spotting all aircraft within %d kilometers.", config.MaxRangeKilometers)
+	} else {
+		log.Printf("Spotting the following aircraft within %d kilometers: %s", config.MaxRangeKilometers, config.AircraftTypes)
+	}
+
 	var alreadySpottedAircraft []jetspotter.Aircraft
 	for {
 		jetspotterHandler(&alreadySpottedAircraft, config)

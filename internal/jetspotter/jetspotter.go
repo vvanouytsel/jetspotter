@@ -22,8 +22,8 @@ import (
 
 // Vars
 var (
-	baseURL = "https://api.adsb.one/v2/point"
-	// baseURL = "https://api.airplanes.live/v2/point"
+	baseURL = "https://api.adsb.one/v2"
+	// baseURL = "https://api.airplanes.live/v2"
 )
 
 // CalculateDistance returns the rounded distance between two coordinates in kilometers
@@ -37,11 +37,54 @@ func convertKilometersToNauticalMiles(kilometers float64) int {
 	return int(kilometers / 1.852)
 }
 
+// getMilitaryAircraftIn range gets all the military aircraft on the map, loops over each aircraft and returns
+// only the aircraft that are within the specified maxRangeKilometers.
+func getMilitaryAircraftInRange(location geodist.Coord, maxRangeKilometers int) (aircraft []Aircraft, err error) {
+	var flightData FlightData
+	endpoint, err := url.JoinPath(baseURL, "mil")
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+	err = json.Unmarshal(body, &flightData)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, ac := range flightData.AC {
+		distance := CalculateDistance(location, geodist.Coord{Lat: ac.Lat, Lon: ac.Lon})
+		if distance <= maxRangeKilometers {
+			aircraft = append(aircraft, ac)
+		}
+	}
+	return aircraft, nil
+}
+
+func getAircraft(location geodist.Coord, config configuration.Config) (aircraft []Aircraft, err error) {
+	if config.AircraftTypes[0] == "MILITARY" {
+		return getMilitaryAircraftInRange(location, config.MaxRangeKilometers)
+	}
+
+	return getAllAircraftInRange(location, config.MaxRangeKilometers)
+}
+
 // getAllAircraftInRange returns all aircraft within maxRange kilometers of the location.
 func getAllAircraftInRange(location geodist.Coord, maxRangeKilometers int) (aircraft []Aircraft, err error) {
 	var flightData FlightData
 	miles := convertKilometersToNauticalMiles(float64(maxRangeKilometers))
-	endpoint, err := url.JoinPath(baseURL,
+	endpoint, err := url.JoinPath(baseURL, "point",
 		strconv.FormatFloat(location.Lat, 'f', -1, 64),
 		strconv.FormatFloat(location.Lon, 'f', -1, 64),
 		strconv.Itoa(miles))
@@ -117,7 +160,7 @@ func validateAircraft(allFilteredAircraft []Aircraft, alreadySpottedAircraft *[]
 func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Config) (aircraft []AircraftOutput, err error) {
 	var newlySpottedAircraft []Aircraft
 
-	allAircraftInRange, err := getAllAircraftInRange(config.Location, config.MaxRangeKilometers)
+	allAircraftInRange, err := getAircraft(config.Location, config)
 	if err != nil {
 		return nil, err
 	}
