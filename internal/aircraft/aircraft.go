@@ -80,4 +80,10 @@ var (
 		Identifier:  "ALL",
 		Description: "ALL",
 	}
+
+	// MILITARY MILITIARY
+	MILITARY = Type{
+		Identifier:  "MILITARY",
+		Description: "MILITARY",
+	}
 )

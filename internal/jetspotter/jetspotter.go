@@ -37,7 +37,7 @@ func convertKilometersToNauticalMiles(kilometers float64) int {
 	return int(kilometers / 1.852)
 }
 
-// getMilitaryAircraftIn range gets all the military aircraft on the map, loops over each aircraft and returns
+// getMilitaryAircraftInRange gets all the military aircraft on the map, loops over each aircraft and returns
 // only the aircraft that are within the specified maxRangeKilometers.
 func getMilitaryAircraftInRange(location geodist.Coord, maxRangeKilometers int) (aircraft []Aircraft, err error) {
 	var flightData FlightData
@@ -196,7 +196,7 @@ func filterAircraftByTypes(aircraft []Aircraft, types []string) []Aircraft {
 
 	for _, ac := range aircraft {
 		for _, aircraftType := range types {
-			if ac.PlaneType == aircraftType || aircraftType == "ALL" {
+			if ac.PlaneType == aircraftType || aircraftType == "ALL" || aircraftType == "MILITARY" {
 				filteredAircraft = append(filteredAircraft, ac)
 			}
 		}

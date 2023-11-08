@@ -101,7 +101,7 @@ func TestFilterAircraftByTypeF16(t *testing.T) {
 	}
 }
 
-func TestFilterAircraftByTypeALL(t *testing.T) {
+func TestFilterAircraftByTypeAll(t *testing.T) {
 	config := configuration.Config{
 		AircraftTypes: []string{aircraft.ALL.Identifier},
 	}
@@ -113,7 +113,19 @@ func TestFilterAircraftByTypeALL(t *testing.T) {
 	}
 }
 
-func TestCalculateDistance(t *testing.T) {
+func TestFilterAircraftByTypeMilitary(t *testing.T) {
+	config := configuration.Config{
+		AircraftTypes: []string{aircraft.MILITARY.Identifier},
+	}
+	expected := planes
+	actual := filterAircraftByTypes(planes, config.AircraftTypes)
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+	}
+}
+
+func TestCalculateDistance1(t *testing.T) {
 	tbilisiAirportCoordinates := geodist.Coord{
 		Lat: 41.4007,
 		Lon: 44.5705,
@@ -126,6 +138,25 @@ func TestCalculateDistance(t *testing.T) {
 
 	expected := 205
 	actual := CalculateDistance(tbilisiAirportCoordinates, kutaisiAirportCoordinates)
+
+	if expected != actual {
+		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+	}
+}
+
+func TestCalculateDistance2(t *testing.T) {
+	lasVegasCoordinates := geodist.Coord{
+		Lat: 36.11467991019019,
+		Lon: -115.18050028591726,
+	}
+
+	denverCoordinates := geodist.Coord{
+		Lat: 39.7400431976992,
+		Lon: -104.99281871032076,
+	}
+
+	expected := 980
+	actual := CalculateDistance(lasVegasCoordinates, denverCoordinates)
 
 	if expected != actual {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
