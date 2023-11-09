@@ -72,14 +72,6 @@ func getMilitaryAircraftInRange(location geodist.Coord, maxRangeKilometers int) 
 	return aircraft, nil
 }
 
-func getAircraft(location geodist.Coord, config configuration.Config) (aircraft []Aircraft, err error) {
-	if config.AircraftTypes[0] == "MILITARY" {
-		return getMilitaryAircraftInRange(location, config.MaxRangeKilometers)
-	}
-
-	return getAllAircraftInRange(location, config.MaxRangeKilometers)
-}
-
 // getAllAircraftInRange returns all aircraft within maxRange kilometers of the location.
 func getAllAircraftInRange(location geodist.Coord, maxRangeKilometers int) (aircraft []Aircraft, err error) {
 	var flightData FlightData
@@ -160,7 +152,7 @@ func validateAircraft(allFilteredAircraft []Aircraft, alreadySpottedAircraft *[]
 func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Config) (aircraft []AircraftOutput, err error) {
 	var newlySpottedAircraft []Aircraft
 
-	allAircraftInRange, err := getAircraft(config.Location, config)
+	allAircraftInRange, err := getAllAircraftInRange(config.Location, config.MaxRangeKilometers)
 	if err != nil {
 		return nil, err
 	}
@@ -186,8 +178,24 @@ func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Con
 
 func handleMetrics(aircraft []AircraftOutput) {
 	for _, ac := range aircraft {
-		metrics.IncrementMetrics(ac.Type, ac.Description, ac.Altitude)
+		metrics.IncrementMetrics(ac.Type, ac.Description, strconv.FormatBool(ac.Military), ac.Altitude)
 	}
+}
+
+func isAircraftMilitary(aircraft Aircraft) bool {
+	return aircraft.DbFlags == 1
+}
+
+func isAircraftDesired(aircraft Aircraft, aircraftType string) bool {
+	if aircraftType == "MILITARY" && aircraft.DbFlags == 1 {
+		return true
+	}
+
+	if aircraft.PlaneType == aircraftType || aircraftType == "ALL" {
+		return true
+	}
+
+	return false
 }
 
 // filterAircraftByTypes returns a list of Aircraft that match the aircraftTypes.
@@ -196,7 +204,7 @@ func filterAircraftByTypes(aircraft []Aircraft, types []string) []Aircraft {
 
 	for _, ac := range aircraft {
 		for _, aircraftType := range types {
-			if ac.PlaneType == aircraftType || aircraftType == "ALL" || aircraftType == "MILITARY" {
+			if isAircraftDesired(ac, aircraftType) {
 				filteredAircraft = append(filteredAircraft, ac)
 			}
 		}
@@ -295,6 +303,7 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.BearingFromAircraft = CalculateBearing(aircraftLocation, config.Location)
 		acOutput.ImageThumbnailURL = image.ThumbnailLarge.Src
 		acOutput.ImageURL = image.Link
+		acOutput.Military = isAircraftMilitary(ac)
 		acOutputs = append(acOutputs, acOutput)
 	}
 	return acOutputs, nil

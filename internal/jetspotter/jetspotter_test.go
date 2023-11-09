@@ -38,11 +38,13 @@ var (
 			Callsign:  "APEX11",
 			PlaneType: aircraft.F16.Identifier,
 			Desc:      aircraft.F16.Description,
+			DbFlags:   1,
 		},
 		{
 			Callsign:  "APEX12",
 			PlaneType: aircraft.F16.Identifier,
 			Desc:      aircraft.F16.Description,
+			DbFlags:   1,
 		},
 		{
 			Callsign:  "XSG123",
@@ -50,9 +52,15 @@ var (
 			Desc:      aircraft.B77L.Description,
 		},
 		{
+			Callsign:  "ABC987",
+			PlaneType: aircraft.A320.Identifier,
+			Desc:      aircraft.A320.Description,
+		},
+		{
 			Callsign:  "GRZLY11",
 			PlaneType: aircraft.A400.Identifier,
 			Desc:      aircraft.A400.Description,
+			DbFlags:   1,
 		},
 	}
 
@@ -83,11 +91,13 @@ func TestFilterAircraftByTypeF16(t *testing.T) {
 			Callsign:  "APEX11",
 			PlaneType: aircraft.F16.Identifier,
 			Desc:      aircraft.F16.Description,
+			DbFlags:   1,
 		},
 		{
 			Callsign:  "APEX12",
 			PlaneType: aircraft.F16.Identifier,
 			Desc:      aircraft.F16.Description,
+			DbFlags:   1,
 		},
 	}
 
@@ -117,7 +127,65 @@ func TestFilterAircraftByTypeMilitary(t *testing.T) {
 	config := configuration.Config{
 		AircraftTypes: []string{aircraft.MILITARY.Identifier},
 	}
-	expected := planes
+	expected := []Aircraft{
+		{
+			Callsign:  "APEX11",
+			PlaneType: aircraft.F16.Identifier,
+			Desc:      aircraft.F16.Description,
+			DbFlags:   1,
+		},
+		{
+			Callsign:  "APEX12",
+			PlaneType: aircraft.F16.Identifier,
+			Desc:      aircraft.F16.Description,
+			DbFlags:   1,
+		},
+		{
+			Callsign:  "GRZLY11",
+			PlaneType: aircraft.A400.Identifier,
+			Desc:      aircraft.A400.Description,
+			DbFlags:   1,
+		},
+	}
+
+	actual := filterAircraftByTypes(planes, config.AircraftTypes)
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+	}
+}
+
+func TestFilterAircraftByTypeMilitaryAndA320(t *testing.T) {
+	config := configuration.Config{
+		AircraftTypes: []string{aircraft.MILITARY.Identifier, aircraft.A320.Identifier},
+	}
+
+	expected := []Aircraft{
+		{
+			Callsign:  "APEX11",
+			PlaneType: aircraft.F16.Identifier,
+			Desc:      aircraft.F16.Description,
+			DbFlags:   1,
+		},
+		{
+			Callsign:  "APEX12",
+			PlaneType: aircraft.F16.Identifier,
+			Desc:      aircraft.F16.Description,
+			DbFlags:   1,
+		},
+		{
+			Callsign:  "ABC987",
+			PlaneType: aircraft.A320.Identifier,
+			Desc:      aircraft.A320.Description,
+		},
+		{
+			Callsign:  "GRZLY11",
+			PlaneType: aircraft.A400.Identifier,
+			Desc:      aircraft.A400.Description,
+			DbFlags:   1,
+		},
+	}
+
 	actual := filterAircraftByTypes(planes, config.AircraftTypes)
 
 	if !reflect.DeepEqual(expected, actual) {
@@ -169,16 +237,19 @@ func TestFilterAircraftByTypes(t *testing.T) {
 			Callsign:  "APEX11",
 			PlaneType: aircraft.F16.Identifier,
 			Desc:      aircraft.F16.Description,
+			DbFlags:   1,
 		},
 		{
 			Callsign:  "APEX12",
 			PlaneType: aircraft.F16.Identifier,
 			Desc:      aircraft.F16.Description,
+			DbFlags:   1,
 		},
 		{
 			Callsign:  "GRZLY11",
 			PlaneType: aircraft.A400.Identifier,
 			Desc:      aircraft.A400.Description,
+			DbFlags:   1,
 		},
 	}
 

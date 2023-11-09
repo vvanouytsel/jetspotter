@@ -60,7 +60,9 @@ type Aircraft struct {
 	// Aircraft latitude position in decimal degrees
 	Lat float64 `json:"lat"`
 	// Aircraft longitude position in decimal degrees
-	Lon      float64       `json:"lon"`
+	Lon float64 `json:"lon"`
+	// Database flags, 1 = military, 2 = interesting, 3 = both
+	DbFlags  int           `json:"dbFlags"`
 	NIC      int           `json:"nic"`
 	RC       int           `json:"rc"`
 	SeenPos  float64       `json:"seen_pos"`
@@ -130,4 +132,7 @@ type AircraftOutput struct {
 
 	// Heading of the aircraft
 	Heading float64
+
+	// Specifies if it is a military type aircraft or not
+	Military bool
 }
