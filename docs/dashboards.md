@@ -21,4 +21,12 @@ jetspotter_aircraft_spotted_total{type="DASSAULT Falcon 7X"} 1
 ```
 
 Grafana can be used to create fancy dashboards.
+
+Show military aircraft.
 ![Dashboard](images/jetspotter-grafana-1.png)
+
+Show all aircraft.
+![Dashboard](images/jetspotter-grafana-2.png)
+
+Show specific types of aircraft.
+![Dashboard](images/jetspotter-grafana-3.png)
