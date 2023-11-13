@@ -8,7 +8,7 @@ import (
 	"github.com/gotify/go-api-client/v2/models"
 )
 
-// SendGotifyMessage sends a discord message containing metadata of a list of aircraft
+// SendGotifyMessage sends a gotify message containing metadata of a list of aircraft
 func SendGotifyMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
 	message, err := buildGotifyMessage(aircraft, config)
 	if err != nil {

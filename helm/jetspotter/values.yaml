@@ -58,6 +58,13 @@ gotify:
   # Token to authenticate with gotify server
   token: ""
 
+ntfy:
+  # server to send ntfy notification to
+  server: "https://ntfy.sh"
+  # Topic to publish notification to
+  topic: ""
+
+
 image:
   repository: ghcr.io/vvanouytsel/jetspotter
   pullPolicy: IfNotPresent

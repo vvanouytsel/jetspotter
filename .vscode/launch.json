@@ -9,7 +9,13 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "cmd/jetspotter/jetspotter.go"
+      "program": "cmd/jetspotter/jetspotter.go",
+      "env": {
+        "NTFY_TOPIC": "jetspottertest",
+        "LOCATION_LATITUDE": "50.899593",
+        "LOCATION_LONGITUDE": "4.48329923",
+        "MAX_RANGE_KILOMETERS": "30",
+      }
     }
   ]
 }

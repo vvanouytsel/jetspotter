@@ -13,3 +13,5 @@ data:
   DISCORD_COLOR_ALTITUDE: {{ .Values.discord.colorAltitude | quote }}
   GOTIFY_URL: {{ .Values.gotify.url }}
   METRICS_PORT: {{ .Values.metrics.port | quote }}
+  NTFY_SERVER: {{ .Values.ntfy.server }}
+  NTFY_TOPIC: {{ .Values.ntfy.topic }}

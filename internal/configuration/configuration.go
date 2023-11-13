@@ -66,6 +66,14 @@ type Config struct {
 	// Port where metrics will be exposed on
 	// METRICS_PORT "7070"
 	MetricsPort string
+
+	// Topic to publish message to
+	// NTFY_TOPIC ""
+	NtfyTopic string
+
+	// URL of the ntfy server.
+	// NTFY_SERVER "https://ntfy.sh"
+	NtfyServer string
 }
 
 // Environment variable names
@@ -80,6 +88,8 @@ const (
 	AircraftTypes            = "AIRCRAFT_TYPES"
 	FetchInterval            = "FETCH_INTERVAL"
 	GotifyURL                = "GOTIFY_URL"
+	NtfyTopic                = "NTFY_TOPIC"
+	NtfyServer               = "NTFY_SERVER"
 	GotifyToken              = "GOTIFY_TOKEN"
 	MetricsPort              = "METRICS_PORT"
 )
@@ -99,6 +109,8 @@ func GetConfig() (config Config, err error) {
 
 	config.GotifyToken = getEnvVariable(GotifyToken, "")
 	config.GotifyURL = getEnvVariable(GotifyURL, "")
+	config.NtfyTopic = getEnvVariable(NtfyTopic, "")
+	config.NtfyServer = getEnvVariable(NtfyServer, "https://ntfy.sh")
 	config.SlackWebHookURL = getEnvVariable(SlackWebhookURL, "")
 	config.DiscordWebHookURL = getEnvVariable(DiscordWebhookURL, "")
 	config.DiscordColorAltitude = getEnvVariable(DiscordColorAltitude, "true")
