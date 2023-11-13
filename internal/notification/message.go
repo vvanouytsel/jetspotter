@@ -23,6 +23,8 @@ const (
 	Slack = "Slack"
 	// Gotify indicates the gotify platform
 	Gotify = "Gotify"
+	// Ntfy indicates the ntfy platform
+	Ntfy = "Ntfy"
 	// Markdown indicates markdown markup language
 	Markdown = "Markdown"
 )
@@ -46,14 +48,13 @@ func formatRegistration(ac jetspotter.AircraftOutput, notificationType string) s
 
 // SendMessage sends a message to a notification platform
 func SendMessage(aircraft []jetspotter.AircraftOutput, notification Notification) error {
-
 	data, err := json.Marshal(notification.Message)
 	if err != nil {
 		return err
 	}
 
 	resp, err := http.Post(notification.URL, "application/json",
-		bytes.NewBuffer(data))
+		bytes.NewReader(data))
 	if err != nil {
 		return err
 	}

@@ -11,40 +11,46 @@ Terminal output is always shown. Depending on the [configuration](configuration.
 
 ### Terminal
 
-![Terminal output ](images/jetspotter-terminal-1.png)
+[![Terminal output](images/jetspotter-terminal-1.png)](images/jetspotter-terminal-1.png)
 
 ### Slack
 
-Slack notifications are sent if the `SLACK_WEBHOOK_URL` environment variable is defined.
+[Slack](https://slack.com/) notifications are sent if the `SLACK_WEBHOOK_URL` environment variable is defined.
 Documentation how to set up notifications using incoming webhooks can be found in the [official slack documentation](https://api.slack.com/messaging/webhooks).
 
-![Slack notfication ](images/jetspotter-slack-1.png)
+[![Slack notfication](images/jetspotter-slack-1.png)](images/jetspotter-slack-1.png)
 
 ### Discord
 
-Discord notifications are sent if the `DISCORD_WEBHOOK_URL` environment variable is defined.
+[Discord](https://discord.com/) notifications are sent if the `DISCORD_WEBHOOK_URL` environment variable is defined.
 Documentation how to set up notifications using incoming webhooks can be found in the [official discord documentation](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks).
 
 By default the color of the embed message is related to the altitude of the aircraft. The color scheme is the same as on the [ADS-B exchange map](https://globe.adsbexchange.com/). This feature can be disabled in the [configuration](configuration.md) to use the same static color for every embed message.
 
 If the altitude color feature is enabled:
-![Discord notfication ](images/jetspotter-discord-1.png)
-![Altitude color scale ](images/jetspotter-color-scale.png)
+[![Discord notfication](images/jetspotter-discord-1.png)](images/jetspotter-discord-1.png)
+![Altitude color scale](images/jetspotter-color-scale.png)
 
 If the altitude color feature is disabled:
-![Discord notfication ](images/jetspotter-discord-2.png)
+[![Discord notfication](images/jetspotter-discord-2.png)](images/jetspotter-discord-2.png)
 
 ### Gotify
 
-Gotify notifications are sent if the `GOTIFY_URL` and `GOTIFY_TOKEN` environment variables are defined.
+[Gotify](https://gotify.net/) notifications are sent if the `GOTIFY_URL` and `GOTIFY_TOKEN` environment variables are defined.
 
-![Gotify notification](images/jetspotter-gotify-1.png)
+[![Gotify notification](images/jetspotter-gotify-1.png)](images/jetspotter-gotify-1.png)
+
+### Ntfy
+
+[Ntfy](https://ntfy.sh/) notifications are sent if the `NTFY_TOPIC` environment variable is defined.
+
+[![Ntfy notification](images/jetspotter-ntfy-1.png)](images/jetspotter-ntfy-1.png)
 
 ### Grafana
 
-Prometheus and Grafana can be leveraged to create dashboards.
+[Prometheus](https://prometheus.io/) and [Grafana](https://grafana.com/) can be leveraged to create dashboards.
 
-![Dashboard](images/jetspotter-grafana-1.png)
+[![Dashboard](images/jetspotter-grafana-1.png)](images/jetspotter-grafana-1.png)
 
 ## Getting started
 
@@ -55,7 +61,7 @@ Download the latest [release](https://github.com/vvanouytsel/jetspotter/releases
 Rename the file and add `.exe` as extension. The full name of the file should be `jetspotter-windows-amd64.exe`
 By default Windows does not show any file extension. You can enable this by clicking on `View` and checking the `File name extensions` box.
 
-![Windows extension ](images/windows1.png)
+[![Windows extension](images/windows1.png)](images/windows1.png)
 
 Open `Windows PowerShell` and navigate to the directory of the `jetspotter-windows-amd64.exe` file using the `cd` command.
 
@@ -66,7 +72,7 @@ cd ~\Downloads
 
 Specify the configuration variables of your choice and run the application.
 
-![Windows jetspotter ](images/windows2.png)
+[![Windows jetspotter](images/windows2.png)](images/windows2.png)
 
 ### Examples
 

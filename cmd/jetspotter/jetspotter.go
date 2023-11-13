@@ -48,6 +48,14 @@ func sendNotifications(aircraft []jetspotter.AircraftOutput, config configuratio
 		}
 	}
 
+	// Ntfy
+	if config.NtfyTopic != "" {
+		err := notification.SendNtfyMessage(sortedAircraft, config)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
