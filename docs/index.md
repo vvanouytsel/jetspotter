@@ -67,12 +67,20 @@ Open `Windows PowerShell` and navigate to the directory of the `jetspotter-windo
 
 ```sh
 # Most likely it is stored in your Downloads folder
-cd ~\Downloads
+cd .\Downloads\
 ```
 
 Specify the configuration variables of your choice and run the application.
 
 [![Windows jetspotter](images/windows2.png)](images/windows2.png)
+
+```powershell
+# All aircraft within 40 kilometers of Eiffel Tower
+$env:LOCATION_LATITUDE="48.85830654260347"
+$env:LOCATION_LONGITUDE="2.294309636051661"
+$env:MAX_RANGE_KILOMETERS="40"
+.\jetspotter-windows-amd64.exe
+```
 
 ### Examples
 
