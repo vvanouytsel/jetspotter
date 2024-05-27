@@ -67,7 +67,7 @@ jobs:
       - name: Install conventional-changelog-conventionalcommits
         run: npm install conventional-changelog-conventionalcommits
       - name: Check semantic release
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v4.0.0
         id: check_semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
