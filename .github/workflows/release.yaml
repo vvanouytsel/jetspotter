@@ -68,6 +68,9 @@ jobs:
         id: check_semantic
         with:
           semantic_version: 19
+          extra_plugins: |
+            @semantic-release/commit-analyzer@10.0.4
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
