@@ -75,10 +75,11 @@ Specify the configuration variables of your choice and run the application.
 [![Windows jetspotter](images/windows2.png)](images/windows2.png)
 
 ```powershell
-# All aircraft within 40 kilometers of Eiffel Tower
+# Spot all aircraft within 40 kilometers of Eiffel Tower and send a Discord notification
 $env:LOCATION_LATITUDE="48.85830654260347"
 $env:LOCATION_LONGITUDE="2.294309636051661"
 $env:MAX_RANGE_KILOMETERS="40"
+$env:DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/XXXXXX/YYYYYY"
 .\jetspotter-windows-amd64.exe
 ```
 
