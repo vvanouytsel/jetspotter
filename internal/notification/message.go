@@ -31,16 +31,16 @@ const (
 
 // Format whether to display a hyperlink for the registration or not
 func formatRegistration(ac jetspotter.AircraftOutput, notificationType string) string {
-	if ac.ImageURL == "" {
-		return ac.Registration
-	}
-
 	if notificationType == Markdown {
 		return fmt.Sprintf("[%s](%s)", ac.Registration, ac.ImageURL)
 	}
 
 	if notificationType == Slack {
 		return fmt.Sprintf("*Registration:* <%s|%s>", ac.ImageURL, ac.Registration)
+	}
+
+	if ac.ImageURL == "" {
+		return ac.Registration
 	}
 
 	return ac.Registration
