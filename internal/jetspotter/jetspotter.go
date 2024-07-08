@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"net/http"
 	"net/url"
@@ -276,10 +277,12 @@ func validateFields(aircraft Aircraft) Aircraft {
 // CreateAircraftOutput returns a list of AircraftOutput objects that will be used to print metadata.
 func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acOutputs []AircraftOutput, err error) {
 	var acOutput AircraftOutput
+	cloudForecastSucceeded := true
 
 	weather, err := weather.GetCloudForecast(config.Location)
 	if err != nil {
-		return nil, err
+		log.Printf("Error getting cloud forecast: %v\n", err)
+		cloudForecastSucceeded = false
 	}
 
 	for _, ac := range aircraft {
@@ -298,7 +301,9 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.Heading = ac.Track
 		acOutput.TrackerURL = fmt.Sprintf("https://globe.adsbexchange.com/?icao=%v&SiteLat=%f&SiteLon=%f&zoom=11&enableLabels&extendedLabels=1&noIsolation",
 			ac.ICAO, config.Location.Lat, config.Location.Lon)
-		acOutput.CloudCoverage = getCloudCoverage(*weather, acOutput.Altitude)
+		if cloudForecastSucceeded {
+			acOutput.CloudCoverage = getCloudCoverage(*weather, acOutput.Altitude)
+		}
 		acOutput.BearingFromLocation = CalculateBearing(config.Location, aircraftLocation)
 		acOutput.BearingFromAircraft = CalculateBearing(aircraftLocation, config.Location)
 		acOutput.ImageThumbnailURL = image.ThumbnailLarge.Src
