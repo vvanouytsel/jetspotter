@@ -36,6 +36,10 @@ func formatRegistration(ac jetspotter.AircraftOutput, notificationType string) s
 	}
 
 	if notificationType == Slack {
+		if ac.ImageURL == "" {
+			return fmt.Sprintf("*Registration:* %s", ac.Registration)
+		}
+
 		return fmt.Sprintf("*Registration:* <%s|%s>", ac.ImageURL, ac.Registration)
 	}
 
