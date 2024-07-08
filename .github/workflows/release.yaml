@@ -61,14 +61,19 @@ jobs:
       new_release_notes: ${{ steps.check_semantic.outputs.new_release_notes }}
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v4
+
+      - uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 16
+
       - name: Install conventional-changelog-conventionalcommits
-        run: npm install conventional-changelog-conventionalcommits
+        run: npm install conventional-changelog-conventionalcommits@~7.0.0
+
       - name: Check semantic release
-        uses: cycjimmy/semantic-release-action@v4.1.0
         id: check_semantic
+        uses: cycjimmy/semantic-release-action@v3
+        with:
+          semantic_version: 19.0.5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
