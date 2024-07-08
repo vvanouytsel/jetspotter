@@ -65,8 +65,7 @@ func GetCloudForecast(location geodist.Coord) (weather *Data, err error) {
 	}
 
 	if response.StatusCode != 200 {
-		fmt.Printf("Received %d from %s but expected 200, not using weather data", response.StatusCode, weatherCloudURL)
-		return nil, nil
+		return nil, fmt.Errorf("Received status code %v", response.StatusCode)
 	}
 
 	err = json.Unmarshal(body, &weather)
