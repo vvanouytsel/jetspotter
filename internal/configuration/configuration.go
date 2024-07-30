@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	"fmt"
 	"log"
 	"strings"
 
@@ -164,6 +165,18 @@ func GetConfig() {
 	err = viper.BindEnv(config_slackWebhookUrl, env_slackWebhookUrl)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			// Config file not found; ignore error
+		} else {
+			panic(fmt.Errorf("fatal error in config file: %w", err))
+		}
 	}
 
 	aircraftTypes := viper.GetString(config_aircraftTypes)
