@@ -150,28 +150,28 @@ func validateAircraft(allFilteredAircraft []Aircraft, alreadySpottedAircraft *[]
 
 // HandleAircraft return a list of aircraft that have been filtered by range and type.
 // Aircraft that have been spotted are removed from the list.
-func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Config) (aircraft []AircraftOutput, err error) {
+func HandleAircraft(alreadySpottedAircraft *[]Aircraft) (aircraft []AircraftOutput, err error) {
 	var newlySpottedAircraft []Aircraft
 
-	allAircraftInRange, err := getAllAircraftInRange(config.Location, config.MaxRangeKilometers)
+	allAircraftInRange, err := getAllAircraftInRange(configuration.Location, configuration.MaxRangeKilometers)
 	if err != nil {
 		return nil, err
 	}
 
 	newlySpottedAircraft, *alreadySpottedAircraft = validateAircraft(allAircraftInRange, alreadySpottedAircraft)
-	filteredAircraftInRange := filterAircraftByTypes(newlySpottedAircraft, config.AircraftTypes)
-	newlySpottedAircraftOutput, err := CreateAircraftOutput(newlySpottedAircraft, config)
+	filteredAircraftInRange := filterAircraftByTypes(newlySpottedAircraft, configuration.AircraftTypes)
+	newlySpottedAircraftOutput, err := CreateAircraftOutput(newlySpottedAircraft)
 	if err != nil {
 		return nil, err
 	}
 	handleMetrics(newlySpottedAircraftOutput)
 
-	acOutputs, err := CreateAircraftOutput(filteredAircraftInRange, config)
+	acOutputs, err := CreateAircraftOutput(filteredAircraftInRange)
 	if err != nil {
 		return nil, err
 	}
 
-	if slices.Contains(config.AircraftTypes, "ALL") {
+	if slices.Contains(configuration.AircraftTypes, "ALL") {
 		return acOutputs, nil
 	}
 	return acOutputs, nil
@@ -275,11 +275,11 @@ func validateFields(aircraft Aircraft) Aircraft {
 }
 
 // CreateAircraftOutput returns a list of AircraftOutput objects that will be used to print metadata.
-func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acOutputs []AircraftOutput, err error) {
+func CreateAircraftOutput(aircraft []Aircraft) (acOutputs []AircraftOutput, err error) {
 	var acOutput AircraftOutput
 	cloudForecastSucceeded := true
 
-	weather, err := weather.GetCloudForecast(config.Location)
+	weather, err := weather.GetCloudForecast(configuration.Location)
 	if err != nil {
 		log.Printf("Error getting cloud forecast: %v\n", err)
 		cloudForecastSucceeded = false
@@ -293,19 +293,19 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.Altitude = ac.AltBaro.(float64)
 		acOutput.Callsign = ac.Callsign
 		acOutput.Description = ac.Desc
-		acOutput.Distance = CalculateDistance(config.Location, aircraftLocation)
+		acOutput.Distance = CalculateDistance(configuration.Location, aircraftLocation)
 		acOutput.Speed = int(ac.GS)
 		acOutput.Registration = ac.Registration
 		acOutput.Type = ac.PlaneType
 		acOutput.ICAO = ac.ICAO
 		acOutput.Heading = ac.Track
 		acOutput.TrackerURL = fmt.Sprintf("https://globe.adsbexchange.com/?icao=%v&SiteLat=%f&SiteLon=%f&zoom=11&enableLabels&extendedLabels=1&noIsolation",
-			ac.ICAO, config.Location.Lat, config.Location.Lon)
+			ac.ICAO, configuration.Location.Lat, configuration.Location.Lon)
 		if cloudForecastSucceeded {
 			acOutput.CloudCoverage = getCloudCoverage(*weather, acOutput.Altitude)
 		}
-		acOutput.BearingFromLocation = CalculateBearing(config.Location, aircraftLocation)
-		acOutput.BearingFromAircraft = CalculateBearing(aircraftLocation, config.Location)
+		acOutput.BearingFromLocation = CalculateBearing(configuration.Location, aircraftLocation)
+		acOutput.BearingFromAircraft = CalculateBearing(aircraftLocation, configuration.Location)
 		acOutput.ImageThumbnailURL = image.ThumbnailLarge.Src
 		acOutput.ImageURL = image.Link
 		acOutput.Military = isAircraftMilitary(ac)

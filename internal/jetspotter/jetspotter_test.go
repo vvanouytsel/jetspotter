@@ -101,10 +101,9 @@ func TestFilterAircraftByTypeF16(t *testing.T) {
 		},
 	}
 
-	config := configuration.Config{
-		AircraftTypes: []string{aircraft.F16.Identifier},
-	}
-	actual := filterAircraftByTypes(planes, config.AircraftTypes)
+	setupAircraftTypes([]string{aircraft.F16.Identifier})
+
+	actual := filterAircraftByTypes(planes, configuration.AircraftTypes)
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
@@ -112,11 +111,10 @@ func TestFilterAircraftByTypeF16(t *testing.T) {
 }
 
 func TestFilterAircraftByTypeAll(t *testing.T) {
-	config := configuration.Config{
-		AircraftTypes: []string{aircraft.ALL.Identifier},
-	}
+	setupAircraftTypes([]string{aircraft.ALL.Identifier})
+
 	expected := planes
-	actual := filterAircraftByTypes(planes, config.AircraftTypes)
+	actual := filterAircraftByTypes(planes, configuration.AircraftTypes)
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
@@ -124,9 +122,8 @@ func TestFilterAircraftByTypeAll(t *testing.T) {
 }
 
 func TestFilterAircraftByTypeMilitary(t *testing.T) {
-	config := configuration.Config{
-		AircraftTypes: []string{aircraft.MILITARY.Identifier},
-	}
+	setupAircraftTypes([]string{aircraft.MILITARY.Identifier})
+
 	expected := []Aircraft{
 		{
 			Callsign:  "APEX11",
@@ -148,7 +145,7 @@ func TestFilterAircraftByTypeMilitary(t *testing.T) {
 		},
 	}
 
-	actual := filterAircraftByTypes(planes, config.AircraftTypes)
+	actual := filterAircraftByTypes(planes, configuration.AircraftTypes)
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
@@ -156,9 +153,9 @@ func TestFilterAircraftByTypeMilitary(t *testing.T) {
 }
 
 func TestFilterAircraftByTypeMilitaryAndA320(t *testing.T) {
-	config := configuration.Config{
-		AircraftTypes: []string{aircraft.MILITARY.Identifier, aircraft.A320.Identifier},
-	}
+	setupAircraftTypes(
+		[]string{aircraft.MILITARY.Identifier, aircraft.A320.Identifier},
+	)
 
 	expected := []Aircraft{
 		{
@@ -186,7 +183,7 @@ func TestFilterAircraftByTypeMilitaryAndA320(t *testing.T) {
 		},
 	}
 
-	actual := filterAircraftByTypes(planes, config.AircraftTypes)
+	actual := filterAircraftByTypes(planes, configuration.AircraftTypes)
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
@@ -253,10 +250,11 @@ func TestFilterAircraftByTypes(t *testing.T) {
 		},
 	}
 
-	config := configuration.Config{
-		AircraftTypes: []string{aircraft.F16.Identifier, aircraft.A400.Identifier},
-	}
-	actual := filterAircraftByTypes(planes, config.AircraftTypes)
+	setupAircraftTypes(
+		[]string{aircraft.F16.Identifier, aircraft.A400.Identifier},
+	)
+
+	actual := filterAircraftByTypes(planes, configuration.AircraftTypes)
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
@@ -305,7 +303,6 @@ func TestSortAircraftByDistance(t *testing.T) {
 }
 
 func TestCalculateBearing1(t *testing.T) {
-
 	expected := 320
 	actual := int(CalculateBearing(locationMannekenPis, locationElisabethPark))
 
@@ -315,7 +312,6 @@ func TestCalculateBearing1(t *testing.T) {
 }
 
 func TestCalculateBearing2(t *testing.T) {
-
 	expected := 140
 	actual := int(CalculateBearing(locationElisabethPark, locationMannekenPis))
 
@@ -325,7 +321,6 @@ func TestCalculateBearing2(t *testing.T) {
 }
 
 func TestCalculateBearing3(t *testing.T) {
-
 	expected := 56
 	actual := int(CalculateBearing(locationChristRedeemer, locationPyramidGiza))
 
@@ -335,7 +330,6 @@ func TestCalculateBearing3(t *testing.T) {
 }
 
 func TestCalculateBearing4(t *testing.T) {
-
 	expected := 242
 	actual := int(CalculateBearing(locationPyramidGiza, locationChristRedeemer))
 
@@ -364,12 +358,12 @@ func TestCalculateBearing5(t *testing.T) {
 }
 
 func TestNewlySpotted(t *testing.T) {
-
 	newAircaft := Aircraft{
 		ICAO:     "ZYX",
 		Type:     "A400",
 		Callsign: "NEW11",
 	}
+
 	expected := true
 	actual := newlySpotted(newAircaft, jets)
 
@@ -379,7 +373,6 @@ func TestNewlySpotted(t *testing.T) {
 }
 
 func TestAlreadySpotted(t *testing.T) {
-
 	expected := false
 	actual := newlySpotted(jackal51Aircraft, jets)
 
@@ -389,7 +382,6 @@ func TestAlreadySpotted(t *testing.T) {
 }
 
 func TestAlreadySpottedAircraftAreFiltered(t *testing.T) {
-
 	aircraft := []Aircraft{
 		{
 			ICAO:      "VVO",
@@ -479,4 +471,9 @@ func TestConvertKilometersToMiles(t *testing.T) {
 	if expected != actual {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
 	}
+}
+
+func setupAircraftTypes(types []string) {
+	configuration.GetConfig()
+	configuration.AircraftTypes = types
 }

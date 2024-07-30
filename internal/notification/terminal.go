@@ -8,7 +8,7 @@ import (
 )
 
 // FormatAircraft prints an Aircraft in a readable manner.
-func FormatAircraft(aircraft jetspotter.AircraftOutput, config configuration.Config) string {
+func FormatAircraft(aircraft jetspotter.AircraftOutput) string {
 
 	return fmt.Sprintf("Callsign: %s\n"+
 		"Description: %s\n"+
@@ -32,9 +32,12 @@ func FormatAircraft(aircraft jetspotter.AircraftOutput, config configuration.Con
 }
 
 // SendTerminalMessage prints a list of Aircraft in a readable manner.
-func SendTerminalMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) {
+func SendTerminalMessage(aircraft []jetspotter.AircraftOutput) {
 	log.Println("🛫 A jet has been spotted! 🛫")
-	for _, ac := range aircraft {
-		fmt.Println(FormatAircraft(ac, config))
+
+	if configuration.LogNewPlanesToConsole {
+		for _, ac := range aircraft {
+			fmt.Println(FormatAircraft(ac))
+		}
 	}
 }

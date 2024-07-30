@@ -33,7 +33,7 @@ type Field struct {
 	Text string `json:"text,omitempty"`
 }
 
-func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) (SlackMessage, error) {
+func buildSlackMessage(aircraft []jetspotter.AircraftOutput) (SlackMessage, error) {
 
 	var blocks []Block
 	blocks = append(blocks, Block{
@@ -47,7 +47,7 @@ func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 	})
 
 	for i, ac := range aircraft {
-		if i > config.MaxAircraftSlackMessage {
+		if i > configuration.MaxAircraftSlackMessage {
 			break
 		}
 
@@ -124,8 +124,8 @@ func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 }
 
 // SendSlackMessage sends a slack message containing metadata of a list of aircraft
-func SendSlackMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
-	message, err := buildSlackMessage(aircraft, config)
+func SendSlackMessage(aircraft []jetspotter.AircraftOutput) error {
+	message, err := buildSlackMessage(aircraft)
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func SendSlackMessage(aircraft []jetspotter.AircraftOutput, config configuration
 	notification := Notification{
 		Message: message,
 		Type:    Slack,
-		URL:     config.SlackWebHookURL,
+		URL:     configuration.SlackWebhookURL,
 	}
 
 	err = SendMessage(aircraft, notification)

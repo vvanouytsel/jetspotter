@@ -13,7 +13,7 @@ func exitWithError(err error) {
 	log.Fatalf("Something went wrong: %v\n", err)
 }
 
-func sendNotifications(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
+func sendNotifications(aircraft []jetspotter.AircraftOutput) error {
 	sortedAircraft := jetspotter.SortByDistance(aircraft)
 
 	if len(aircraft) < 1 {
@@ -22,35 +22,35 @@ func sendNotifications(aircraft []jetspotter.AircraftOutput, config configuratio
 	}
 
 	// Terminal
-	notification.SendTerminalMessage(sortedAircraft, config)
+	notification.SendTerminalMessage(sortedAircraft)
 
 	// Slack
-	if config.SlackWebHookURL != "" {
-		err := notification.SendSlackMessage(sortedAircraft, config)
+	if configuration.SlackWebhookURL != "" {
+		err := notification.SendSlackMessage(sortedAircraft)
 		if err != nil {
 			return err
 		}
 	}
 
 	// Discord
-	if config.DiscordWebHookURL != "" {
-		err := notification.SendDiscordMessage(sortedAircraft, config)
+	if configuration.DiscordWebhookURL != "" {
+		err := notification.SendDiscordMessage(sortedAircraft)
 		if err != nil {
 			return err
 		}
 	}
 
 	// Gotify
-	if config.GotifyURL != "" && config.GotifyToken != "" {
-		err := notification.SendGotifyMessage(sortedAircraft, config)
+	if configuration.GotifyURL != "" && configuration.GotifyToken != "" {
+		err := notification.SendGotifyMessage(sortedAircraft)
 		if err != nil {
 			return err
 		}
 	}
 
 	// Ntfy
-	if config.NtfyTopic != "" {
-		err := notification.SendNtfyMessage(sortedAircraft, config)
+	if configuration.NtfyTopic != "" {
+		err := notification.SendNtfyMessage(sortedAircraft)
 		if err != nil {
 			return err
 		}
@@ -59,31 +59,31 @@ func sendNotifications(aircraft []jetspotter.AircraftOutput, config configuratio
 	return nil
 }
 
-func jetspotterHandler(alreadySpottedAircraft *[]jetspotter.Aircraft, config configuration.Config) {
-	aircraft, err := jetspotter.HandleAircraft(alreadySpottedAircraft, config)
+func jetspotterHandler(alreadySpottedAircraft *[]jetspotter.Aircraft) {
+	aircraft, err := jetspotter.HandleAircraft(alreadySpottedAircraft)
 	if err != nil {
 		exitWithError(err)
 	}
 
-	err = sendNotifications(aircraft, config)
+	err = sendNotifications(aircraft)
 	if err != nil {
 		exitWithError(err)
 	}
 }
 
-func HandleJetspotter(config configuration.Config) {
-	log.Printf("Spotting the following aircraft types within %d kilometers: %s", config.MaxRangeKilometers, config.AircraftTypes)
+func HandleJetspotter() {
+	log.Printf("Spotting the following aircraft types within %d kilometers: %s", configuration.MaxRangeKilometers, configuration.AircraftTypes)
 
 	var alreadySpottedAircraft []jetspotter.Aircraft
 	for {
-		jetspotterHandler(&alreadySpottedAircraft, config)
-		time.Sleep(time.Duration(config.FetchInterval) * time.Second)
+		jetspotterHandler(&alreadySpottedAircraft)
+		time.Sleep(time.Duration(configuration.FetchInterval) * time.Second)
 	}
 }
 
-func HandleMetrics(config configuration.Config) {
+func HandleMetrics() {
 	go func() {
-		err := metrics.HandleMetrics(config)
+		err := metrics.HandleMetrics()
 		if err != nil {
 			exitWithError(err)
 		}
@@ -91,10 +91,8 @@ func HandleMetrics(config configuration.Config) {
 }
 
 func main() {
-	config, err := configuration.GetConfig()
-	if err != nil {
-		exitWithError(err)
-	}
-	HandleMetrics(config)
-	HandleJetspotter(config)
+	configuration.GetConfig()
+
+	HandleMetrics()
+	HandleJetspotter()
 }
