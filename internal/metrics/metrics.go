@@ -34,14 +34,19 @@ func IncrementMetrics(aircrafType, description, military string, altitude float6
 	}()
 }
 
-func HandleMetrics(config configuration.Config) error {
+func HandleMetrics() error {
 	path := "/metrics"
-	port := config.MetricsPort
+	port := configuration.MetricsPort
+
 	http.Handle(path, promhttp.Handler())
-	log.Printf("Serving metrics on port %s and path %s", port, path)
-	err := http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
+
+	log.Printf("Serving metrics on port %d and path %s", port, path)
+
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

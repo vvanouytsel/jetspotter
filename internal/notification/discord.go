@@ -23,8 +23,8 @@ const (
 )
 
 // SendDiscordMessage sends a discord message containing metadata of a list of aircraft
-func SendDiscordMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
-	message, err := buildDiscordMessage(aircraft, config)
+func SendDiscordMessage(aircraft []jetspotter.AircraftOutput) error {
+	message, err := buildDiscordMessage(aircraft)
 	if err != nil {
 		return err
 	}
@@ -32,7 +32,7 @@ func SendDiscordMessage(aircraft []jetspotter.AircraftOutput, config configurati
 	notification := Notification{
 		Message: message,
 		Type:    Discord,
-		URL:     config.DiscordWebHookURL,
+		URL:     configuration.DiscordWebhookURL,
 	}
 
 	err = SendMessage(aircraft, notification)
@@ -70,7 +70,7 @@ func getColorByAltitude(altitude int) int {
 	}
 }
 
-func buildDiscordMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) (message discordgo.Message, err error) {
+func buildDiscordMessage(aircraft []jetspotter.AircraftOutput) (message discordgo.Message, err error) {
 	message.Content = ":airplane: A jet has been spotted! :airplane:"
 	var embeds []*discordgo.MessageEmbed
 	for _, ac := range aircraft {
@@ -129,7 +129,7 @@ func buildDiscordMessage(aircraft []jetspotter.AircraftOutput, config configurat
 			},
 		}
 
-		if config.DiscordColorAltitude == "true" {
+		if configuration.DiscordColorAltitude {
 			embed.Color = getColorByAltitude(int(ac.Altitude))
 		} else {
 			embed.Color = darkBlue

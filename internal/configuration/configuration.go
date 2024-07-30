@@ -2,144 +2,189 @@ package configuration
 
 import (
 	"log"
-	"os"
-	"strconv"
 	"strings"
 
 	"github.com/jftuga/geodist"
+	"github.com/spf13/viper"
 )
 
-// Config is the type used for all user configuration.
-// All parameters can be set using ENV variables.
-// The comments below are structured as following:
-// ENV_VARIABLE_NAME DEFAULT_VALUE
-type Config struct {
-	// Latitude and Longitude coordinates of the location you want to use.
-	// LOCATION_LATITUDE 51.17348
-	// LOCATION_LONGITUDE 5.45921
-	Location geodist.Coord
-
-	// Maximum range in kilometers from the location that you want aircraft to be spotted.
-	// Note that this is an approximation due to roundings.
-	// MAX_RANGE_KILOMETERS 30
-	MaxRangeKilometers int
-
-	// A comma seperated list of types that you want to spot
-	// If not set, 'ALL' will be used, which will disable the filter and show all aircraft within range.
-	// Full list can be found at https://www.icao.int/publications/doc8643/pages/search.aspx in 'Type Designator' column.
-	// AIRCRAFT_TYPES ALL
-	// EXAMPLES
-	// AIRCRAFT_TYPES F16,F35
-	// To spot all military aircraft, you can use MILITARY.
-	// AIRCRAFT_TYPES MILITARY
-	AircraftTypes []string
-
-	// Maximum amount of aircraft to show in a single slack message.
-	// Note that a single slack message only supports up to 50 'blocks' and each aircraft that we display has multiple blocks.
-	// MAX_AIRCRAFT_SLACK_MESSAGE 8
+var (
+	AircraftTypes           []string
+	DiscordWebhookURL       string
+	DiscordColorAltitude    bool
+	FetchInterval           int
+	GotifyToken             string
+	GotifyURL               string
+	Location                geodist.Coord
+	LogNewPlanesToConsole   bool
 	MaxAircraftSlackMessage int
-
-	// Webhook used to send notifications to Slack. If not set, no messages will be sent to Slack.
-	// SLACK_WEBHOOK_URL ""
-	SlackWebHookURL string
-
-	// Webhook used to send notifications to Discord. If not set, no messages will be sent to Discord.
-	// DISCORD_WEBHOOK_URL ""
-	DiscordWebHookURL string
-
-	// Discord notifications use an embed color based on the alitute of the aircraft.
-	// DISCORD_COLOR_ALTITUDE "true"
-	DiscordColorAltitude string
-
-	// Interval in seconds between fetching aircraft, minimum is 60 due to API rate limiting.
-	// FETCH_INTERVAL 60
-	FetchInterval int
-
-	// Token to authenticate with the gotify server.
-	// GOTIFY_TOKEN ""
-	GotifyToken string
-
-	// URL of the gotify server.
-	// GOTIFY_URL ""
-	GotifyURL string
-
-	// Port where metrics will be exposed on
-	// METRICS_PORT "7070"
-	MetricsPort string
-
-	// Topic to publish message to
-	// NTFY_TOPIC ""
-	NtfyTopic string
-
-	// URL of the ntfy server.
-	// NTFY_SERVER "https://ntfy.sh"
-	NtfyServer string
-}
-
-// Environment variable names
-const (
-	SlackWebhookURL          = "SLACK_WEBHOOK_URL"
-	DiscordWebhookURL        = "DISCORD_WEBHOOK_URL"
-	DiscordColorAltitude     = "DISCORD_COLOR_ALTITUDE"
-	LocationLatitude         = "LOCATION_LATITUDE"
-	LocationLongitude        = "LOCATION_LONGITUDE"
-	MaxRangeKilometers       = "MAX_RANGE_KILOMETERS"
-	MaxAircrfaftSlackMessage = "MAX_AIRCRAFT_SLACK_MESSAGE"
-	AircraftTypes            = "AIRCRAFT_TYPES"
-	FetchInterval            = "FETCH_INTERVAL"
-	GotifyURL                = "GOTIFY_URL"
-	NtfyTopic                = "NTFY_TOPIC"
-	NtfyServer               = "NTFY_SERVER"
-	GotifyToken              = "GOTIFY_TOKEN"
-	MetricsPort              = "METRICS_PORT"
+	MaxRangeKilometers      int
+	MetricsPort             int
+	NtfyServer              string
+	NtfyTopic               string
+	SlackWebhookURL         string
 )
 
-// getEnvVariable looks up a specified environment variable, if not set the specified default is used
-func getEnvVariable(key, fallback string) string {
-	value, exists := os.LookupEnv(key)
-	if !exists {
-		value = fallback
-	}
-	return value
-}
+const (
+	// Defaults
+
+	defaultFetchInterval           int = 60
+	defaultMaxAircraftSlackMessage int = 8
+	defaultMaxRangeKilometers      int = 30
+
+	// Config IDs
+
+	config_aircraftTypes           string = "aircraftTypes"
+	config_discordColorAltitude    string = "discordColorAltitude"
+	config_discordWebHookUrl       string = "discordWebHookUrl"
+	config_fetchInterval           string = "fetchInterval"
+	config_gotifyToken             string = "gotifyToken"
+	config_gotifyUrl               string = "gotifyUrl"
+	config_locationLatitude        string = "locationLatitude"
+	config_locationLongitude       string = "locationLongitude"
+	config_logNewPlanesToConsole   string = "logNewPlanesToConsole"
+	config_maxAircraftSlackMessage string = "maxAircraftSlackMessage"
+	config_maxRangeKilometers      string = "maxRangeKilometers"
+	config_metricsPort             string = "metricsPort"
+	config_ntfyServer              string = "ntfyServer"
+	config_ntfyTopic               string = "ntfyTopic"
+	config_slackWebhookUrl         string = "slackWebhookUrl"
+
+	// Environment variables
+
+	env_aircraftTypes           string = "AIRCRAFT_TYPES"
+	env_discordColorAltitude    string = "DISCORD_COLOR_ALTITUDE"
+	env_discordWebHookUrl       string = "DISCORD_WEBHOOK_URL"
+	env_fetchInterval           string = "FETCH_INTERVAL"
+	env_gotifyToken             string = "GOTIFY_TOKEN"
+	env_gotifyUrl               string = "GOTIFY_URL"
+	env_locationLatitude        string = "LOCATION_LATITUDE"
+	env_locationLongitude       string = "LOCATION_LONGITUDE"
+	env_logNewPlanesToConsole   string = "LOG_NEW_PLANES_TO_CONSOLE"
+	env_maxAircraftSlackMessage string = "MAX_AIRCRAFT_SLACK_MESSAGE"
+	env_maxRangeKilometers      string = "MAX_RANGE_KILOMETERS"
+	env_metricsPort             string = "METRICS_PORT"
+	env_ntfyServer              string = "NTFY_SERVER"
+	env_ntfyTopic               string = "NTFY_TOPIC"
+	env_slackWebhookUrl         string = "SLACK_WEBHOOK_URL"
+)
 
 // GetConfig attempts to read the configuration via environment variables and uses a default if the environment variable is not set
-func GetConfig() (config Config, err error) {
-	defaultFetchInterval := 60
+func GetConfig() {
+	var err error
 
-	config.GotifyToken = getEnvVariable(GotifyToken, "")
-	config.GotifyURL = getEnvVariable(GotifyURL, "")
-	config.NtfyTopic = getEnvVariable(NtfyTopic, "")
-	config.NtfyServer = getEnvVariable(NtfyServer, "https://ntfy.sh")
-	config.SlackWebHookURL = getEnvVariable(SlackWebhookURL, "")
-	config.DiscordWebHookURL = getEnvVariable(DiscordWebhookURL, "")
-	config.DiscordColorAltitude = getEnvVariable(DiscordColorAltitude, "true")
-	config.MetricsPort = getEnvVariable(MetricsPort, "7070")
-	config.FetchInterval, err = strconv.Atoi(getEnvVariable(FetchInterval, strconv.Itoa(defaultFetchInterval)))
-	if err != nil || config.FetchInterval < 60 {
-		log.Printf("Fetch interval of %ds detected. You might hit rate limits, consider using the default of %ds instead.", config.FetchInterval, defaultFetchInterval)
-	}
+	viper.SetDefault(config_aircraftTypes, "ALL")
+	viper.SetDefault(config_discordColorAltitude, true)
+	viper.SetDefault(config_discordWebHookUrl, "")
+	viper.SetDefault(config_fetchInterval, defaultFetchInterval)
+	viper.SetDefault(config_gotifyToken, "")
+	viper.SetDefault(config_gotifyUrl, "")
+	viper.SetDefault(config_locationLatitude, 51.17348)
+	viper.SetDefault(config_locationLongitude, 5.45921)
+	viper.SetDefault(config_logNewPlanesToConsole, true)
+	viper.SetDefault(config_maxAircraftSlackMessage, defaultMaxAircraftSlackMessage)
+	viper.SetDefault(config_maxRangeKilometers, defaultMaxRangeKilometers)
+	viper.SetDefault(config_metricsPort, 7070)
+	viper.SetDefault(config_ntfyServer, "https://ntfy.sh")
+	viper.SetDefault(config_ntfyTopic, "")
+	viper.SetDefault(config_slackWebhookUrl, "")
 
-	config.Location.Lat, err = strconv.ParseFloat(getEnvVariable(LocationLatitude, "51.17348"), 64)
+	// Bind the Viper key to an associated environment variable name
+
+	err = viper.BindEnv(config_aircraftTypes, env_aircraftTypes)
 	if err != nil {
-		return Config{}, err
+		log.Fatal(err)
 	}
 
-	config.Location.Lon, err = strconv.ParseFloat(getEnvVariable(LocationLongitude, "5.45921"), 64)
+	err = viper.BindEnv(config_discordColorAltitude, env_discordColorAltitude)
 	if err != nil {
-		return Config{}, err
+		log.Fatal(err)
 	}
 
-	config.MaxRangeKilometers, err = strconv.Atoi(getEnvVariable(MaxRangeKilometers, "30"))
+	err = viper.BindEnv(config_discordWebHookUrl, env_discordWebHookUrl)
 	if err != nil {
-		return Config{}, err
+		log.Fatal(err)
 	}
 
-	config.MaxAircraftSlackMessage, err = strconv.Atoi(getEnvVariable(MaxAircrfaftSlackMessage, "8"))
+	err = viper.BindEnv(config_fetchInterval, env_fetchInterval)
 	if err != nil {
-		return Config{}, err
+		log.Fatal(err)
 	}
 
-	config.AircraftTypes = strings.Split(strings.ToUpper(strings.ReplaceAll(getEnvVariable(AircraftTypes, "ALL"), " ", "")), ",")
-	return config, nil
+	err = viper.BindEnv(config_gotifyToken, env_gotifyToken)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindEnv(config_gotifyUrl, env_gotifyUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindEnv(config_locationLatitude, env_locationLatitude)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindEnv(config_locationLongitude, env_locationLongitude)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindEnv(config_logNewPlanesToConsole, env_logNewPlanesToConsole)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindEnv(config_maxAircraftSlackMessage, env_maxAircraftSlackMessage)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindEnv(config_maxRangeKilometers, env_maxRangeKilometers)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindEnv(config_metricsPort, env_metricsPort)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindEnv(config_ntfyServer, env_ntfyServer)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindEnv(config_ntfyTopic, env_ntfyTopic)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = viper.BindEnv(config_slackWebhookUrl, env_slackWebhookUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	aircraftTypes := viper.GetString(config_aircraftTypes)
+	AircraftTypes = strings.Split(strings.ToUpper(strings.ReplaceAll(aircraftTypes, " ", "")), ",")
+
+	DiscordColorAltitude = viper.GetBool(config_discordColorAltitude)
+	DiscordWebhookURL = viper.GetString(config_discordWebHookUrl)
+	FetchInterval = viper.GetInt(config_fetchInterval)
+	GotifyToken = viper.GetString(config_gotifyToken)
+	GotifyURL = viper.GetString(config_gotifyUrl)
+	Location.Lat = viper.GetFloat64(config_locationLatitude)
+	Location.Lon = viper.GetFloat64(config_locationLongitude)
+	LogNewPlanesToConsole = viper.GetBool(config_logNewPlanesToConsole)
+	MaxAircraftSlackMessage = viper.GetInt(config_maxAircraftSlackMessage)
+	MaxRangeKilometers = viper.GetInt(config_maxRangeKilometers)
+	MetricsPort = viper.GetInt(config_metricsPort)
+	NtfyServer = viper.GetString(config_ntfyServer)
+	NtfyTopic = viper.GetString(config_ntfyTopic)
+	SlackWebhookURL = viper.GetString(config_slackWebhookUrl)
+
+	if FetchInterval < 60 {
+		log.Printf("Fetch interval of %ds detected. You might hit rate limits. Please consider using the default of %ds instead.", FetchInterval, defaultFetchInterval)
+	}
 }
