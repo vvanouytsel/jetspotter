@@ -13,3 +13,15 @@ The supported parameters and their corresponding environment variables are liste
    comments=false
 %}
 ```
+
+You can also use a `config.yaml` file located in the same directory as the executable. Here is a sample:
+
+```yaml
+aircraftTypes: ALL
+locationLatitude: 51.17348
+locationLongitude: 5.45921
+logNewPlanesToConsole: true
+maxRangeKilometers: 20
+metricsPort: 7070
+slackWebhookUrl: https://hooks.slack.com/services/XXX/YYY/ZZZ
+```
