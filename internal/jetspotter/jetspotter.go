@@ -159,14 +159,20 @@ func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Con
 	}
 
 	newlySpottedAircraft, *alreadySpottedAircraft = validateAircraft(allAircraftInRange, alreadySpottedAircraft)
-	filteredAircraftInRange := filterAircraftByTypes(newlySpottedAircraft, config.AircraftTypes)
+	filteredAircraft := filterAircraftByTypes(newlySpottedAircraft, config.AircraftTypes)
+
+	// Filter aircraft by altitude
+	if config.MaxAltitudeFeet > 0 {
+		filteredAircraft = filterAircraftByAltitude(filteredAircraft, config.MaxAltitudeFeet)
+	}
+
 	newlySpottedAircraftOutput, err := CreateAircraftOutput(newlySpottedAircraft, config)
 	if err != nil {
 		return nil, err
 	}
 	handleMetrics(newlySpottedAircraftOutput)
 
-	acOutputs, err := CreateAircraftOutput(filteredAircraftInRange, config)
+	acOutputs, err := CreateAircraftOutput(filteredAircraft, config)
 	if err != nil {
 		return nil, err
 	}
@@ -209,6 +215,21 @@ func filterAircraftByTypes(aircraft []Aircraft, types []string) []Aircraft {
 				filteredAircraft = append(filteredAircraft, ac)
 			}
 		}
+	}
+
+	return filteredAircraft
+}
+
+// filterAircraftByAltitude returns a list of Aircraft that are below the maxAltitudeFeet.
+func filterAircraftByAltitude(aircraft []Aircraft, maxAltitudeFeet int) []Aircraft {
+	var filteredAircraft []Aircraft
+
+	for _, ac := range aircraft {
+        if ac.AltBaro != nil {
+            if alt, ok := ac.AltBaro.(int); ok && alt <= maxAltitudeFeet {
+                filteredAircraft = append(filteredAircraft, ac)
+            }
+        }
 	}
 
 	return filteredAircraft

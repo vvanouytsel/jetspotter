@@ -33,6 +33,21 @@ var (
 		Callsign:  "JACKAL51",
 		PlaneType: "F16",
 	}
+
+	planesWithAltitude = []Aircraft{
+		{
+			Callsign:  "KHARMA11",
+			AltBaro:  4000,
+		},
+		{
+			Callsign:  "KHARMA12",
+			AltBaro:  9000,
+		},
+		{
+			Callsign:  "KHARMA13",
+		},
+	}
+
 	planes = []Aircraft{
 		{
 			Callsign:  "APEX11",
@@ -477,6 +492,25 @@ func TestConvertKilometersToMiles(t *testing.T) {
 	expected := 10
 	actual := convertKilometersToNauticalMiles(20)
 	if expected != actual {
+		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+	}
+}
+
+
+func TestFilterAircraftByAltitude(t *testing.T) {
+	expected := []Aircraft{
+		{
+			Callsign:  "KHARMA11",
+			AltBaro: 4000,
+		},
+	}
+
+	config := configuration.Config{
+		MaxAltitudeFeet: 5000,
+	}
+	actual := filterAircraftByAltitude(planesWithAltitude, config.MaxAltitudeFeet)
+
+	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
 	}
 }

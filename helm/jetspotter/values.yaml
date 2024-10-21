@@ -7,7 +7,9 @@ jetspotter:
   fetchInterval: 60
   #  Maximum range in kilometers from the location that you want aircraft to be spotted.
   maxRangeKilometers: 30
-  # A comma seperated list of types that you want to spot
+  # Maximum altitude in feet that you want aircraft to be spotted. Set to 0 to disable.
+  maxAltitudeFeet: 0
+  # A comma separated list of types that you want to spot
   #  If not set, 'ALL' will be used, which will disable the filter and show all aircraft within range.
   # Full list can be found at https://www.icao.int/publications/doc8643/pages/search.aspx in 'Type Designator' column.
   aircraftTypes:
