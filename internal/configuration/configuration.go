@@ -24,6 +24,11 @@ type Config struct {
 	// MAX_RANGE_KILOMETERS 30
 	MaxRangeKilometers int
 
+	// Maximum altitude in feet that you want to spot aircraft at.
+	// Set to 0 to disable the filter.
+	// MAX_ALTITUDE_FEET 0
+	MaxAltitudeFeet int
+
 	// A comma seperated list of types that you want to spot
 	// If not set, 'ALL' will be used, which will disable the filter and show all aircraft within range.
 	// Full list can be found at https://www.icao.int/publications/doc8643/pages/search.aspx in 'Type Designator' column.
@@ -84,6 +89,7 @@ const (
 	LocationLatitude         = "LOCATION_LATITUDE"
 	LocationLongitude        = "LOCATION_LONGITUDE"
 	MaxRangeKilometers       = "MAX_RANGE_KILOMETERS"
+	MaxAltitudeFeet          = "MAX_ALTITUDE_FEET"
 	MaxAircrfaftSlackMessage = "MAX_AIRCRAFT_SLACK_MESSAGE"
 	AircraftTypes            = "AIRCRAFT_TYPES"
 	FetchInterval            = "FETCH_INTERVAL"
@@ -131,6 +137,11 @@ func GetConfig() (config Config, err error) {
 	}
 
 	config.MaxRangeKilometers, err = strconv.Atoi(getEnvVariable(MaxRangeKilometers, "30"))
+	if err != nil {
+		return Config{}, err
+	}
+
+	config.MaxAltitudeFeet, err = strconv.Atoi(getEnvVariable(MaxAltitudeFeet, "0"))
 	if err != nil {
 		return Config{}, err
 	}
