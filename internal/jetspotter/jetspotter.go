@@ -148,7 +148,7 @@ func validateAircraft(allFilteredAircraft []Aircraft, alreadySpottedAircraft *[]
 	return newlySpottedAircraft, *alreadySpottedAircraft
 }
 
-// HandleAircraft return a list of aircraft that have been filtered by range and type.
+// HandleAircraft return a list of aircraft that have been filtered by range, type and altitude.
 // Aircraft that have been spotted are removed from the list.
 func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Config) (aircraft []AircraftOutput, err error) {
 	var newlySpottedAircraft []Aircraft
@@ -226,7 +226,8 @@ func filterAircraftByAltitude(aircraft []Aircraft, maxAltitudeFeet int) []Aircra
 
 	for _, ac := range aircraft {
         if ac.AltBaro != nil {
-            if alt, ok := ac.AltBaro.(int); ok && alt <= maxAltitudeFeet {
+			altitude := int(ac.AltBaro.(float64))
+			if altitude <= maxAltitudeFeet {
                 filteredAircraft = append(filteredAircraft, ac)
             }
         }
