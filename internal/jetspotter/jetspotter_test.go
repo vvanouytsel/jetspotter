@@ -37,11 +37,11 @@ var (
 	planesWithAltitude = []Aircraft{
 		{
 			Callsign:  "KHARMA11",
-			AltBaro:  4000,
+			AltBaro:  4000.0,
 		},
 		{
 			Callsign:  "KHARMA12",
-			AltBaro:  9000,
+			AltBaro:  9000.0,
 		},
 		{
 			Callsign:  "KHARMA13",
@@ -501,12 +501,12 @@ func TestFilterAircraftByAltitude(t *testing.T) {
 	expected := []Aircraft{
 		{
 			Callsign:  "KHARMA11",
-			AltBaro: 4000,
+			AltBaro: 4000.0,
 		},
 	}
 
 	config := configuration.Config{
-		MaxAltitudeFeet: 5000,
+		MaxAltitudeFeet: 5000.0,
 	}
 	actual := filterAircraftByAltitude(planesWithAltitude, config.MaxAltitudeFeet)
 
