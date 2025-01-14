@@ -26,6 +26,15 @@ docker-build:
 	@echo "Building docker image with tag 'dev'..."
 	docker build -t ghcr.io/vvanouytsel/jetspotter:dev .
 
+podman-build:
+	@echo "Building docker image with tag 'dev'..."
+	podman build -t ghcr.io/vvanouytsel/jetspotter:dev .
+
+podman-run: podman-build
+	@echo "Running docker container with tag 'dev'..."
+	podman run ghcr.io/vvanouytsel/jetspotter:dev
+
+
 docker-run: docker-build
 	@echo "Running docker container with tag 'dev'..."
 	docker run ghcr.io/vvanouytsel/jetspotter:dev

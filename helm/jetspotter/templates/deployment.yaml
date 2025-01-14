@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "jetspotter.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   {{- if .Values.deployment.annotations }}
   annotations:
     {{- range $key, $value := .Values.deployment.annotations }}
@@ -28,7 +29,6 @@ spec:
         - name: {{ .Chart.Name }}
           ports:
           - name: metrics
-            port: {{ .Values.metrics.port }}
             containerPort: {{ .Values.metrics.port }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
