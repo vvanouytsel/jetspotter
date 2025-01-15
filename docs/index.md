@@ -177,21 +177,3 @@ Releases can be found on the [GitHub repository](https://github.com/vvanouytsel/
 ## Container images
 
 [Container images](https://github.com/vvanouytsel/jetspotter/pkgs/container/jetspotter) are also created for each release.
-
-## Build
-
-```bash
-go build -o jetspotter -ldflags "-linkmode external -extldflags -static" cmd/jetspotter/jetspotter.go
-```
-
-## Run
-
-```bash
-go run cmd/jetspotter/*
-```
-
-## Test
-
-```bash
-make test
-```

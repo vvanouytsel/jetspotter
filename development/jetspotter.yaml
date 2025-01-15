@@ -1,0 +1,107 @@
+---
+# Source: jetspotter/templates/secret.yaml
+kind: Secret
+apiVersion: v1
+metadata:
+  name: jetspotter
+  labels: 
+    helm.sh/chart: jetspotter-1.0.0
+    app.kubernetes.io/name: jetspotter
+    app.kubernetes.io/instance: jetspotter
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+  namespace: dev
+stringData:
+  SLACK_WEBHOOK_URL: 
+  DISCORD_WEBHOOK_URL: 
+  GOTIFY_TOKEN:
+---
+# Source: jetspotter/templates/configmap.yaml
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: jetspotter
+  labels: 
+    helm.sh/chart: jetspotter-1.0.0
+    app.kubernetes.io/name: jetspotter
+    app.kubernetes.io/instance: jetspotter
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+  namespace: dev
+data:
+  LOCATION_LATITUDE: "51.17348"
+  LOCATION_LONGITUDE: "5.45921"
+  FETCH_INTERVAL:  "60"
+  MAX_RANGE_KILOMETERS: "30"
+  MAX_ALTITUDE_FEET: "0"
+  AIRCRAFT_TYPES: ALL
+  MAX_AIRCRAFT_SLACK_MESSAGE: "8"
+  DISCORD_COLOR_ALTITUDE: "true"
+  GOTIFY_URL: 
+  METRICS_PORT: "7070"
+  NTFY_SERVER: https://ntfy.sh
+  NTFY_TOPIC:
+---
+# Source: jetspotter/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: jetspotter
+  namespace: dev
+  labels:
+    helm.sh/chart: jetspotter-1.0.0
+    app.kubernetes.io/name: jetspotter
+    app.kubernetes.io/instance: jetspotter
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  ports:
+    - port: 7070
+      targetPort: metrics
+      name: metrics
+  selector:
+    app.kubernetes.io/name: jetspotter
+    app.kubernetes.io/instance: jetspotter
+---
+# Source: jetspotter/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jetspotter
+  namespace: dev
+  labels:
+    helm.sh/chart: jetspotter-1.0.0
+    app.kubernetes.io/name: jetspotter
+    app.kubernetes.io/instance: jetspotter
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: jetspotter
+      app.kubernetes.io/instance: jetspotter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: jetspotter
+        app.kubernetes.io/instance: jetspotter
+    spec:
+      containers:
+        - name: jetspotter
+          ports:
+          - name: metrics
+            containerPort: 7070
+          image: "ghcr.io/vvanouytsel/jetspotter:dev"
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: jetspotter
+            - secretRef:
+                name: jetspotter
+          resources:
+            limits:
+              memory: 512Mi
+            requests:
+              cpu: 50m
+              memory: 128Mi
