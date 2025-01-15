@@ -95,7 +95,7 @@ Type "help" for help.
 postgres=# 
 ```
 
-## Cleaning up
+### Cleaning up
 
 Delete your local `minikube` cluster.
 

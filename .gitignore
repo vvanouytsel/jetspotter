@@ -26,3 +26,5 @@ go.work
 # mkdocs
 site/
 
+# jetspotter binary
+jetspotter
