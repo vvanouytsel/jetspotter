@@ -26,6 +26,11 @@ Test the application.
 ```bash
 $ just test
 ```
+
+## Devcontainers
+
+You can run this code in a [devcontainer](https://containers.dev/overview). That allows you to run the code locally in a container without needing any dependencies, except `docker`.
+
 ## Setting up a local development environment
 
 [Minikube](https://minikube.sigs.k8s.io/docs) can be used for local development.
@@ -51,6 +56,8 @@ myuser : myuser wheel libvirt
 $ groups
 myuser : myuser wheel libvirt
  ```
+
+> Note: All steps below are automated via the 'just create-dev' command.
 
 Start the local Kubernetes environment.
 
@@ -86,9 +93,7 @@ service/postgres created
 You can now connect directly to the database if you have `psql` installed.
 
 ```bash
-# The password is defined in the development/postgres.yaml file and is 'dev' by default.
-$ psql -h postgres.dev.svc.cluster.local -U postgres
-Password for user postgres: 
+$ kubectl exec -ti -n dev $(kubectl get pods  -l app=postgres --no-headers -o custom-columns=":metadata.name" -n dev) -- psql -U postgres
 psql (16.3, server 16.6 (Debian 16.6-1.pgdg120+1))
 Type "help" for help.
 

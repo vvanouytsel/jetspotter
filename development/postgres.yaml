@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:16
+          image: docker.io/library/postgres:16
           ports:
             - name: db
               containerPort: 5432

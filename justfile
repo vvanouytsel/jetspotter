@@ -15,7 +15,7 @@ test:
 	go test ./...
 
 generate-doc:
-	echo "Generating documentation..."
+	echo "✨ Generating documentation..."
 	go doc -u configuration.Config | sed -n '/type Config struct {/,/}/p' > {{config_snippet}}
 	cat {{config_snippet}}
 	go doc -u jetspotter.AircraftOutput | sed -n '/type AircraftOutput struct {/,/}/p' > {{output_snippet}}
@@ -26,16 +26,44 @@ generate-doc:
 	cat helm/jetspotter/README.md
 
 build-container:
-    #!/bin/bash
-    ct=$(command -v podman || command -v docker)
-    [[ "$ct" == "" ]] && echo "Please install Podman or Docker." && exit 1
-    
-    $ct build -t ghcr.io/vvanouytsel/jetspotter:dev .
+	#!/bin/bash
+	set -e
+	ct=$(command -v docker || command -v podman)
+	[[ "$ct" == "" ]] && echo "✨ Please install Podman or Docker." && exit 1
+	$ct build -t ghcr.io/vvanouytsel/jetspotter:dev .
 
 run-container: build-container
-    #!/bin/bash
-    ct=$(command -v podman || command -v docker)
-    [[ "$ct" == "" ]] && echo "Please install Podman or Docker." && exit 1
-    
-    $ct run ghcr.io/vvanouytsel/jetspotter:dev
+	#!/bin/bash
+	set -e
+	ct=$(command -v docker || command -v podman)
+	[[ "$ct" == "" ]] && echo "✨ Please install Podman or Docker." && exit 1
+	$ct run ghcr.io/vvanouytsel/jetspotter:dev
 
+apply-manifests:
+	just check kubectl
+	kubectl apply -f development/
+	kubectl get pods --no-headers -o custom-columns=":metadata.name" -n dev | xargs -I {}  kubectl wait --for=condition=Ready pod/{} -n dev 
+
+load-image: build-container
+	minikube image load ghcr.io/vvanouytsel/jetspotter:dev
+
+create-dev:
+	#!/bin/bash
+	set -e
+	just check minikube
+	minikube start --driver docker
+	just load-image
+	just apply-manifests
+
+	echo "✨ You can connect to your local database via: kubectl exec -ti -n dev $(kubectl get pods  -l app=postgres --no-headers -o custom-columns=":metadata.name" -n dev) -- psql -U postgres"
+
+destroy-dev:
+	minikube delete
+
+check $tool:
+	#!/bin/bash
+	set -e
+	if ! command -v $tool > /dev/null; then
+		echo "✨ Please install $tool."
+		exit 1
+	fi
