@@ -1,6 +1,32 @@
 # Development
 
-## Setting up a local environment
+## Using the justfile
+
+The [just](https://github.com/casey/just) command runner is used to automate simple tasks.
+List all available options:
+
+```bash
+$ just list
+```
+
+Build the application.
+
+```bash
+$ just build
+```
+
+Run the application.
+
+```bash
+$ just run
+```
+
+Test the application.
+
+```bash
+$ just test
+```
+## Setting up a local development environment
 
 [Minikube](https://minikube.sigs.k8s.io/docs) can be used for local development.
 
