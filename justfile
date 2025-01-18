@@ -11,8 +11,11 @@ build:
 run:
 	go run cmd/jetspotter/*
 	
-test:
-	go test ./...
+unit-tests:
+	go test $(go list ./... | grep -v postgres)
+
+integration-tests:
+	go test $(go list ./... | grep postgres)
 
 generate-doc:
 	echo "✨ Generating documentation..."
@@ -39,10 +42,15 @@ run-container: build-container
 	[[ "$ct" == "" ]] && echo "✨ Please install Podman or Docker." && exit 1
 	$ct run ghcr.io/vvanouytsel/jetspotter:dev
 
+forward-database: apply-manifests
+	echo "✨ You can connect to your local database via: kubectl exec -ti -n dev $(kubectl get pods  -l app=postgres --no-headers -o custom-columns=":metadata.name" -n dev) -- psql -U jetspotter"
+	echo "✨ Alternatively you can use 'psql -U jetspotter -h localhost -p 5432'"
+	kubectl port-forward -n dev service/postgres 5432:5432
+
 apply-manifests:
 	just check kubectl
 	kubectl apply -f development/
-	kubectl get pods --no-headers -o custom-columns=":metadata.name" -n dev | xargs -I {}  kubectl wait --for=condition=Ready pod/{} -n dev 
+	kubectl get pods --no-headers -o custom-columns=":metadata.name" -n dev | xargs -I {} kubectl wait --for=condition=Ready pod/{} -n dev 
 
 load-image: build-container
 	minikube image load ghcr.io/vvanouytsel/jetspotter:dev
@@ -54,8 +62,7 @@ create-dev:
 	minikube start --driver docker
 	just load-image
 	just apply-manifests
-
-	echo "✨ You can connect to your local database via: kubectl exec -ti -n dev $(kubectl get pods  -l app=postgres --no-headers -o custom-columns=":metadata.name" -n dev) -- psql -U postgres"
+	just forward-database
 
 destroy-dev:
 	minikube delete
