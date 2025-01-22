@@ -11,7 +11,7 @@ const (
 )
 
 func TestInit(t *testing.T) {
-	err := initialize()
+	err := Initialize()
 	if err != nil {
 		t.Errorf("Error: %v", err)
 	}

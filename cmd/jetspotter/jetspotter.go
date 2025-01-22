@@ -1,6 +1,7 @@
 package main
 
 import (
+	"jetspotter/internal/api"
 	"jetspotter/internal/configuration"
 	"jetspotter/internal/jetspotter"
 	"jetspotter/internal/metrics"
@@ -93,11 +94,21 @@ func HandleMetrics(config configuration.Config) {
 	}()
 }
 
+func HandleAPI(config configuration.Config) {
+	go func() {
+		err := api.HandleAPI(config)
+		if err != nil {
+			exitWithError(err)
+		}
+	}()
+}
+
 func main() {
 	config, err := configuration.GetConfig()
 	if err != nil {
 		exitWithError(err)
 	}
 	HandleMetrics(config)
+	HandleAPI(config)
 	HandleJetspotter(config)
 }

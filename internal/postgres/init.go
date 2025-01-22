@@ -15,7 +15,7 @@ var (
 			type VARCHAR(100),
 			description VARCHAR(255),
 			tail_number VARCHAR(50),
-			icao24 VARCHAR(50),
+			icao VARCHAR(50),
 			image_url VARCHAR(255),
 			military BOOLEAN
 		);`,
@@ -63,7 +63,7 @@ var (
 )
 
 // Initialize creates the tables in the database if they did not exist yet.
-func initialize() error {
+func Initialize() error {
 	host := "localhost"
 	port := 5432
 	user := "jetspotter"
