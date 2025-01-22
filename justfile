@@ -49,7 +49,7 @@ forward-database: apply-manifests
 
 apply-manifests:
 	just check kubectl
-	kubectl apply -f development/
+	kubectl apply -f development/manifests/
 	kubectl get pods --no-headers -o custom-columns=":metadata.name" -n dev | xargs -I {} kubectl wait --for=condition=Ready pod/{} -n dev 
 
 load-image: build-container
@@ -66,6 +66,10 @@ create-dev:
 
 destroy-dev:
 	minikube delete
+
+create-testdata:
+	just check psql
+	development/scripts/create_database_data.sh
 
 check $tool:
 	#!/bin/bash

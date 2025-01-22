@@ -40,7 +40,7 @@ Install the binary.
 ```bash
 $ curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64
 $ sudo install minikube-linux-amd64 /usr/local/bin/minikube && rm minikube-linux-amd64
-$ minikube version  
+$ minikube version
 minikube version: v1.34.0
 commit: 210b148df93a80eb872ecbeb7e35281b3c582c61
 ```
@@ -49,13 +49,13 @@ Add your user to the `libvirt` group, make sure to log out and log back in.
 
 ```bash
 $ sudo usermod -aG libvirt $(whoami)
-$ groups $(whoami)  
+$ groups $(whoami)
 myuser : myuser wheel libvirt
 
 # Log out and log back in, verify that you are part of the libvirt group.
 $ groups
 myuser : myuser wheel libvirt
- ```
+```
 
 > Note: All steps below are automated via the 'just create-dev' command.
 
@@ -80,7 +80,7 @@ $ minikube image load ghcr.io/vvanouytsel/jetspotter:dev
 Apply the manifests.
 
 ```bash
-$ kubectl apply -f development
+$ kubectl apply -f development/manifests/
 namespace/dev created
 secret/jetspotter created
 configmap/jetspotter created
@@ -97,7 +97,7 @@ $ kubectl exec -ti -n dev $(kubectl get pods  -l app=postgres --no-headers -o cu
 psql (16.3, server 16.6 (Debian 16.6-1.pgdg120+1))
 Type "help" for help.
 
-postgres=# 
+postgres=#
 ```
 
 ### Cleaning up
