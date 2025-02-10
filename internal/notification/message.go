@@ -29,6 +29,19 @@ const (
 	Markdown = "Markdown"
 )
 
+// Format the callsign whether to display a hyperlink or not
+func formatCallsign(ac jetspotter.AircraftOutput, notificationType string) string {
+	if notificationType == Markdown {
+		return fmt.Sprintf("[%s](%s)", ac.Callsign, ac.TrackerURL)
+	}
+
+	if notificationType == Slack {
+		return fmt.Sprintf("*Callsign:* <%s|%s>", ac.TrackerURL, ac.Callsign)
+	}
+
+	return ac.Callsign
+}
+
 // Format whether to display a hyperlink for the registration or not
 func formatRegistration(ac jetspotter.AircraftOutput, notificationType string) string {
 	if notificationType == Markdown {

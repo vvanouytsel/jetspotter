@@ -39,7 +39,7 @@ func buildGotifyMessage(aircraft []jetspotter.AircraftOutput, config configurati
 
 	for _, ac := range aircraft {
 		message.Message += "==================\n\n"
-		message.Message += fmt.Sprintf("**Callsign**: [%s](%s)\n\n", ac.Callsign, ac.TrackerURL)
+		message.Message += fmt.Sprintf("**Callsign**: %s\n\n", formatCallsign(ac, Markdown))
 		message.Message += fmt.Sprintf("**Registration**: %s\n\n", formatRegistration(ac, Markdown))
 		message.Message += fmt.Sprintf("**Speed:** %s\n\n", printSpeed(ac))
 		message.Message += fmt.Sprintf("**Altitude**: %s\n\n", printAltitude(ac))

@@ -1,7 +1,6 @@
 package notification
 
 import (
-	"fmt"
 	"jetspotter/internal/configuration"
 	"jetspotter/internal/jetspotter"
 
@@ -78,7 +77,7 @@ func buildDiscordMessage(aircraft []jetspotter.AircraftOutput, config configurat
 			Fields: []*discordgo.MessageEmbedField{
 				{
 					Name:   "Callsign",
-					Value:  fmt.Sprintf("[%s](%s)", ac.Callsign, ac.TrackerURL),
+					Value:  formatCallsign(ac, Markdown),
 					Inline: true,
 				},
 				{
