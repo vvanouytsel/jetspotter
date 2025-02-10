@@ -11,6 +11,7 @@ import (
 	"slices"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"jetspotter/internal/configuration"
@@ -225,12 +226,12 @@ func filterAircraftByAltitude(aircraft []Aircraft, maxAltitudeFeet int) []Aircra
 	var filteredAircraft []Aircraft
 
 	for _, ac := range aircraft {
-        if ac.AltBaro != nil {
+		if ac.AltBaro != nil {
 			altitude := int(ac.AltBaro.(float64))
 			if altitude <= maxAltitudeFeet {
-                filteredAircraft = append(filteredAircraft, ac)
-            }
-        }
+				filteredAircraft = append(filteredAircraft, ac)
+			}
+		}
 	}
 
 	return filteredAircraft
@@ -279,7 +280,7 @@ func getHighestValue(numbers ...int) (highest int) {
 }
 
 func validateFields(aircraft Aircraft) Aircraft {
-	if aircraft.Callsign == "" {
+	if aircraft.Callsign == "" || strings.HasPrefix(aircraft.Callsign, " ") {
 		aircraft.Callsign = "UNKNOWN"
 	}
 

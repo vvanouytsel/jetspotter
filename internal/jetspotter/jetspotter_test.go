@@ -36,15 +36,15 @@ var (
 
 	planesWithAltitude = []Aircraft{
 		{
-			Callsign:  "KHARMA11",
+			Callsign: "KHARMA11",
 			AltBaro:  4000.0,
 		},
 		{
-			Callsign:  "KHARMA12",
+			Callsign: "KHARMA12",
 			AltBaro:  9000.0,
 		},
 		{
-			Callsign:  "KHARMA13",
+			Callsign: "KHARMA13",
 		},
 	}
 
@@ -480,6 +480,34 @@ func TestAlreadySpottedAircraftAreFiltered(t *testing.T) {
 	}
 }
 
+// TestCallsignStartsEmptySpace tests that the callsign is set to "UNKNOWN" when the callsign starts with empty spaces
+func TestCallsignStartsEmptySpace(t *testing.T) {
+	aircraft := Aircraft{
+		Callsign: "    ",
+	}
+
+	expected := "UNKNOWN"
+	actual := validateFields(aircraft).Callsign
+
+	if expected != actual {
+		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+	}
+}
+
+// TestCallsignNoEmptySpace tests that the callsign is not changed if it does not start with empty spaces
+func TestCallsignNoEmptySpace(t *testing.T) {
+	aircraft := Aircraft{
+		Callsign: "x  x  ",
+	}
+
+	expected := "x  x  "
+	actual := validateFields(aircraft).Callsign
+
+	if expected != actual {
+		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+	}
+}
+
 func TestGetHighestValue(t *testing.T) {
 	expected := 14
 	actual := getHighestValue(0, 8, 14, 3, 12)
@@ -496,12 +524,11 @@ func TestConvertKilometersToMiles(t *testing.T) {
 	}
 }
 
-
 func TestFilterAircraftByAltitude(t *testing.T) {
 	expected := []Aircraft{
 		{
-			Callsign:  "KHARMA11",
-			AltBaro: 4000.0,
+			Callsign: "KHARMA11",
+			AltBaro:  4000.0,
 		},
 	}
 
