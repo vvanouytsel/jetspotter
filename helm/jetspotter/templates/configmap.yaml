@@ -17,6 +17,3 @@ data:
   METRICS_PORT: {{ .Values.metrics.port | quote }}
   NTFY_SERVER: {{ .Values.ntfy.server }}
   NTFY_TOPIC: {{ .Values.ntfy.topic }}
-  # Web UI configuration
-  WEB_UI_ENABLED: {{ .Values.webUI.enabled | quote }}
-  WEB_UI_PORT: {{ .Values.webUI.port | quote }}

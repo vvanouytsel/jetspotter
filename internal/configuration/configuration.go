@@ -72,18 +72,6 @@ type Config struct {
 	// METRICS_PORT "7070"
 	MetricsPort string
 
-	// Port where API will be exposed on
-	// API_PORT "8085"
-	APIPort string
-
-	// Enable or disable the web UI
-	// WEB_UI_ENABLED "true"
-	WebUIEnabled bool
-
-	// Port where web UI will be exposed on
-	// WEB_UI_PORT "8080"
-	WebUIPort string
-
 	// Topic to publish message to
 	// NTFY_TOPIC ""
 	NtfyTopic string
@@ -110,9 +98,6 @@ const (
 	NtfyServer               = "NTFY_SERVER"
 	GotifyToken              = "GOTIFY_TOKEN"
 	MetricsPort              = "METRICS_PORT"
-	APIPort                  = "API_PORT"
-	WebUIEnabled             = "WEB_UI_ENABLED"
-	WebUIPort                = "WEB_UI_PORT"
 )
 
 // getEnvVariable looks up a specified environment variable, if not set the specified default is used
@@ -136,17 +121,6 @@ func GetConfig() (config Config, err error) {
 	config.DiscordWebHookURL = getEnvVariable(DiscordWebhookURL, "")
 	config.DiscordColorAltitude = getEnvVariable(DiscordColorAltitude, "true")
 	config.MetricsPort = getEnvVariable(MetricsPort, "7070")
-	config.APIPort = getEnvVariable(APIPort, "8085")
-	config.WebUIPort = getEnvVariable(WebUIPort, "8080")
-
-	// Convert WebUIEnabled string to bool
-	webUIEnabledStr := getEnvVariable(WebUIEnabled, "true")
-	config.WebUIEnabled, err = strconv.ParseBool(webUIEnabledStr)
-	if err != nil {
-		log.Printf("Invalid value for WEB_UI_ENABLED: %s, using default: true", webUIEnabledStr)
-		config.WebUIEnabled = true
-	}
-
 	config.FetchInterval, err = strconv.Atoi(getEnvVariable(FetchInterval, strconv.Itoa(defaultFetchInterval)))
 	if err != nil || config.FetchInterval < 60 {
 		log.Printf("Fetch interval of %ds detected. You might hit rate limits, consider using the default of %ds instead.", config.FetchInterval, defaultFetchInterval)

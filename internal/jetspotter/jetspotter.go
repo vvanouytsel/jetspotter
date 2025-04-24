@@ -178,11 +178,6 @@ func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Con
 		return nil, err
 	}
 
-	// Update the SpottedAircraft for the API to access
-	SpottedAircraft.Lock()
-	SpottedAircraft.Aircraft = allAircraftInRange
-	SpottedAircraft.Unlock()
-
 	if slices.Contains(config.AircraftTypes, "ALL") {
 		return acOutputs, nil
 	}
@@ -340,23 +335,6 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutputs = append(acOutputs, acOutput)
 	}
 	return acOutputs, nil
-}
-
-// ConvertAircraftToOutput converts a slice of Aircraft to a slice of AircraftOutput
-func ConvertAircraftToOutput(aircraft []Aircraft) []AircraftOutput {
-	config, err := configuration.GetConfig()
-	if err != nil {
-		log.Printf("Error getting config for API: %v", err)
-		return []AircraftOutput{}
-	}
-
-	outputs, err := CreateAircraftOutput(aircraft, config)
-	if err != nil {
-		log.Printf("Error creating aircraft output for API: %v", err)
-		return []AircraftOutput{}
-	}
-
-	return outputs
 }
 
 // SortByDistance sorts a slice of aircraft to show the closest aircraft first
