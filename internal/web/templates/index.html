@@ -35,6 +35,7 @@
                 <div class="stat-box">
                     <div class="stat-value" id="totalAircraft">0</div>
                     <div class="stat-label">Total Aircraft</div>
+                    <div class="stat-sublabel">within {{.ScanRadius}} kilometers</div>
                 </div>
                 <div class="stat-box">
                     <div class="stat-value" id="militaryAircraft">0</div>
@@ -53,8 +54,9 @@
             <div class="filter-container">
                 <div class="filter">
                     <label for="filter-type">Filter by Type:</label>
-                    <select id="filter-type">
-                        <option value="ALL">All Types</option>
+                    <select id="filter-description">
+                        <option value="">All Aircraft</option>
+                        <!-- Description options will be populated by JavaScript -->
                     </select>
                 </div>
                 <div class="filter">
@@ -71,11 +73,11 @@
                     </select>
                 </div>
                 <div class="filter">
-                    <label for="sort-order">Direction:</label>
-                    <select id="sort-order">
-                        <option value="asc">Ascending</option>
-                        <option value="desc">Descending</option>
-                    </select>
+                    <button id="sort-direction-toggle" class="sort-direction-toggle" aria-label="Toggle sort direction">
+                        <span class="sort-icon asc-icon">↑</span>
+                        <span class="sort-icon desc-icon">↓</span>
+                        <span class="sort-label">Ascending</span>
+                    </button>
                 </div>
             </div>
 
@@ -114,16 +116,8 @@
             </div>
             <div class="aircraft-info">
                 <div class="info-row">
-                    <span class="info-label">Type:</span>
-                    <span class="aircraft-type"></span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Registration:</span>
-                    <span class="aircraft-registration"></span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">ICAO:</span>
-                    <span class="aircraft-icao"></span>
+                    <span class="info-label">Description:</span>
+                    <span class="aircraft-description"></span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Altitude:</span>
@@ -145,6 +139,14 @@
                         <span class="aircraft-distance"></span>
                         <span class="unit">km</span>
                     </div>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Registration:</span>
+                    <span class="aircraft-registration"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">ICAO:</span>
+                    <span class="aircraft-icao"></span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Heading:</span>

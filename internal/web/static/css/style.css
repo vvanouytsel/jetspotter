@@ -129,6 +129,12 @@ header h1 {
     margin-top: 5px;
 }
 
+.stat-sublabel {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 2px;
+}
+
 /* Filter section */
 .filter-container {
     display: flex;
@@ -236,6 +242,18 @@ header h1 {
     object-fit: cover;
 }
 
+/* Add specific styling for the fallback image */
+.aircraft-image img.fallback-image {
+    object-fit: contain;
+    padding: 10px;
+    max-height: 100%;
+    background-color: #f8f8f8;
+}
+
+[data-theme="dark"] .aircraft-image img.fallback-image {
+    background-color: #2a2a2a;
+}
+
 .aircraft-image::after {
     content: "No image available";
     position: absolute;
@@ -276,7 +294,7 @@ header h1 {
 }
 
 /* Give all info values consistent styling, not just those with units */
-.aircraft-type, .aircraft-registration, .aircraft-icao {
+.aircraft-type, .aircraft-registration, .aircraft-icao, .aircraft-description {
     margin-left: auto; /* Push to the right */
     text-align: right;
 }
@@ -563,4 +581,53 @@ header h1 {
 
 [data-theme="light"] .theme-toggle .moon-icon {
     display: block;
+}
+
+/* Sort direction toggle button */
+.sort-direction-toggle {
+    display: flex;
+    align-items: center;
+    background-color: var(--card-color);
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 7px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: normal;
+    color: var(--text-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sort-direction-toggle:hover {
+    background-color: #f5f5f5;
+}
+
+[data-theme="dark"] .sort-direction-toggle:hover {
+    background-color: #333;
+}
+
+.sort-direction-toggle .sort-icon {
+    margin-right: 6px;
+    font-weight: bold;
+}
+
+.sort-direction-toggle.desc .asc-icon {
+    display: none;
+}
+
+.sort-direction-toggle.asc .desc-icon {
+    display: none;
+}
+
+[data-theme="dark"] .sort-direction-toggle {
+    background-color: #2a2a2a;
+    border-color: #444;
+}
+
+/* Responsive styles for the sort direction toggle */
+@media (max-width: 768px) {
+    .sort-direction-toggle {
+        width: 100%;
+        justify-content: center;
+    }
 }

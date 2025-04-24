@@ -1,8 +1,8 @@
 // Global variables
 let allAircraft = [];
-let aircraftTypes = new Set(['ALL']);
+let aircraftDescriptions = new Set();
 let currentFilters = {
-    type: 'ALL',
+    description: '',
     military: false
 };
 let currentSort = 'distance';
@@ -13,8 +13,8 @@ let countdownInterval = null;
 // DOM elements
 document.addEventListener('DOMContentLoaded', () => {
     // Set up event listeners
-    document.getElementById('filter-type').addEventListener('change', (e) => {
-        currentFilters.type = e.target.value;
+    document.getElementById('filter-description').addEventListener('change', (e) => {
+        currentFilters.description = e.target.value;
         renderAircraftGrid();
     });
 
@@ -28,8 +28,23 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAircraftGrid();
     });
     
-    document.getElementById('sort-order').addEventListener('change', (e) => {
-        currentSortOrder = e.target.value;
+    // Initialize and set up the sort direction toggle
+    const sortDirectionToggle = document.getElementById('sort-direction-toggle');
+    sortDirectionToggle.classList.add(currentSortOrder);
+    
+    sortDirectionToggle.addEventListener('click', () => {
+        // Toggle between asc and desc
+        currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+        
+        // Update the button appearance
+        sortDirectionToggle.classList.remove('asc', 'desc');
+        sortDirectionToggle.classList.add(currentSortOrder);
+        
+        // Update the label text
+        sortDirectionToggle.querySelector('.sort-label').textContent = 
+            currentSortOrder === 'asc' ? 'Ascending' : 'Descending';
+        
+        // Refresh the grid with the new sort order
         renderAircraftGrid();
     });
 
@@ -90,8 +105,8 @@ async function fetchData() {
         // Update last update timestamp
         document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
         
-        // Update aircraft type filter options
-        updateAircraftTypes();
+        // Update aircraft description dropdown
+        updateAircraftDescriptions();
         
         // Render the grid with the new data
         renderAircraftGrid();
@@ -106,39 +121,41 @@ async function fetchData() {
     }
 }
 
-// Update available aircraft types for filtering
-function updateAircraftTypes() {
-    // Extract all unique aircraft types
+// Update available aircraft descriptions for filtering
+function updateAircraftDescriptions() {
+    // Clear previous set
+    aircraftDescriptions = new Set();
+    
+    // Extract all unique aircraft descriptions
     allAircraft.forEach(aircraft => {
-        if (aircraft.Type) {
-            aircraftTypes.add(aircraft.Type);
+        const description = aircraft.Description || aircraft.Type || '';
+        if (description) {
+            aircraftDescriptions.add(description);
         }
     });
     
     // Update the filter dropdown
-    const typeFilter = document.getElementById('filter-type');
+    const descriptionFilter = document.getElementById('filter-description');
     
     // Save current selection
-    const currentSelection = typeFilter.value;
+    const currentSelection = descriptionFilter.value;
     
-    // Clear existing options (except ALL)
-    while (typeFilter.options.length > 1) {
-        typeFilter.remove(1);
+    // Clear existing options (except the "All Aircraft" option)
+    while (descriptionFilter.options.length > 1) {
+        descriptionFilter.remove(1);
     }
     
-    // Add all aircraft types as options
-    Array.from(aircraftTypes).sort().forEach(type => {
-        if (type === 'ALL') return; // Skip the ALL option as it's already there
-        
+    // Add all aircraft descriptions as options
+    Array.from(aircraftDescriptions).sort().forEach(description => {
         const option = document.createElement('option');
-        option.value = type;
-        option.textContent = type;
-        typeFilter.appendChild(option);
+        option.value = description;
+        option.textContent = description;
+        descriptionFilter.appendChild(option);
     });
     
     // Restore selection if possible
-    if (Array.from(typeFilter.options).some(opt => opt.value === currentSelection)) {
-        typeFilter.value = currentSelection;
+    if (Array.from(descriptionFilter.options).some(opt => opt.value === currentSelection)) {
+        descriptionFilter.value = currentSelection;
     }
 }
 
@@ -207,8 +224,12 @@ function getFilteredAndSortedAircraft() {
     // Apply filters
     let filtered = allAircraft;
     
-    if (currentFilters.type !== 'ALL') {
-        filtered = filtered.filter(aircraft => aircraft.Type === currentFilters.type);
+    // Filter by description
+    if (currentFilters.description && currentFilters.description !== '') {
+        filtered = filtered.filter(aircraft => {
+            const description = aircraft.Description || aircraft.Type || '';
+            return description === currentFilters.description;
+        });
     }
     
     if (currentFilters.military) {
@@ -221,9 +242,11 @@ function getFilteredAndSortedAircraft() {
             case 'distance':
                 return (a.Distance || 0) - (b.Distance || 0);
             case 'altitude':
-                return (b.Altitude || 0) - (a.Altitude || 0);
+                // Fix sorting so ascending means lower altitudes first
+                return (a.Altitude || 0) - (b.Altitude || 0);
             case 'speed':
-                return (b.Speed || 0) - (a.Speed || 0);
+                // Fix sorting so ascending means lower speeds first
+                return (a.Speed || 0) - (b.Speed || 0);
             case 'type':
                 return (a.Type || '').localeCompare(b.Type || '');
             default:
@@ -283,13 +306,20 @@ function createAircraftCard(aircraft) {
     aircraftHeader.classList.add(getAltitudeHeaderClass(altitude));
     
     // Set the image - use ImageURL as fallback if thumbnail is not available
+    // If no image is available, use the aircraft_not_found.png
     const imgElement = card.querySelector('.aircraft-image img');
     if (aircraft.ImageThumbnailURL) {
         imgElement.src = aircraft.ImageThumbnailURL;
         imgElement.alt = `${aircraft.Type || 'Aircraft'} - ${aircraft.Registration || ''}`;
+        imgElement.classList.remove('fallback-image');
     } else if (aircraft.ImageURL) {
         imgElement.src = aircraft.ImageURL;
         imgElement.alt = `${aircraft.Type || 'Aircraft'} - ${aircraft.Registration || ''}`;
+        imgElement.classList.remove('fallback-image');
+    } else {
+        imgElement.src = '/static/images/aircraft_not_found.png';
+        imgElement.alt = 'No image available';
+        imgElement.classList.add('fallback-image');
     }
     
     // Add notification icons
@@ -297,7 +327,7 @@ function createAircraftCard(aircraft) {
     addNotificationIcons(notificationsContainer, aircraft);
     
     // Set basic info
-    card.querySelector('.aircraft-type').textContent = aircraft.Type || 'Unknown';
+    card.querySelector('.aircraft-description').textContent = aircraft.Description || aircraft.Type || 'Unknown';
     card.querySelector('.aircraft-registration').textContent = aircraft.Registration || 'Unknown';
     card.querySelector('.aircraft-icao').textContent = aircraft.ICAO || 'Unknown';
     

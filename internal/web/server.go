@@ -79,9 +79,24 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get scan radius from the API endpoint
+	resp, err := http.Get(s.config.APIEndpoint + "/api/config")
+	var scanRadius int = 30 // Default value
+
+	if err == nil {
+		defer resp.Body.Close()
+		var configData map[string]interface{}
+		if decodeErr := json.NewDecoder(resp.Body).Decode(&configData); decodeErr == nil {
+			if radius, ok := configData["MaxRangeKilometers"].(float64); ok {
+				scanRadius = int(radius)
+			}
+		}
+	}
+
 	data := map[string]interface{}{
 		"Title":         "Jetspotter",
 		"RefreshPeriod": int(s.config.RefreshPeriod.Seconds()),
+		"ScanRadius":    scanRadius,
 	}
 
 	w.Header().Set("Content-Type", "text/html")

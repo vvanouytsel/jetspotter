@@ -96,7 +96,7 @@ func HandleMetrics(config configuration.Config) {
 }
 
 func HandleAPI(config configuration.Config) {
-	jetspotter.SetupAPI(config.APIPort)
+	jetspotter.SetupAPI(config.APIPort, config)
 }
 
 func HandleWebUI(config configuration.Config) {
