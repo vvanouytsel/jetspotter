@@ -11,7 +11,7 @@ Jetspotter is a simple program that queries the ADS-B API. It is used to send no
 
 ## [Documentation](https://vvanouytsel.github.io/jetspotter/)
 
-Please have a look at the [Documentation](https://vvanouytsel.github.io/jetspotter/) for installation and configuration steps.
+Please have a look at the [documentation](https://vvanouytsel.github.io/jetspotter/) for installation and configuration steps.
 
 ## Screenshots
 
