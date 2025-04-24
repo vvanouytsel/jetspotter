@@ -27,4 +27,4 @@ go.work
 site/
 
 # jetspotter binary
-jetspotter
+^jetspotter$

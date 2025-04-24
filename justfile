@@ -39,6 +39,14 @@ run-container: build-container
 	[[ "$ct" == "" ]] && echo "✨ Please install Podman or Docker." && exit 1
 	$ct run ghcr.io/vvanouytsel/jetspotter:dev
 
+run-web-container: build-container
+	#!/bin/bash
+	set -e
+	ct=$(command -v docker || command -v podman)
+	[[ "$ct" == "" ]] && echo "✨ Please install Podman or Docker." && exit 1
+	echo "✨ Running jetspotter container with web UI on http://localhost:8080"
+	$ct run -p 8080:8080 -p 8085:8085 -e WEB_UI_ENABLED=true ghcr.io/vvanouytsel/jetspotter:dev
+
 apply-manifests:
 	just check kubectl
 	kubectl apply -f development/
