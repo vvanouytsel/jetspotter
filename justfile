@@ -9,7 +9,7 @@ build:
 	go build -o jetspotter -ldflags "-linkmode external -extldflags -static" cmd/jetspotter/jetspotter.go
 
 run:
-	go run cmd/jetspotter/*
+	MAX_RANGE_KILOMETERS=70 go run cmd/jetspotter/*
 	
 test:
 	go test ./...
@@ -38,6 +38,14 @@ run-container: build-container
 	ct=$(command -v docker || command -v podman)
 	[[ "$ct" == "" ]] && echo "✨ Please install Podman or Docker." && exit 1
 	$ct run ghcr.io/vvanouytsel/jetspotter:dev
+
+run-web-container: build-container
+	#!/bin/bash
+	set -e
+	ct=$(command -v docker || command -v podman)
+	[[ "$ct" == "" ]] && echo "✨ Please install Podman or Docker." && exit 1
+	echo "✨ Running jetspotter container with web UI on http://localhost:8080"
+	$ct run -p 8080:8080 -p 8085:8085 -e WEB_UI_ENABLED=true ghcr.io/vvanouytsel/jetspotter:dev
 
 apply-manifests:
 	just check kubectl

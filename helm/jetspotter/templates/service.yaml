@@ -16,5 +16,10 @@ spec:
     - port: {{ .Values.metrics.port }}
       targetPort: metrics
       name: metrics
+    {{- if .Values.webUI.enabled }}
+    - port: {{ .Values.webUI.port }}
+      targetPort: webui
+      name: webui
+    {{- end }}
   selector:
     {{- include "jetspotter.selectorLabels" . | nindent 4 }}

@@ -9,6 +9,26 @@
 
 ## [Documentation](https://vvanouytsel.github.io/jetspotter/)
 
+## Screenshots
+
+### Web UI
+![Jetspotter UI](docs/images/jetspotter-ui-1.png)
+
+### Discord Notifications
+![Discord Notifications](docs/images/jetspotter-discord-1.png)
+
+### Slack Notifications
+![Slack Notifications](docs/images/jetspotter-slack-1.png)
+
+### Ntfy Notifications
+![Ntfy Notifications](docs/images/jetspotter-ntfy-1.png)
+
+### Gotify Notifications
+![Gotify Notifications](docs/images/jetspotter-gotify-1.png)
+
+### Terminal Output
+![Terminal Output](docs/images/jetspotter-terminal-1.png)
+
 ## Stargazers
 
 [![Stargazers](https://starchart.cc/vvanouytsel/jetspotter.svg)](https://starchart.cc/vvanouytsel/jetspotter)

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script>
+        // Auto-refresh data every {{.RefreshPeriod}} seconds
+        const REFRESH_PERIOD = {{.RefreshPeriod}};
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-section">
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 11.807A9.002 9.002 0 0 1 10.049 2a9.942 9.942 0 0 0-5.12 2.735c-3.905 3.905-3.905 10.237 0 14.142 3.906 3.906 10.237 3.905 14.143 0a9.943 9.943 0 0 0 2.735-5.119A9.003 9.003 0 0 1 12 11.807z"></path>
+                    </svg>
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M6.995 12c0 2.761 2.246 5.007 5.007 5.007s5.007-2.246 5.007-5.007-2.246-5.007-5.007-5.007S6.995 9.239 6.995 12zM11 19h2v3h-2zm0-17h2v3h-2zm-9 9h3v2H2zm17 0h3v2h-3zM5.637 19.778l-1.414-1.414 2.121-2.121 1.414 1.414zM16.242 6.344l2.122-2.122 1.414 1.414-2.122 2.122zM6.344 7.759 4.223 5.637l1.415-1.414 2.12 2.122zm13.434 10.605-1.414 1.414-2.122-2.122 1.414-1.414z"></path>
+                    </svg>
+                </button>
+                <h1>Jetspotter</h1>
+            </div>
+            <div class="status-info">
+                <div class="last-update">Last update: <span id="lastUpdate">-</span></div>
+                <div class="next-update">Next update in: <span id="nextUpdateCountdown">-</span></div>
+            </div>
+        </header>
+
+        <div class="dashboard">
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalAircraft">0</div>
+                    <div class="stat-label">Total Aircraft</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="militaryAircraft">0</div>
+                    <div class="stat-label">Military Aircraft</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="closestAircraft">-</div>
+                    <div class="stat-label">Closest Aircraft</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="highestAircraft">-</div>
+                    <div class="stat-label">Highest Aircraft</div>
+                </div>
+            </div>
+
+            <div class="filter-container">
+                <div class="filter">
+                    <label for="filter-type">Filter by Type:</label>
+                    <select id="filter-type">
+                        <option value="ALL">All Types</option>
+                    </select>
+                </div>
+                <div class="filter">
+                    <label for="filter-military">Military Only:</label>
+                    <input type="checkbox" id="filter-military">
+                </div>
+                <div class="filter">
+                    <label for="sort-by">Sort By:</label>
+                    <select id="sort-by">
+                        <option value="distance">Distance</option>
+                        <option value="altitude">Altitude</option>
+                        <option value="speed">Speed</option>
+                        <option value="type">Aircraft Type</option>
+                    </select>
+                </div>
+                <div class="filter">
+                    <label for="sort-order">Direction:</label>
+                    <select id="sort-order">
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="aircraft-grid" id="aircraftGrid">
+                <!-- Aircraft cards will be inserted here by JavaScript -->
+                <div class="no-aircraft" id="noAircraftMessage">No aircraft currently spotted</div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <a href="https://github.com/vvanouytsel/jetspotter/" target="_blank" class="github-link">
+                    <svg class="github-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Aircraft card template -->
+    <template id="aircraft-card-template">
+        <div class="aircraft-card">
+            <div class="aircraft-header">
+                <div class="aircraft-callsign"></div>
+                <div class="aircraft-military-badge">MILITARY</div>
+            </div>
+            <div class="aircraft-image">
+                <img src="" alt="Aircraft Image">
+            </div>
+            <div class="aircraft-notifications">
+                <!-- Notification icons will be added here -->
+            </div>
+            <div class="aircraft-info">
+                <div class="info-row">
+                    <span class="info-label">Type:</span>
+                    <span class="aircraft-type"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Registration:</span>
+                    <span class="aircraft-registration"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">ICAO:</span>
+                    <span class="aircraft-icao"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Altitude:</span>
+                    <div class="info-value">
+                        <span class="aircraft-altitude"></span>
+                        <span class="unit">ft</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Speed:</span>
+                    <div class="info-value">
+                        <span class="aircraft-speed"></span>
+                        <span class="unit">knots</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Distance:</span>
+                    <div class="info-value">
+                        <span class="aircraft-distance"></span>
+                        <span class="unit">km</span>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Heading:</span>
+                    <div class="info-value">
+                        <span class="aircraft-heading"></span>
+                        <span class="unit">°</span>
+                    </div>
+                </div>
+            </div>
+            <div class="aircraft-links">
+                <a href="#" class="tracker-link" target="_blank">Track Aircraft</a>
+                <a href="#" class="image-link" target="_blank">More Images</a>
+            </div>
+        </div>
+    </template>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
