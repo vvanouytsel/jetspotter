@@ -22,6 +22,9 @@ import (
 	"github.com/jftuga/geodist"
 )
 
+// Make sure api.go is included in test compilation
+var _ = SetupAPI
+
 // Vars
 var (
 	baseURL = "https://api.adsb.one/v2"
