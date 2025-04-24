@@ -24,6 +24,19 @@
     --altitude-grey: #3a3a3a;
 }
 
+/* Dark mode colors */
+[data-theme="dark"] {
+    --primary-color: #4fa8eb;
+    --secondary-color: #61dafb;
+    --accent-color: #ff6b6b;
+    --background-color: #121212;
+    --card-color: #1e1e1e;
+    --text-color: #e0e0e0;
+    --military-color: #ff5252;
+    --button-color: #4a4a4a;
+    --altitude-unknown: #888888;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -52,8 +65,22 @@ header {
     border-bottom: 1px solid #ddd;
 }
 
+.title-section {
+    display: flex;
+    align-items: center;
+}
+
+.title-section .theme-toggle {
+    margin-right: 10px;
+    margin-left: 0;
+}
+
 header h1 {
     color: var(--secondary-color);
+}
+
+[data-theme="dark"] header h1 {
+    color: #e0e0e0; /* Changed back to a professional white-ish color */
 }
 
 .status-info {
@@ -431,4 +458,109 @@ header h1 {
     .aircraft-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Dark mode specific adjustments */
+[data-theme="dark"] .aircraft-header {
+    background-color: var(--card-color);
+    border-bottom: 1px solid #333;
+}
+
+[data-theme="dark"] .aircraft-notifications {
+    background-color: #2a2a2a;
+    border-bottom: 1px solid #333;
+}
+
+[data-theme="dark"] .info-label {
+    color: #aaa;
+}
+
+[data-theme="dark"] .unit,
+[data-theme="dark"] .stat-label,
+[data-theme="dark"] .last-update,
+[data-theme="dark"] .next-update {
+    color: #999;
+}
+
+[data-theme="dark"] .stat-value {
+    color: #ffffff;
+}
+
+[data-theme="dark"] header {
+    border-bottom: 1px solid #333;
+}
+
+[data-theme="dark"] .aircraft-links {
+    border-top: 1px solid #333;
+}
+
+[data-theme="dark"] .footer {
+    border-top: 1px solid #333;
+}
+
+[data-theme="dark"] .filter select,
+[data-theme="dark"] .filter input[type="checkbox"] {
+    background-color: #2a2a2a;
+    color: var(--text-color);
+    border: 1px solid #444;
+}
+
+/* Theme toggle in footer */
+.theme-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.theme-label {
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .github-icon,
+[data-theme="dark"] .github-link {
+    color: #e0e0e0;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    margin-left: 10px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.theme-toggle:hover {
+    background-color: rgba(128, 128, 128, 0.2);
+}
+
+.theme-toggle svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+[data-theme="dark"] .theme-toggle svg {
+    fill: #ff9800; /* Changed from white to orange for the sun icon */
+}
+
+[data-theme="dark"] .theme-toggle .sun-icon {
+    display: block;
+}
+
+[data-theme="dark"] .theme-toggle .moon-icon {
+    display: none;
+}
+
+[data-theme="light"] .theme-toggle .sun-icon {
+    display: none;
+}
+
+[data-theme="light"] .theme-toggle .moon-icon {
+    display: block;
 }

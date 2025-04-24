@@ -33,6 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAircraftGrid();
     });
 
+    // Initialize dark mode
+    initializeTheme();
+    
+    // Theme toggle button event listener
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
     // Start fetching data
     fetchData();
     setInterval(fetchData, REFRESH_PERIOD * 1000);
@@ -40,6 +46,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize countdown timer
     startCountdownTimer();
 });
+
+// Initialize theme from localStorage or system preference
+function initializeTheme() {
+    // Check if theme is stored in localStorage
+    const storedTheme = localStorage.getItem('theme');
+    
+    if (storedTheme) {
+        // Apply stored theme
+        document.documentElement.setAttribute('data-theme', storedTheme);
+    } else {
+        // Check for system preference
+        const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const initialTheme = prefersDarkMode ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', initialTheme);
+        localStorage.setItem('theme', initialTheme);
+    }
+}
+
+// Toggle between light and dark themes
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    // Set the theme attribute on the html element
+    document.documentElement.setAttribute('data-theme', newTheme);
+    
+    // Save theme preference to localStorage
+    localStorage.setItem('theme', newTheme);
+}
 
 // Fetch aircraft data from the API
 async function fetchData() {

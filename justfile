@@ -9,7 +9,7 @@ build:
 	go build -o jetspotter -ldflags "-linkmode external -extldflags -static" cmd/jetspotter/jetspotter.go
 
 run:
-	go run cmd/jetspotter/*
+	MAX_RANGE_KILOMETERS=70 go run cmd/jetspotter/*
 	
 test:
 	go test ./...
