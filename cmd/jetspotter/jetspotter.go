@@ -5,7 +5,9 @@ import (
 	"jetspotter/internal/jetspotter"
 	"jetspotter/internal/metrics"
 	"jetspotter/internal/notification"
+	"jetspotter/internal/web"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -93,11 +95,51 @@ func HandleMetrics(config configuration.Config) {
 	}()
 }
 
+func HandleAPI(config configuration.Config) {
+	jetspotter.SetupAPI(config.APIPort)
+}
+
+func HandleWebUI(config configuration.Config) {
+	if !config.WebUIEnabled {
+		return
+	}
+
+	go func() {
+		// Convert port string to int
+		port, err := strconv.Atoi(config.WebUIPort)
+		if err != nil {
+			log.Printf("Invalid web UI port: %s, using default: 8080", config.WebUIPort)
+			port = 8080
+		}
+
+		// Set up API endpoint - we'll use localhost with the API port
+		apiEndpoint := "http://localhost:" + config.APIPort
+
+		// Configure and start the web server
+		webConfig := web.Config{
+			ListenPort:    port,
+			APIEndpoint:   apiEndpoint,
+			RefreshPeriod: time.Duration(config.FetchInterval) * time.Second,
+		}
+
+		webServer := web.NewServer(webConfig)
+		if err := webServer.Start(); err != nil {
+			log.Printf("Web UI server error: %v", err)
+		}
+	}()
+}
+
 func main() {
 	config, err := configuration.GetConfig()
 	if err != nil {
 		exitWithError(err)
 	}
+
+	// Start services
 	HandleMetrics(config)
+	HandleAPI(config)
+	HandleWebUI(config)
+
+	// Start the main aircraft tracking loop
 	HandleJetspotter(config)
 }

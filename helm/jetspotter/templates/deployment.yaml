@@ -30,6 +30,10 @@ spec:
           ports:
           - name: metrics
             containerPort: {{ .Values.metrics.port }}
+          {{- if .Values.webUI.enabled }}
+          - name: webui
+            containerPort: {{ .Values.webUI.port }}
+          {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
@@ -39,4 +43,3 @@ spec:
                 name: {{ include "jetspotter.fullname" . }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          
