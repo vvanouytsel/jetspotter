@@ -87,7 +87,10 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		defer resp.Body.Close()
 		var configData map[string]interface{}
 		if decodeErr := json.NewDecoder(resp.Body).Decode(&configData); decodeErr == nil {
-			if radius, ok := configData["MaxRangeKilometers"].(float64); ok {
+			// Prefer MaxScanRangeKilometers if available, otherwise fall back to MaxRangeKilometers
+			if scanRange, ok := configData["MaxScanRangeKilometers"].(float64); ok {
+				scanRadius = int(scanRange)
+			} else if radius, ok := configData["MaxRangeKilometers"].(float64); ok {
 				scanRadius = int(radius)
 			}
 		}

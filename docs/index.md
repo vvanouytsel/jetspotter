@@ -123,6 +123,17 @@ docker run -e LOCATION_LATITUDE=51.1697898378895 -e LOCATION_LONGITUDE=5.4701143
 LOCATION_LATITUDE=51.1697898378895 LOCATION_LONGITUDE=5.470114381971933 AIRCRAFT_TYPES=MILITARY MAX_RANGE_KILOMETERS=20 ./jetspotter
 ```
 
+Scan all aircraft within a radius of 50 kilometers of Kleine-Brogel airbase, but only send notifications for military aircraft within a radius of 30 kilometers. (Aircraft between 30 and 50 kilometers still show up in the UI and the metrics)
+
+```bash
+# Docker
+docker run -e LOCATION_LATITUDE=51.1697898378895 -e LOCATION_LONGITUDE=5.470114381971933 -e AIRCRAFT_TYPES=MILITARY -e MAX_SCAN_RANGE_KILOMETERS=50 -e MAX_RANGE_KILOMETERS=30 ghcr.io/vvanouytsel/jetspotter:latest
+
+
+# Binary
+LOCATION_LATITUDE=51.1697898378895 LOCATION_LONGITUDE=5.470114381971933 AIRCRAFT_TYPES=MILITARY MAX_SCAN_RANGE_KILOMETERS=50 MAX_RANGE_KILOMETERS=30 ./jetspotter
+```
+
 Show all military and AIRBUS A320 aircraft within 30 kilometers of Kleine-Brogel airbase.
 
 ```bash
