@@ -26,8 +26,8 @@
 
 /* Dark mode colors */
 [data-theme="dark"] {
-    --primary-color: #4fa8eb;
-    --secondary-color: #61dafb;
+    --primary-color: #e0e0e0; /* Changed from light blue to white-ish color */
+    --secondary-color: #cccccc; /* Changed from light blue to grey-ish color */
     --accent-color: #ff6b6b;
     --background-color: #121212;
     --card-color: #1e1e1e;
@@ -56,13 +56,24 @@ body {
     padding: 20px;
 }
 
+.header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
 header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 30px;
     padding-bottom: 15px;
     border-bottom: 1px solid #ddd;
+}
+
+[data-theme="dark"] header {
+    border-bottom-color: #333;
 }
 
 .title-section {
@@ -83,10 +94,18 @@ header h1 {
     color: #e0e0e0; /* Changed back to a professional white-ish color */
 }
 
+/* Adjust status-info for new layout */
 .status-info {
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
     text-align: right;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+[data-theme="dark"] .status-info {
+    color: #999;
 }
 
 .last-update, .next-update {
@@ -488,6 +507,219 @@ header h1 {
     fill: currentColor;
 }
 
+/* Add the navigation links for switching between dashboard and config page */
+.nav-links {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.nav-link:hover {
+    background-color: rgba(128, 128, 128, 0.1);
+}
+
+.nav-link.active {
+    color: var(--secondary-color);
+    font-weight: bold;
+}
+
+/* Configuration page styles */
+.config-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.config-section {
+    background-color: var(--card-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.config-section h2 {
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+[data-theme="dark"] .config-section h2 {
+    color: #e0e0e0; /* Changed from primary-color to white-ish color for consistency */
+    border-bottom-color: #444;
+}
+
+.config-item {
+    margin-bottom: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+}
+
+.config-label {
+    font-weight: bold;
+    color: #666;
+    width: 180px;
+    flex-shrink: 0;
+}
+
+[data-theme="dark"] .config-label {
+    color: #aaa;
+}
+
+.config-value {
+    font-size: 1.1rem;
+}
+
+.config-description {
+    margin-top: 5px;
+    color: #888;
+    font-size: 0.9rem;
+    flex-basis: 100%;
+    margin-left: 180px;
+}
+
+[data-theme="dark"] .config-description {
+    color: #777;
+}
+
+.error-message {
+    color: var(--accent-color);
+    text-align: center;
+    padding: 20px;
+    font-weight: bold;
+}
+
+/* Notification cards */
+.notification-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.notification-card {
+    background-color: var(--card-color);
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .notification-card {
+    border-color: #444;
+}
+
+.notification-card-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: #f8f8f8;
+}
+
+[data-theme="dark"] .notification-card-header {
+    background-color: #2a2a2a;
+}
+
+.notification-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+#terminal-card .notification-icon {
+    background-color: #333333;
+}
+
+#discord-card .notification-icon {
+    background-color: #5865F2;
+}
+
+#slack-card .notification-icon {
+    background-color: #4A154B;
+}
+
+#gotify-card .notification-icon {
+    background-color: #3498db;
+}
+
+#ntfy-card .notification-icon {
+    background-color: #FF8300;
+}
+
+.notification-name {
+    font-weight: bold;
+}
+
+.notification-status {
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+}
+
+[data-theme="dark"] .notification-status {
+    border-bottom-color: #444;
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background-color: #ccc;
+}
+
+.status-indicator.active {
+    background-color: #4caf50;
+}
+
+.status-text {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+[data-theme="dark"] .status-text {
+    color: #aaa;
+}
+
+.notification-config {
+    padding: 15px;
+}
+
+/* Responsive styles for the configuration page */
+@media (max-width: 768px) {
+    .config-label {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+    
+    .config-description {
+        margin-left: 0;
+    }
+    
+    .notification-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+    }
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .stats {
@@ -664,5 +896,102 @@ header h1 {
     .sort-direction-toggle {
         width: 100%;
         justify-content: center;
+    }
+}
+
+/* Map container styles */
+.location-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.location-info {
+    flex: 1;
+    min-width: 250px;
+}
+
+.map-container {
+    flex: 2;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#location-map {
+    height: 300px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background-color: #f5f5f5; /* Light background to make it visible when empty */
+    position: relative; /* For absolute positioning of error messages */
+    min-height: 300px; /* Ensure a minimum height */
+    width: 100%; /* Ensure full width */
+}
+
+[data-theme="dark"] #location-map {
+    background-color: #2a2a2a; /* Dark background for dark mode */
+}
+
+/* Map legend styles */
+#map-legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 8px;
+    background-color: var(--card-color);
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+}
+
+.circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.notification-range {
+    background-color: rgba(231, 76, 60, 0.7); /* Red with opacity */
+    border: 1px solid #e74c3c;
+}
+
+.scan-range {
+    background-color: rgba(52, 152, 219, 0.4); /* Blue with opacity */
+    border: 1px solid #3498db;
+}
+
+/* Dark mode adjustments for the map */
+[data-theme="dark"] #map-legend {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+}
+
+/* Responsive styles for the header */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .header-right {
+        margin-top: 15px;
+        align-items: flex-start;
+    }
+    
+    .nav-links {
+        margin-bottom: 10px;
+    }
+    
+    .status-info {
+        align-items: flex-start;
+        text-align: left;
     }
 }
