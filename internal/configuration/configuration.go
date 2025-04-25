@@ -24,6 +24,12 @@ type Config struct {
 	// MAX_RANGE_KILOMETERS 30
 	MaxRangeKilometers int
 
+	// Maximum range in kilometers from the location that you want to scan for aircraft.
+	// This is used to determine the area to query from the ADS-B API.
+	// If not set, MAX_RANGE_KILOMETERS will be used.
+	// MAX_SCAN_RANGE_KILOMETERS 30
+	MaxScanRangeKilometers int
+
 	// Maximum altitude in feet that you want to spot aircraft at.
 	// Set to 0 to disable the filter.
 	// MAX_ALTITUDE_FEET 0
@@ -101,6 +107,7 @@ const (
 	LocationLatitude         = "LOCATION_LATITUDE"
 	LocationLongitude        = "LOCATION_LONGITUDE"
 	MaxRangeKilometers       = "MAX_RANGE_KILOMETERS"
+	MaxScanRangeKilometers   = "MAX_SCAN_RANGE_KILOMETERS"
 	MaxAltitudeFeet          = "MAX_ALTITUDE_FEET"
 	MaxAircrfaftSlackMessage = "MAX_AIRCRAFT_SLACK_MESSAGE"
 	AircraftTypes            = "AIRCRAFT_TYPES"
@@ -165,6 +172,17 @@ func GetConfig() (config Config, err error) {
 	config.MaxRangeKilometers, err = strconv.Atoi(getEnvVariable(MaxRangeKilometers, "30"))
 	if err != nil {
 		return Config{}, err
+	}
+
+	// Get MAX_SCAN_RANGE_KILOMETERS - If not set, use MAX_RANGE_KILOMETERS for backward compatibility
+	maxScanRangeStr := getEnvVariable(MaxScanRangeKilometers, "")
+	if maxScanRangeStr == "" {
+		config.MaxScanRangeKilometers = config.MaxRangeKilometers
+	} else {
+		config.MaxScanRangeKilometers, err = strconv.Atoi(maxScanRangeStr)
+		if err != nil {
+			return Config{}, err
+		}
 	}
 
 	config.MaxAltitudeFeet, err = strconv.Atoi(getEnvVariable(MaxAltitudeFeet, "0"))

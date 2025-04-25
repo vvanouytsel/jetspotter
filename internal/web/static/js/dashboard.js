@@ -9,6 +9,7 @@ let currentSort = 'distance';
 let currentSortOrder = 'asc';
 let lastUpdateTime = null;
 let countdownInterval = null;
+let isLoading = true; // New variable to track loading state
 
 // DOM elements
 document.addEventListener('DOMContentLoaded', () => {
@@ -94,6 +95,10 @@ function toggleTheme() {
 // Fetch aircraft data from the API
 async function fetchData() {
     try {
+        // Set loading state to true before fetching
+        isLoading = true;
+        renderAircraftGrid(); // Show loading indicator
+        
         const response = await fetch('/api/aircraft');
         
         if (!response.ok) {
@@ -108,6 +113,9 @@ async function fetchData() {
         // Update aircraft description dropdown
         updateAircraftDescriptions();
         
+        // Set loading to false now that we have data
+        isLoading = false;
+        
         // Render the grid with the new data
         renderAircraftGrid();
         
@@ -118,6 +126,9 @@ async function fetchData() {
         startCountdownTimer();
     } catch (error) {
         console.error('Error fetching aircraft data:', error);
+        // Even on error, stop showing loading
+        isLoading = false;
+        renderAircraftGrid();
     }
 }
 
@@ -274,11 +285,18 @@ function renderAircraftGrid() {
         }
     });
     
-    // Show/hide the no-aircraft message
-    if (filteredAircraft.length === 0) {
-        noAircraftMessage.style.display = 'block';
+    // Show/hide the no-aircraft message or loading spinner
+    if (isLoading) {
+        noAircraftMessage.style.display = 'flex';
+        noAircraftMessage.innerHTML = '<div class="loading-spinner"></div><div class="loading-text">Loading aircraft data...</div>';
+        noAircraftMessage.classList.add('loading');
+    } else if (filteredAircraft.length === 0) {
+        noAircraftMessage.style.display = 'flex';
+        noAircraftMessage.innerHTML = 'No aircraft currently spotted';
+        noAircraftMessage.classList.remove('loading');
     } else {
         noAircraftMessage.style.display = 'none';
+        noAircraftMessage.classList.remove('loading');
         
         // Render each aircraft card
         filteredAircraft.forEach(aircraft => {

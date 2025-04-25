@@ -8,7 +8,6 @@ import (
 	"math"
 	"net/http"
 	"net/url"
-	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -154,39 +153,52 @@ func validateAircraft(allFilteredAircraft []Aircraft, alreadySpottedAircraft *[]
 func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Config) (aircraft []AircraftOutput, err error) {
 	var newlySpottedAircraft []Aircraft
 
-	allAircraftInRange, err := getAllAircraftInRange(config.Location, config.MaxRangeKilometers)
+	// Use MaxScanRangeKilometers for scanning (API query)
+	allAircraftInRange, err := getAllAircraftInRange(config.Location, config.MaxScanRangeKilometers)
 	if err != nil {
 		return nil, err
 	}
 
-	newlySpottedAircraft, *alreadySpottedAircraft = validateAircraft(allAircraftInRange, alreadySpottedAircraft)
-	filteredAircraft := filterAircraftByTypes(newlySpottedAircraft, config.AircraftTypes)
-
-	// Filter aircraft by altitude
-	if config.MaxAltitudeFeet > 0 {
-		filteredAircraft = filterAircraftByAltitude(filteredAircraft, config.MaxAltitudeFeet)
+	// Filter the aircraft by the notification range (MaxRangeKilometers)
+	var aircraftInNotificationRange []Aircraft
+	for _, ac := range allAircraftInRange {
+		distance := CalculateDistance(config.Location, geodist.Coord{Lat: ac.Lat, Lon: ac.Lon})
+		if distance <= config.MaxRangeKilometers {
+			aircraftInNotificationRange = append(aircraftInNotificationRange, ac)
+		}
 	}
 
+	// For notifications, we need to track what's new and filter by type
+	newlySpottedAircraft, *alreadySpottedAircraft = validateAircraft(aircraftInNotificationRange, alreadySpottedAircraft)
+
+	// Only filter by types for notifications, not for the full output
+	filteredForNotifications := filterAircraftByTypes(newlySpottedAircraft, config.AircraftTypes)
+
+	// Apply altitude filter if configured
+	if config.MaxAltitudeFeet > 0 {
+		filteredForNotifications = filterAircraftByAltitude(filteredForNotifications, config.MaxAltitudeFeet)
+	}
+
+	// Process newly spotted aircraft for metrics
 	newlySpottedAircraftOutput, err := CreateAircraftOutput(newlySpottedAircraft, config)
 	if err != nil {
 		return nil, err
 	}
 	handleMetrics(newlySpottedAircraftOutput)
 
-	acOutputs, err := CreateAircraftOutput(filteredAircraft, config)
+	// Generate output for notifications (filtered by AIRCRAFT_TYPES)
+	notificationOutputs, err := CreateAircraftOutput(filteredForNotifications, config)
 	if err != nil {
 		return nil, err
 	}
 
-	// Update the SpottedAircraft for the API to access
+	// Update the SpottedAircraft for the API to access - always store ALL aircraft in range
 	SpottedAircraft.Lock()
 	SpottedAircraft.Aircraft = allAircraftInRange
 	SpottedAircraft.Unlock()
 
-	if slices.Contains(config.AircraftTypes, "ALL") {
-		return acOutputs, nil
-	}
-	return acOutputs, nil
+	// Return the filtered aircraft for notifications
+	return notificationOutputs, nil
 }
 
 func handleMetrics(aircraft []AircraftOutput) {

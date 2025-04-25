@@ -74,7 +74,14 @@ func jetspotterHandler(alreadySpottedAircraft *[]jetspotter.Aircraft, config con
 }
 
 func HandleJetspotter(config configuration.Config) {
-	log.Printf("Spotting the following aircraft types within %d kilometers: %s", config.MaxRangeKilometers, config.AircraftTypes)
+	if config.MaxScanRangeKilometers > config.MaxRangeKilometers {
+		log.Printf("Scanning for aircraft within %d kilometers, sending notifications for those within %d kilometers: %s",
+			config.MaxScanRangeKilometers, config.MaxRangeKilometers, config.AircraftTypes)
+	} else {
+		log.Printf("Spotting the following aircraft types within %d kilometers: %s",
+			config.MaxRangeKilometers, config.AircraftTypes)
+	}
+
 	if config.MaxAltitudeFeet > 0 {
 		log.Printf("Only showing aircraft at or below %d feet.", config.MaxAltitudeFeet)
 	}
