@@ -7,6 +7,8 @@ jetspotter:
   fetchInterval: 60
   #  Maximum range in kilometers from the location that you want aircraft to be spotted.
   maxRangeKilometers: 30
+  # Maximum scan range in kilometers from the location to fetch aircraft data.
+  maxScanRangeKilometers: 30
   # Maximum altitude in feet that you want aircraft to be spotted. Set to 0 to disable.
   maxAltitudeFeet: 0
   # A comma separated list of types that you want to spot
