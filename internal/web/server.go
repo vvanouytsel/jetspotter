@@ -54,8 +54,14 @@ func (s *Server) setupRoutes() {
 	// Homepage
 	s.router.HandleFunc("/", s.handleIndex)
 
+	// Configuration page
+	s.router.HandleFunc("/config", s.handleConfig)
+
 	// API proxy - forwards to the actual API for AJAX requests
 	s.router.HandleFunc("/api/aircraft", s.handleAPIProxy)
+
+	// API endpoint for configuration
+	s.router.HandleFunc("/api/config", s.handleAPIConfigProxy)
 }
 
 // Start runs the web server
@@ -108,6 +114,30 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// handleConfig serves the configuration page
+func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
+	tmplFS, err := fs.Sub(content, "templates")
+	if err != nil {
+		http.Error(w, "Failed to load templates", http.StatusInternalServerError)
+		return
+	}
+
+	tmpl, err := template.ParseFS(tmplFS, "config.html")
+	if err != nil {
+		http.Error(w, "Failed to parse template", http.StatusInternalServerError)
+		return
+	}
+
+	data := map[string]interface{}{
+		"Title": "Jetspotter Configuration",
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+	if err := tmpl.Execute(w, data); err != nil {
+		http.Error(w, "Failed to render template", http.StatusInternalServerError)
+	}
+}
+
 // handleAPIProxy proxies requests to the backend API
 func (s *Server) handleAPIProxy(w http.ResponseWriter, r *http.Request) {
 	// Forward the request to the actual API
@@ -129,5 +159,30 @@ func (s *Server) handleAPIProxy(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(aircraft); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
+}
+
+// handleAPIConfigProxy proxies requests to the backend API for configuration
+func (s *Server) handleAPIConfigProxy(w http.ResponseWriter, r *http.Request) {
+	// Forward the request to the actual API
+	resp, err := http.Get(s.config.APIEndpoint + "/api/config")
+	if err != nil {
+		http.Error(w, "Failed to fetch config data from API", http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Set the content type
+	w.Header().Set("Content-Type", "application/json")
+
+	// Copy the response body to the output
+	var config interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&config); err != nil {
+		http.Error(w, "Failed to parse API config response", http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(config); err != nil {
+		http.Error(w, "Failed to encode config response", http.StatusInternalServerError)
 	}
 }

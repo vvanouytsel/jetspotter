@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <style>
+        /* Add custom tooltip styles */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .info-icon {
+            color: var(--primary-color);
+            font-size: 14px;
+            cursor: help;
+            transition: transform 0.2s ease;
+        }
+        
+        .info-icon:hover {
+            transform: scale(1.2);
+        }
+        
+        .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: var(--secondary-color);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.9rem;
+            font-weight: normal;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--secondary-color) transparent transparent transparent;
+        }
+        
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Add professional styling to the config items */
+        .config-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+        
+        [data-theme="dark"] .config-item {
+            background-color: rgba(30, 30, 30, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .config-item:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        [data-theme="dark"] .config-item:hover {
+            background-color: rgba(40, 40, 40, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .config-section {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            background-color: var(--card-color);
+        }
+        
+        .config-section h2 {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            font-size: 1.6rem;
+            color: var(--secondary-color);
+        }
+        
+        [data-theme="dark"] .config-section h2 {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .config-label {
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            display: flex;
+            align-items: center;
+            width: 180px;
+            flex-shrink: 0;
+        }
+        
+        .config-label span {
+            font-size: 1.05rem;
+        }
+        
+        .config-value {
+            font-size: 1.1rem;
+            font-weight: 500;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .config-value span:first-child {
+            color: var(--secondary-color);
+        }
+        
+        [data-theme="dark"] .config-value span:first-child {
+            color: var(--primary-color);
+        }
+        
+        .unit {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-left: 3px;
+        }
+        
+        .inline-description {
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: normal;
+            line-height: 1.4;
+        }
+        
+        [data-theme="dark"] .inline-description {
+            color: #aaa;
+        }
+        
+        /* Notification cards styling */
+        .notification-cards {
+            gap: 25px;
+        }
+        
+        .notification-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .notification-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        }
+        
+        .notification-card-header {
+            padding: 18px;
+        }
+        
+        .notification-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+        }
+        
+        .notification-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        /* Status indicator styling */
+        .status-indicator {
+            width: 14px;
+            height: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .status-indicator.active {
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.3);
+        }
+        
+        /* Map container styling */
+        #location-map {
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            height: 350px;
+        }
+        
+        .location-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+        
+        .location-info {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .map-container {
+            flex: 2;
+            min-width: 300px;
+        }
+        
+        #map-legend {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: var(--card-color);
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-section">
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 11.807A9.002 9.002 0 0 1 10.049 2a9.942 9.942 0 0 0-5.12 2.735c-3.905 3.905-3.905 10.237 0 14.142 3.906 3.906 10.237 3.905 14.143 0a9.943 9.943 0 0 0 2.735-5.119A9.003 9.003 0 0 1 12 11.807z"></path>
+                    </svg>
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M6.995 12c0 2.761 2.246 5.007 5.007 5.007s5.007-2.246 5.007-5.007-2.246-5.007-5.007-5.007S6.995 9.239 6.995 12zM11 19h2v3h-2zm0-17h2v3h-2zm-9 9h3v2H2zm17 0h3v2h-3zM5.637 19.778l-1.414-1.414 2.121-2.121 1.414 1.414zM16.242 6.344l2.122-2.122 1.414 1.414-2.122 2.122zM6.344 7.759 4.223 5.637l1.415-1.414 2.12 2.122zm13.434 10.605-1.414 1.414-2.122-2.122 1.414-1.414z"></path>
+                    </svg>
+                </button>
+                <h1>Jetspotter</h1>
+            </div>
+            <div class="header-right">
+                <div class="nav-links">
+                    <a href="/" class="nav-link">Dashboard</a>
+                    <a href="/config" class="nav-link active">Configuration</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="config-dashboard">
+            <div class="config-section" id="loading-section">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Loading configuration data...</div>
+            </div>
+
+            <div class="config-section" id="location-section" style="display: none;">
+                <h2>Location Settings</h2>
+                <div class="location-content">
+                    <div class="location-info">
+                        <div class="config-item">
+                            <div class="config-label">Latitude:</div>
+                            <div class="config-value" id="latitude-value"></div>
+                        </div>
+                        <div class="config-item">
+                            <div class="config-label">Longitude:</div>
+                            <div class="config-value" id="longitude-value"></div>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <div id="location-map"></div>
+                        <div id="map-legend">
+                            <div class="legend-item">
+                                <div class="circle notification-range"></div>
+                                <span>Notification Range</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="circle scan-range"></div>
+                                <span>Scan Range</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-section" id="tracking-section" style="display: none;">
+                <h2>Tracking Settings</h2>
+                <div class="config-item">
+                    <div class="config-label">Scan Range:</div>
+                    <div class="config-value">
+                        <span id="scan-range-value"></span> <span class="unit">km</span>
+                        <div class="inline-description">The maximum distance from your location to scan for aircraft.</div>
+                    </div>
+                </div>
+                <div class="config-item">
+                    <div class="config-label">Maximum Altitude:</div>
+                    <div class="config-value">
+                        <span id="altitude-value"></span> <span class="unit">ft</span>
+                        <div class="inline-description">The highest altitude in feet to track aircraft.</div>
+                    </div>
+                </div>
+                <div class="config-item">
+                    <div class="config-label">Update Interval:</div>
+                    <div class="config-value">
+                        <span id="interval-value"></span> <span class="unit">seconds</span>
+                        <div class="inline-description">How frequently the system checks for new aircraft data.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="config-section" id="notification-filters-section" style="display: none;">
+                <h2>Notification Filters</h2>
+                <div class="config-item">
+                    <div class="config-label">Notification Range:</div>
+                    <div class="config-value">
+                        <span id="range-value"></span> <span class="unit">km</span>
+                        <div class="inline-description">Only aircraft within this distance from your location will trigger notifications.</div>
+                    </div>
+                </div>
+                <div class="config-item">
+                    <div class="config-label">Tracked Aircraft Types:</div>
+                    <div class="config-value">
+                        <span id="aircraft-types-value"></span>
+                        <div class="inline-description">Categories of aircraft that the system will send notifications for when detected.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-section" id="notification-section" style="display: none;">
+                <h2>Notification Services</h2>
+                <div class="notification-cards">
+                    <div class="notification-card" id="terminal-card">
+                        <div class="notification-card-header">
+                            <div class="notification-icon">T</div>
+                            <div class="notification-name">Terminal</div>
+                        </div>
+                        <div class="notification-status">
+                            <span class="status-indicator active"></span>
+                            <span class="status-text">Active</span>
+                        </div>
+                    </div>
+
+                    <div class="notification-card" id="discord-card">
+                        <div class="notification-card-header">
+                            <div class="notification-icon">D</div>
+                            <div class="notification-name">Discord</div>
+                        </div>
+                        <div class="notification-status">
+                            <span class="status-indicator"></span>
+                            <span class="status-text">Not configured</span>
+                        </div>
+                        <div class="notification-config" id="discord-config">
+                            <div class="config-item">
+                                <div class="config-label">Color by altitude:</div>
+                                <div class="config-value" id="discord-color-value">No</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="notification-card" id="slack-card">
+                        <div class="notification-card-header">
+                            <div class="notification-icon">S</div>
+                            <div class="notification-name">Slack</div>
+                        </div>
+                        <div class="notification-status">
+                            <span class="status-indicator"></span>
+                            <span class="status-text">Not configured</span>
+                        </div>
+                        <div class="notification-config" id="slack-config">
+                            <div class="config-item">
+                                <div class="config-label">Max aircraft per message:</div>
+                                <div class="config-value" id="slack-max-value">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="notification-card" id="gotify-card">
+                        <div class="notification-card-header">
+                            <div class="notification-icon">G</div>
+                            <div class="notification-name">Gotify</div>
+                        </div>
+                        <div class="notification-status">
+                            <span class="status-indicator"></span>
+                            <span class="status-text">Not configured</span>
+                        </div>
+                    </div>
+
+                    <div class="notification-card" id="ntfy-card">
+                        <div class="notification-card-header">
+                            <div class="notification-icon">N</div>
+                            <div class="notification-name">Ntfy</div>
+                        </div>
+                        <div class="notification-status">
+                            <span class="status-indicator"></span>
+                            <span class="status-text">Not configured</span>
+                        </div>
+                        <div class="notification-config" id="ntfy-config">
+                            <div class="config-item">
+                                <div class="config-label">Topic:</div>
+                                <div class="config-value" id="ntfy-topic-value">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <a href="https://github.com/vvanouytsel/jetspotter/" target="_blank" class="github-link">
+                    <svg class="github-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/config.js"></script>
+</body>
+</html>

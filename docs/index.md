@@ -112,6 +112,13 @@ docker run -e LOCATION_LATITUDE=51.1697898378895 -e LOCATION_LONGITUDE=5.4701143
 LOCATION_LATITUDE=51.1697898378895 LOCATION_LONGITUDE=5.470114381971933 AIRCRAFT_TYPES=F16,A400 MAX_RANGE_KILOMETERS=100 ./jetspotter
 ```
 
+Show all aircraft within 40 kilometers of Kleine-Brogel airbase and port-forward the UI to `localhost:8080`.
+
+```bash
+# Docker
+docker run -e LOCATION_LATITUDE=51.1697898378895 -e LOCATION_LONGITUDE=5.470114381971933 -e MAX_RANGE_KILOMETERS=40 -p 8080:8080 ghcr.io/vvanouytsel/jetspotter:latest
+```
+
 Show all military aircraft within 20 kilometers of Kleine-Brogel airbase.
 
 ```bash
