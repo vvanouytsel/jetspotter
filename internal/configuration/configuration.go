@@ -155,7 +155,7 @@ func GetConfig() (config Config, err error) {
 	}
 
 	config.FetchInterval, err = strconv.Atoi(getEnvVariable(FetchInterval, strconv.Itoa(defaultFetchInterval)))
-	if err != nil || config.FetchInterval < 60 {
+	if err != nil || config.FetchInterval < 5 {
 		log.Printf("Fetch interval of %ds detected. You might hit rate limits, consider using the default of %ds instead.", config.FetchInterval, defaultFetchInterval)
 	}
 
