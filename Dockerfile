@@ -9,8 +9,7 @@ ARG BUILD_TIME=unknown
 
 # Build with version information
 RUN go build -o jetspotter \
-    -ldflags "-linkmode external -extldflags -static \
-              -X jetspotter/internal/version.Version=${VERSION} \
+    -ldflags "-X jetspotter/internal/version.Version=${VERSION} \
               -X jetspotter/internal/version.Commit=${COMMIT} \
               -X jetspotter/internal/version.BuildTime=${BUILD_TIME}" \
     cmd/jetspotter/jetspotter.go
