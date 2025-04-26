@@ -7,6 +7,9 @@ ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_TIME=unknown
 
+# Build with CGO disabled for a fully static binary
+ENV CGO_ENABLED=0
+
 # Build with version information
 RUN go build -o jetspotter \
     -ldflags "-X jetspotter/internal/version.Version=${VERSION} \
@@ -14,7 +17,8 @@ RUN go build -o jetspotter \
               -X jetspotter/internal/version.BuildTime=${BUILD_TIME}" \
     cmd/jetspotter/jetspotter.go
 
-
 FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
 COPY --from=builder /usr/src/app/jetspotter .
-CMD [ "./jetspotter" ]
+CMD ["./jetspotter"]
