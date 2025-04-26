@@ -1,4 +1,4 @@
-FROM golang:1.21 as builder
+FROM golang:1.21 AS builder
 WORKDIR /usr/src/app
 COPY . /usr/src/app/
 
@@ -11,12 +11,7 @@ ARG BUILD_TIME=unknown
 ENV CGO_ENABLED=0
 
 # Build with version information
-RUN go build -o jetspotter \
-    -ldflags "-X jetspotter/internal/version.Version=${VERSION} \
-              -X jetspotter/internal/version.Commit=${COMMIT} \
-              -X jetspotter/internal/version.BuildTime=${BUILD_TIME}" \
-    cmd/jetspotter/jetspotter.go
-
+RUN go build -o jetspotter -ldflags "-X jetspotter/internal/version.Version=${VERSION} -X jetspotter/internal/version.Commit=${COMMIT} -X jetspotter/internal/version.BuildTime=${BUILD_TIME}" cmd/jetspotter/jetspotter.go
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/

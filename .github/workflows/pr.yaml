@@ -68,6 +68,9 @@ jobs:
         - name: Set up Docker Buildx
           uses: docker/setup-buildx-action@v3
 
+        - name: Set build time environment variable
+          run: echo "BUILD_TIME=$(date -u '+%Y-%m-%d_%H:%M:%S')" >> $GITHUB_ENV
+
         - name: Build container
           uses: docker/build-push-action@v5
           with:
@@ -77,5 +80,5 @@ jobs:
             build-args: |
               VERSION=dev
               COMMIT=${{ github.sha }}
-              BUILD_TIME=$(date -u '+%Y-%m-%d_%H:%M:%S')
+              BUILD_TIME=${{ env.BUILD_TIME }}
             tags: ${{ env.REGISTRY }}/${{ github.repository }}:dev
