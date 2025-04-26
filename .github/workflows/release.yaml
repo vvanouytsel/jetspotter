@@ -77,30 +77,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  release:
-    name: Create release
-    needs: [check]
-    if: needs.check.outputs.new_release_version
-    runs-on: [ubuntu-22.04]
-    steps:
-      - run: mkdir artifacts
-      - uses: actions/download-artifact@v4
-        name: Download artifact
-        with:
-          path: artifacts
-
-      - run: ls -ltr artifacts/jetspotter-*/*
-
-      - name: Create the release
-        uses: ncipollo/release-action@v1
-        id: release
-        with:
-          artifacts: artifacts/jetspotter-*/*
-          name: ${{ needs.check.outputs.new_release_version }}
-          body: ${{ needs.check.outputs.new_release_notes }}
-          tag: ${{ needs.check.outputs.new_release_version }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-
   image:
     name: Push container image and helm chart
     runs-on: ubuntu-latest
@@ -135,6 +111,30 @@ jobs:
         run: |
           helm package helm/jetspotter --version ${{ needs.check.outputs.new_release_version }} --app-version ${{ needs.check.outputs.new_release_version }} 
           helm push jetspotter-${{ needs.check.outputs.new_release_version }}.tgz oci://${{ env.REGISTRY }}/${{ github.repository }}-chart
+  
+  release:
+    name: Create release
+    needs: [check,image]
+    if: needs.check.outputs.new_release_version
+    runs-on: [ubuntu-22.04]
+    steps:
+      - run: mkdir artifacts
+      - uses: actions/download-artifact@v4
+        name: Download artifact
+        with:
+          path: artifacts
+
+      - run: ls -ltr artifacts/jetspotter-*/*
+
+      - name: Create the release
+        uses: ncipollo/release-action@v1
+        id: release
+        with:
+          artifacts: artifacts/jetspotter-*/*
+          name: ${{ needs.check.outputs.new_release_version }}
+          body: ${{ needs.check.outputs.new_release_notes }}
+          tag: ${{ needs.check.outputs.new_release_version }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   notification:
     name: Send notification on failure
