@@ -112,7 +112,12 @@
     <template id="aircraft-card-template">
         <div class="aircraft-card">
             <div class="aircraft-header">
-                <div class="aircraft-callsign"></div>
+                <div class="aircraft-header-left">
+                    <div class="aircraft-callsign"></div>
+                </div>
+                <div class="aircraft-country">
+                    <span class="aircraft-country-flag"></span>
+                </div>
                 <div class="aircraft-military-badge">MILITARY</div>
             </div>
             <div class="aircraft-image">
@@ -150,6 +155,10 @@
                 <div class="info-row">
                     <span class="info-label">Registration:</span>
                     <span class="aircraft-registration"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Country:</span>
+                    <span class="aircraft-country-info"></span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">ICAO:</span>

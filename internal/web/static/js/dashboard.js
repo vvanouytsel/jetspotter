@@ -330,6 +330,14 @@ function createAircraftCard(aircraft) {
     // Set the callsign
     card.querySelector('.aircraft-callsign').textContent = aircraft.Callsign || 'Unknown';
     
+    // Set country info
+    const countryName = aircraft.Country || 'Unknown';
+    card.querySelector('.aircraft-country-info').textContent = countryName;
+    
+    // Add a larger flag emoji in the header
+    const flagEmoji = getCountryFlagEmoji(countryName);
+    card.querySelector('.aircraft-country-flag').textContent = flagEmoji;
+    
     // Apply altitude-based color to the header
     const aircraftHeader = card.querySelector('.aircraft-header');
     const altitude = aircraft.Altitude || 0;
@@ -386,6 +394,79 @@ function createAircraftCard(aircraft) {
     }
     
     return card;
+}
+
+// Get emoji flag based on country name
+function getCountryFlagEmoji(countryName) {
+    // Map country names to two-letter ISO country codes for emoji flags
+    const countryToISOCode = {
+        'United States': 'US',
+        'United Kingdom': 'GB',
+        'Canada': 'CA',
+        'Mexico': 'MX',
+        'France': 'FR',
+        'Germany': 'DE',
+        'Italy': 'IT',
+        'Spain': 'ES',
+        'Portugal': 'PT',
+        'Ireland': 'IE',
+        'Belgium': 'BE',
+        'Netherlands': 'NL',
+        'Sweden': 'SE',
+        'Denmark': 'DK',
+        'Finland': 'FI',
+        'Norway': 'NO',
+        'Romania': 'RO',
+        'Poland': 'PL',
+        'Czech Republic': 'CZ',
+        'Hungary': 'HU',
+        'Serbia': 'RS',
+        'Greece': 'GR',
+        'Malta': 'MT',
+        'Japan': 'JP',
+        'China': 'CN',
+        'India': 'IN',
+        'Thailand': 'TH',
+        'Indonesia': 'ID',
+        'Malaysia': 'MY',
+        'Singapore': 'SG',
+        'Australia': 'AU',
+        'New Zealand': 'NZ',
+        'Argentina': 'AR',
+        'Brazil': 'BR',
+        'Chile': 'CL',
+        'Colombia': 'CO',
+        'Israel': 'IL',
+        'Turkey': 'TR',
+        'Egypt': 'EG',
+        'South Africa': 'ZA',
+        'Ethiopia': 'ET',
+        'Nigeria': 'NG',
+        'Algeria': 'DZ',
+        'Morocco': 'MA',
+        'Saudi Arabia': 'SA',
+        'United Arab Emirates': 'AE',
+        'Qatar': 'QA',
+        'Bahrain': 'BH',
+        'Iran': 'IR',
+        'Iraq': 'IQ',
+        'Kuwait': 'KW'
+    };
+    
+    // Extract country code from "Unknown (X)" format
+    if (countryName.startsWith('Unknown (') && countryName.endsWith(')')) {
+        return '🏳️';  // Generic flag for unknown countries
+    }
+    
+    const countryCode = countryToISOCode[countryName];
+    if (!countryCode) return '🏳️';  // Generic flag for unknown countries
+    
+    // Convert ISO country code to country flag emoji
+    // Regional Indicator Symbols are Unicode characters U+1F1E6 to U+1F1FF
+    // which represent the letters A-Z
+    const offset = 127397; // Offset to convert ASCII letter to Regional Indicator Symbol
+    const codePoints = [...countryCode].map(char => char.charCodeAt(0) + offset);
+    return String.fromCodePoint(...codePoints);
 }
 
 // Add notification icons based on aircraft notification status

@@ -45,6 +45,7 @@ func buildNtfyMessage(aircraft []jetspotter.AircraftOutput, config configuration
 		message.Message += "\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\\=\n"
 		message.Message += fmt.Sprintf("Callsign: %s\n", formatCallsign(ac, Markdown))
 		message.Message += fmt.Sprintf("Registration: %s\n", formatRegistration(ac, Markdown))
+		message.Message += fmt.Sprintf("Country: %s\n", ac.Country)
 		message.Message += fmt.Sprintf("Speed: %s\n", printSpeed(ac))
 		message.Message += fmt.Sprintf("Altitude: %s\n", printAltitude(ac))
 		message.Message += fmt.Sprintf("Distance: %s\n", printDistance(ac))

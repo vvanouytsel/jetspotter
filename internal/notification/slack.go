@@ -64,6 +64,10 @@ func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 				},
 				{
 					Type: "mrkdwn",
+					Text: fmt.Sprintf("*Country:* %s", ac.Country),
+				},
+				{
+					Type: "mrkdwn",
 					Text: fmt.Sprintf("*Speed:* %s", printSpeed(ac)),
 				},
 				{

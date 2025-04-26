@@ -102,6 +102,9 @@ type AircraftOutput struct {
 	// Registration number of the aircraft
 	Registration string
 
+	// Country of the aircraft based on the registration prefix
+	Country string
+
 	// Alitude of the aircraft in feet
 	Altitude float64
 

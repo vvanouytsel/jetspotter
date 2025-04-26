@@ -269,9 +269,30 @@ header h1 {
     border-bottom: 1px solid #eee;
 }
 
+.aircraft-header-left {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
 .aircraft-callsign {
     font-weight: bold;
     font-size: 1.2rem;
+    margin-right: 5px;
+}
+
+/* Country flag in header styling */
+.aircraft-country {
+    display: flex;
+    align-items: center;
+    margin-left: auto; /* Push to the right */
+    margin-right: 10px; /* Space between flag and military badge */
+}
+
+.aircraft-country-flag {
+    font-size: 1.5rem; /* Bigger flag */
+    display: inline-block;
+    line-height: 1;
 }
 
 .aircraft-military-badge {
@@ -356,7 +377,7 @@ header h1 {
 }
 
 /* Give all info values consistent styling, not just those with units */
-.aircraft-type, .aircraft-registration, .aircraft-icao, .aircraft-description {
+.aircraft-type, .aircraft-registration, .aircraft-icao, .aircraft-description, .aircraft-country-info {
     margin-left: auto; /* Push to the right */
     text-align: right;
 }

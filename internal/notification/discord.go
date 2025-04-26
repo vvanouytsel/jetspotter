@@ -86,6 +86,11 @@ func buildDiscordMessage(aircraft []jetspotter.AircraftOutput, config configurat
 					Inline: true,
 				},
 				{
+					Name:   "Country",
+					Value:  ac.Country,
+					Inline: true,
+				},
+				{
 					Name:   "Speed",
 					Value:  printSpeed(ac),
 					Inline: true,

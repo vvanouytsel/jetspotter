@@ -14,6 +14,7 @@ func FormatAircraft(aircraft jetspotter.AircraftOutput, config configuration.Con
 		"Description: %s\n"+
 		"Type: %s\n"+
 		"Tail number: %s\n"+
+		"Country: %s\n"+
 		"Altitude: %dft | %dm\n"+
 		"Speed: %dkn | %dkm/h\n"+
 		"Distance: %dkm\n"+
@@ -25,7 +26,7 @@ func FormatAircraft(aircraft jetspotter.AircraftOutput, config configuration.Con
 		"ImageURL: %s\n",
 
 		aircraft.Callsign, aircraft.Description, aircraft.Type,
-		aircraft.Registration, int(aircraft.Altitude), jetspotter.ConvertFeetToMeters(aircraft.Altitude),
+		aircraft.Registration, aircraft.Country, int(aircraft.Altitude), jetspotter.ConvertFeetToMeters(aircraft.Altitude),
 		aircraft.Speed, jetspotter.ConvertKnotsToKilometersPerHour(aircraft.Speed),
 		aircraft.Distance, aircraft.CloudCoverage, aircraft.BearingFromLocation,
 		aircraft.BearingFromAircraft, aircraft.Heading, aircraft.TrackerURL, aircraft.ImageURL)

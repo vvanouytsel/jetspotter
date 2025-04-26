@@ -336,6 +336,7 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.Distance = CalculateDistance(config.Location, aircraftLocation)
 		acOutput.Speed = int(ac.GS)
 		acOutput.Registration = ac.Registration
+		acOutput.Country = GetCountryFromRegistration(ac.Registration)
 		acOutput.Type = ac.PlaneType
 		acOutput.ICAO = ac.ICAO
 		acOutput.Heading = ac.Track
@@ -401,4 +402,97 @@ func toRadians(degrees float64) float64 {
 
 func toDegrees(rad float64) float64 {
 	return rad * (180 / math.Pi)
+}
+
+// GetCountryFromRegistration determines the country of an aircraft based on the registration prefix
+func GetCountryFromRegistration(registration string) string {
+	if registration == "" {
+		return "Unknown"
+	}
+
+	// Map common registration prefixes to countries
+	registryMap := map[string]string{
+		// A few examples from each region
+		// North America
+		"N":   "United States",
+		"C-F": "Canada",
+		"C-G": "Canada",
+		"C-I": "Canada",
+		"XA":  "Mexico",
+		"XB":  "Mexico",
+		"XC":  "Mexico",
+
+		// Europe
+		"G-":  "United Kingdom",
+		"F-":  "France",
+		"D-":  "Germany",
+		"I-":  "Italy",
+		"EC-": "Spain",
+		"CS-": "Portugal",
+		"EI-": "Ireland",
+		"OO-": "Belgium",
+		"PH-": "Netherlands",
+		"SE-": "Sweden",
+		"OY-": "Denmark",
+		"OH-": "Finland",
+		"LN-": "Norway",
+		"YR-": "Romania",
+		"SP-": "Poland",
+		"OK-": "Czech Republic",
+		"HA-": "Hungary",
+		"YU-": "Serbia",
+		"SX-": "Greece",
+		"9H-": "Malta",
+
+		// Asia & Oceania
+		"JA":  "Japan",
+		"B-":  "China",
+		"VT-": "India",
+		"HS-": "Thailand",
+		"PK-": "Indonesia",
+		"9M-": "Malaysia",
+		"9V-": "Singapore",
+		"VH-": "Australia",
+		"ZK-": "New Zealand",
+
+		// South America
+		"LV-": "Argentina",
+		"PP-": "Brazil",
+		"PR-": "Brazil",
+		"PT-": "Brazil",
+		"PU-": "Brazil",
+		"CC-": "Chile",
+		"HK-": "Colombia",
+
+		// Middle East & Africa
+		"4X-":  "Israel",
+		"TC-":  "Turkey",
+		"SU-":  "Egypt",
+		"ZS-":  "South Africa",
+		"ET-":  "Ethiopia",
+		"5N-":  "Nigeria",
+		"7T-":  "Algeria",
+		"CN-":  "Morocco",
+		"HZ-":  "Saudi Arabia",
+		"A6-":  "United Arab Emirates",
+		"A7-":  "Qatar",
+		"A9C-": "Bahrain",
+		"EP-":  "Iran",
+		"YI-":  "Iraq",
+		"9K-":  "Kuwait",
+	}
+
+	// Check for matching prefixes
+	for prefix, country := range registryMap {
+		if strings.HasPrefix(registration, prefix) {
+			return country
+		}
+	}
+
+	// If no match found, return the first character as a basic hint
+	if len(registration) > 0 {
+		return "Unknown (" + string(registration[0]) + ")"
+	}
+
+	return "Unknown"
 }
