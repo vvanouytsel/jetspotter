@@ -5,6 +5,7 @@ import (
 	"jetspotter/internal/jetspotter"
 	"jetspotter/internal/metrics"
 	"jetspotter/internal/notification"
+	"jetspotter/internal/version"
 	"jetspotter/internal/web"
 	"log"
 	"strconv"
@@ -137,6 +138,10 @@ func HandleWebUI(config configuration.Config) {
 }
 
 func main() {
+	// Log version information at startup
+	log.Printf("Starting Jetspotter version %s (commit: %s, built at: %s)", 
+		version.Version, version.Commit, version.BuildTime)
+	
 	config, err := configuration.GetConfig()
 	if err != nil {
 		exitWithError(err)

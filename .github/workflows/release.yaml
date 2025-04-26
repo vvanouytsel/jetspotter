@@ -23,9 +23,34 @@ jobs:
         run: |
           go test ./internal/... --count 1
 
+  check:
+    name: Check release required
+    needs: [test]
+    runs-on: ubuntu-22.04
+    outputs:
+      new_release_version: ${{ steps.check_semantic.outputs.new_release_version }}
+      new_release_notes: ${{ steps.check_semantic.outputs.new_release_notes }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install conventional-changelog-conventionalcommits
+        run: npm install conventional-changelog-conventionalcommits@~7.0.0
+
+      - name: Check semantic release
+        id: check_semantic
+        uses: cycjimmy/semantic-release-action@v3
+        with:
+          semantic_version: 19.0.5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build:
     name: Build
-    needs: [test]
+    needs: [check]
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -49,9 +74,9 @@ jobs:
           COMMIT=$(git rev-parse --short HEAD)
           
           go build -o jetspotter-${{ matrix.os }}-${{ matrix.architecture }} \
-            -ldflags "-X github.com/vvanouytsel/jetspotter/internal/version.Version=${VERSION} \
-                      -X github.com/vvanouytsel/jetspotter/internal/version.Commit=${COMMIT} \
-                      -X github.com/vvanouytsel/jetspotter/internal/version.BuildTime=${BUILD_TIME}" \
+            -ldflags "-X jetspotter/internal/version.Version=${VERSION} \
+                      -X jetspotter/internal/version.Commit=${COMMIT} \
+                      -X jetspotter/internal/version.BuildTime=${BUILD_TIME}" \
             cmd/jetspotter/jetspotter.go
 
       - uses: actions/upload-artifact@v4
@@ -59,31 +84,6 @@ jobs:
         with:
           name: "jetspotter-${{ matrix.os }}-${{ matrix.architecture }}"
           path: jetspotter-${{ matrix.os }}-${{ matrix.architecture }}
-
-  check:
-    name: Check release required
-    needs: [build]
-    runs-on: ubuntu-22.04
-    outputs:
-      new_release_version: ${{ steps.check_semantic.outputs.new_release_version }}
-      new_release_notes: ${{ steps.check_semantic.outputs.new_release_notes }}
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-
-      - name: Install conventional-changelog-conventionalcommits
-        run: npm install conventional-changelog-conventionalcommits@~7.0.0
-
-      - name: Check semantic release
-        id: check_semantic
-        uses: cycjimmy/semantic-release-action@v3
-        with:
-          semantic_version: 19.0.5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   image:
     name: Push container image and helm chart
@@ -113,6 +113,10 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
+          build-args: |
+            VERSION=${{ needs.check.outputs.new_release_version }}
+            COMMIT=${{ github.sha }}
+            BUILD_TIME=$(date -u '+%Y-%m-%d_%H:%M:%S')
           tags: ${{ env.REGISTRY }}/${{ github.repository }}:latest,${{ env.REGISTRY }}/${{ github.repository }}:${{ needs.check.outputs.new_release_version }}
 
       - name: Package and push helm chart
