@@ -22,6 +22,10 @@
     --altitude-dark-blue: #2868a3;
     --altitude-purple: #a416a9;
     --altitude-grey: #3a3a3a;
+    
+    /* GitHub link colors */
+    --github-link-color: #333333;
+    --github-link-hover-color: #0366d6;
 }
 
 /* Dark mode colors */
@@ -35,6 +39,10 @@
     --military-color: #ff5252;
     --button-color: #4a4a4a;
     --altitude-unknown: #888888;
+    
+    /* GitHub link colors for dark mode */
+    --github-link-color: #e0e0e0;
+    --github-link-hover-color: #58a6ff;
 }
 
 * {
@@ -786,6 +794,35 @@ header h1 {
 .theme-label {
     font-size: 0.9rem;
     color: var(--text-color);
+}
+
+/* GitHub link styling */
+.github-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--github-link-color);
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.github-link:hover {
+    color: var(--github-link-hover-color);
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .github-link:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.github-icon {
+    margin-right: 8px;
+    fill: currentColor;
 }
 
 [data-theme="dark"] .github-icon,
