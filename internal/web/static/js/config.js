@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize theme toggle 
     initThemeToggle();
 
+    // Fetch version information
+    fetchVersionInfo();
+
     // Fetch configuration data
     fetchConfigData();
 });
@@ -30,6 +33,30 @@ function initThemeToggle() {
         document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
     });
+}
+
+// Fetch version information from the API
+async function fetchVersionInfo() {
+    try {
+        const response = await fetch('/api/version');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const versionData = await response.json();
+        const appVersion = versionData.version || 'dev';
+        
+        // Update the version display in the footer
+        const appVersionElement = document.getElementById('appVersion');
+        if (appVersionElement) {
+            appVersionElement.textContent = appVersion;
+        }
+    } catch (error) {
+        console.error('Error fetching version information:', error);
+        // Fall back to default 'dev' version if there's an error
+        document.getElementById('appVersion').textContent = 'dev';
+    }
 }
 
 // Fetch configuration data from the API

@@ -10,6 +10,7 @@ let currentSortOrder = 'asc';
 let lastUpdateTime = null;
 let countdownInterval = null;
 let isLoading = true; // New variable to track loading state
+let appVersion = 'dev'; // Variable to store app version
 
 // DOM elements
 document.addEventListener('DOMContentLoaded', () => {
@@ -55,6 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Theme toggle button event listener
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
+    // Fetch version information
+    fetchVersionInfo();
+    
     // Start fetching data
     fetchData();
     setInterval(fetchData, REFRESH_PERIOD * 1000);
@@ -510,5 +514,29 @@ function updateCountdown() {
         const minutes = Math.floor(secondsLeft / 60);
         const seconds = secondsLeft % 60;
         nextUpdateCountdown.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+}
+
+// Fetch version information from the API
+async function fetchVersionInfo() {
+    try {
+        const response = await fetch('/api/version');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const versionData = await response.json();
+        appVersion = versionData.version || 'dev';
+        
+        // Update the version display in the footer
+        const appVersionElement = document.getElementById('appVersion');
+        if (appVersionElement) {
+            appVersionElement.textContent = appVersion;
+        }
+    } catch (error) {
+        console.error('Error fetching version information:', error);
+        // Fall back to default 'dev' version if there's an error
+        document.getElementById('appVersion').textContent = 'dev';
     }
 }

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"jetspotter/internal/jetspotter"
+	"jetspotter/internal/version"
 )
 
 // Templates and static assets embedded in the binary
@@ -62,6 +63,9 @@ func (s *Server) setupRoutes() {
 
 	// API endpoint for configuration
 	s.router.HandleFunc("/api/config", s.handleAPIConfigProxy)
+	
+	// Version information endpoint
+	s.router.HandleFunc("/api/version", s.handleVersion)
 }
 
 // Start runs the web server
@@ -184,5 +188,13 @@ func (s *Server) handleAPIConfigProxy(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewEncoder(w).Encode(config); err != nil {
 		http.Error(w, "Failed to encode config response", http.StatusInternalServerError)
+	}
+}
+
+// handleVersion serves the application version information
+func (s *Server) handleVersion(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(version.GetFullVersionInfo()); err != nil {
+		http.Error(w, "Failed to encode version information", http.StatusInternalServerError)
 	}
 }

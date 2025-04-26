@@ -44,7 +44,15 @@ jobs:
           GOARCH: ${{ matrix.architecture }}
         id: build
         run: |
-          go build -o jetspotter-${{ matrix.os }}-${{ matrix.architecture }} cmd/jetspotter/jetspotter.go
+          BUILD_TIME=$(date -u '+%Y-%m-%d_%H:%M:%S')
+          VERSION=${{ needs.check.outputs.new_release_version || 'dev' }}
+          COMMIT=$(git rev-parse --short HEAD)
+          
+          go build -o jetspotter-${{ matrix.os }}-${{ matrix.architecture }} \
+            -ldflags "-X github.com/vvanouytsel/jetspotter/internal/version.Version=${VERSION} \
+                      -X github.com/vvanouytsel/jetspotter/internal/version.Commit=${COMMIT} \
+                      -X github.com/vvanouytsel/jetspotter/internal/version.BuildTime=${BUILD_TIME}" \
+            cmd/jetspotter/jetspotter.go
 
       - uses: actions/upload-artifact@v4
         name: Upload artifact

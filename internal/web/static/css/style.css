@@ -484,27 +484,13 @@ header h1 {
     align-items: center;
 }
 
-.version {
-    color: #666;
+.version-info {
+    color: #888;
     font-size: 0.9rem;
 }
 
-.github-link {
-    display: flex;
-    align-items: center;
-    color: var(--button-color);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-
-.github-link:hover {
-    color: #333;
-}
-
-.github-icon {
-    margin-right: 8px;
-    fill: currentColor;
+[data-theme="dark"] .version-info {
+    color: #aaa;
 }
 
 /* Add the navigation links for switching between dashboard and config page */
