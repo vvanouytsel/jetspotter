@@ -95,9 +95,12 @@ function toggleTheme() {
 // Fetch aircraft data from the API
 async function fetchData() {
     try {
-        // Set loading state to true before fetching
-        isLoading = true;
-        renderAircraftGrid(); // Show loading indicator
+        // Only show loading spinner on initial load, not during refreshes
+        const initialLoad = allAircraft.length === 0;
+        if (initialLoad) {
+            isLoading = true;
+            renderAircraftGrid(); // Show loading indicator
+        }
         
         const response = await fetch('/api/aircraft');
         
@@ -105,22 +108,27 @@ async function fetchData() {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
         
-        allAircraft = await response.json();
+        const newAircraft = await response.json();
         
         // Update last update timestamp
         document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
         
-        // Update aircraft description dropdown
-        updateAircraftDescriptions();
+        // Only update the UI if data has changed
+        if (JSON.stringify(allAircraft) !== JSON.stringify(newAircraft)) {
+            allAircraft = newAircraft;
+            
+            // Update aircraft description dropdown
+            updateAircraftDescriptions();
+            
+            // Update dashboard stats
+            updateStats();
+        }
         
         // Set loading to false now that we have data
         isLoading = false;
         
         // Render the grid with the new data
         renderAircraftGrid();
-        
-        // Update dashboard stats
-        updateStats();
         
         // Reset countdown timer
         startCountdownTimer();
