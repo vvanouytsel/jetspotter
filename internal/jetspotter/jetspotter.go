@@ -443,7 +443,10 @@ func GetCountryFromRegistration(registration string) string {
 		"OK-": "Czech Republic",
 		"HA-": "Hungary",
 		"YU-": "Serbia",
+		"LY-": "Lithuania",
+		"UR-": "Ukraine",
 		"SX-": "Greece",
+		"LX-": "Luxembourg",
 		"9H-": "Malta",
 
 		// Asia & Oceania
@@ -482,6 +485,7 @@ func GetCountryFromRegistration(registration string) string {
 		"EP-":  "Iran",
 		"YI-":  "Iraq",
 		"9K-":  "Kuwait",
+		"4K-":  "Azerbaijan",
 	}
 
 	// Check for matching prefixes
