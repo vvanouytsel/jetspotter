@@ -3,7 +3,10 @@ let allAircraft = [];
 let aircraftDescriptions = new Set();
 let currentFilters = {
     description: '',
-    military: false
+    statuses: {
+        military: false,
+        inbound: false
+    }
 };
 let currentSort = 'distance';
 let currentSortOrder = 'asc';
@@ -21,7 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('filter-military').addEventListener('change', (e) => {
-        currentFilters.military = e.target.checked;
+        currentFilters.statuses.military = e.target.checked;
+        renderAircraftGrid();
+    });
+
+    document.getElementById('filter-inbound').addEventListener('change', (e) => {
+        currentFilters.statuses.inbound = e.target.checked;
         renderAircraftGrid();
     });
 
@@ -114,12 +122,16 @@ async function fetchData() {
         
         const newAircraft = await response.json();
         
-        // Update last update timestamp
-        document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+        // Always update last update timestamp - this is key to fixing the countdown timer
+        lastUpdateTime = new Date();
+        document.getElementById('lastUpdate').textContent = lastUpdateTime.toLocaleTimeString();
         
         // Only update the UI if data has changed
         if (JSON.stringify(allAircraft) !== JSON.stringify(newAircraft)) {
             allAircraft = newAircraft;
+            
+            // Process inbound status for all aircraft immediately after fetching
+            processAircraftInboundStatus();
             
             // Update aircraft description dropdown
             updateAircraftDescriptions();
@@ -133,15 +145,34 @@ async function fetchData() {
         
         // Render the grid with the new data
         renderAircraftGrid();
-        
-        // Reset countdown timer
-        startCountdownTimer();
     } catch (error) {
         console.error('Error fetching aircraft data:', error);
-        // Even on error, stop showing loading
+        // Even on error, update timestamp and reset the timer
+        lastUpdateTime = new Date();
+        // Stop showing loading
         isLoading = false;
         renderAircraftGrid();
     }
+}
+
+// Process inbound status for all aircraft
+function processAircraftInboundStatus() {
+    // Calculate inbound status for all aircraft
+    allAircraft.forEach(aircraft => {
+        const heading = aircraft.Heading;
+        const bearing = aircraft.BearingFromLocation;
+        
+        if (heading !== undefined && bearing !== undefined && heading !== null && bearing !== null) {
+            const bearingToAircraft = bearing;
+            const bearingFromAircraft = (bearing + 180) % 360; // Opposite direction
+            const headingDiff = Math.abs((heading - bearingFromAircraft + 360) % 360);
+            
+            // Store inbound status on the aircraft object
+            aircraft.Inbound = (headingDiff <= 20);
+        } else {
+            aircraft.Inbound = false;
+        }
+    });
 }
 
 // Update available aircraft descriptions for filtering
@@ -219,27 +250,20 @@ function updateStats() {
     const totalAircraft = allAircraft.length;
     const militaryAircraft = allAircraft.filter(a => a.Military).length;
     
-    // Find closest and highest aircraft
+    // Find closest aircraft
     let closestAircraft = "-";
-    let highestAircraft = "-";
     
     if (totalAircraft > 0) {
         // Sort by distance
         const sortedByDistance = [...allAircraft].sort((a, b) => (a.Distance || 0) - (b.Distance || 0));
         const closest = sortedByDistance[0];
         closestAircraft = `${closest.Callsign || 'Unknown'} (${closest.Distance}km)`;
-        
-        // Sort by altitude
-        const sortedByAltitude = [...allAircraft].sort((a, b) => (b.Altitude || 0) - (a.Altitude || 0));
-        const highest = sortedByAltitude[0];
-        highestAircraft = `${highest.Callsign || 'Unknown'} (${Math.round(highest.Altitude).toLocaleString()}ft)`;
     }
     
     // Update DOM
     document.getElementById('totalAircraft').textContent = totalAircraft;
     document.getElementById('militaryAircraft').textContent = militaryAircraft;
     document.getElementById('closestAircraft').textContent = closestAircraft;
-    document.getElementById('highestAircraft').textContent = highestAircraft;
 }
 
 // Filter and sort aircraft based on current settings
@@ -255,8 +279,12 @@ function getFilteredAndSortedAircraft() {
         });
     }
     
-    if (currentFilters.military) {
+    if (currentFilters.statuses.military) {
         filtered = filtered.filter(aircraft => aircraft.Military);
+    }
+    
+    if (currentFilters.statuses.inbound) {
+        filtered = filtered.filter(aircraft => aircraft.Inbound);
     }
     
     // Apply sorting
@@ -313,8 +341,19 @@ function renderAircraftGrid() {
         noAircraftMessage.classList.add('loading', 'scanning');
     } else if (filteredAircraft.length === 0) {
         noAircraftMessage.style.display = 'flex';
-        noAircraftMessage.innerHTML = 'No aircraft currently spotted';
-        noAircraftMessage.classList.remove('loading', 'scanning');
+        // Use the same message for consistency
+        noAircraftMessage.innerHTML = `
+            <div class="scanning-animation">
+                <div class="radar-circle"></div>
+                <div class="radar-sweep"></div>
+            </div>
+            <div class="scanning-text">
+                <div class="scanning-title">Scanning the skies...</div>
+                <div class="scanning-subtitle">Looking for aircraft in your vicinity</div>
+            </div>
+        `;
+        noAircraftMessage.classList.add('scanning');
+        noAircraftMessage.classList.remove('loading');
     } else {
         noAircraftMessage.style.display = 'none';
         noAircraftMessage.classList.remove('loading', 'scanning');
@@ -356,6 +395,15 @@ function createAircraftCard(aircraft) {
     const militaryBadge = card.querySelector('.aircraft-military-badge');
     militaryBadge.style.display = aircraft.Military ? 'block' : 'none';
     
+    // Handle inbound status display
+    const approachBadge = card.querySelector('.aircraft-approach-badge');
+    if (aircraft.Inbound) {
+        approachBadge.style.display = 'block';
+        card.classList.add('is-inbound');
+    } else {
+        approachBadge.style.display = 'none';
+    }
+    
     // Set the image - use ImageURL as fallback if thumbnail is not available
     // If no image is available, use the aircraft_not_found.png
     const imgElement = card.querySelector('.aircraft-image img');
@@ -389,21 +437,31 @@ function createAircraftCard(aircraft) {
     
     card.querySelector('.aircraft-speed').textContent = aircraft.Speed || 'Unknown';
     card.querySelector('.aircraft-distance').textContent = aircraft.Distance || 'Unknown';
-    card.querySelector('.aircraft-heading').textContent = aircraft.Heading ? Math.round(aircraft.Heading) : 'Unknown';
+    
+    // Fix: Use aircraft.Heading instead of the undefined 'heading' variable
+    const heading = aircraft.Heading;
+    card.querySelector('.aircraft-heading').textContent = heading ? Math.round(heading) : 'Unknown';
+    
+    // Set aircraft heading direction indicator
+    if (heading !== undefined && heading !== null) {
+        const headingIndicator = card.querySelector('.heading-indicator');
+        // Rotate the SVG to match the aircraft's heading
+        headingIndicator.style.transform = `rotate(${heading}deg)`;
+        headingIndicator.title = `Aircraft heading direction: ${Math.round(heading)}°`;
+    }
     
     // Set bearing and rotate the compass arrow
     const bearing = aircraft.BearingFromLocation;
-    
     if (bearing !== undefined && bearing !== null) {
-        const directionContainer = card.querySelector('.direction-container');
-        const directionArrow = directionContainer.querySelector('svg');
+        const directionIndicator = card.querySelector('.direction-indicator');
+        const directionArrow = directionIndicator.querySelector('svg');
         
         // Rotate the SVG for the compass arrow
         directionArrow.style.transform = `rotate(${bearing}deg)`;
         
         // Update the tooltip to show the bearing
         const bearingRounded = Math.round(bearing);
-        directionContainer.title = `Direction to aircraft from your location: ${bearingRounded}°`;
+        directionIndicator.title = `Direction to aircraft from your location: ${bearingRounded}°`;
     }
     
     // Set up links section with appropriate disabled states for unavailable resources

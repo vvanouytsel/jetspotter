@@ -51,10 +51,6 @@
                     <div class="stat-value" id="closestAircraft">-</div>
                     <div class="stat-label">Closest Aircraft</div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="highestAircraft">-</div>
-                    <div class="stat-label">Highest Aircraft</div>
-                </div>
             </div>
 
             <div class="filter-container">
@@ -65,9 +61,18 @@
                         <!-- Description options will be populated by JavaScript -->
                     </select>
                 </div>
-                <div class="filter">
-                    <label for="filter-military">Military Only:</label>
-                    <input type="checkbox" id="filter-military">
+                <div class="filter filter-status">
+                    <label>Status Filters:</label>
+                    <div class="status-filters">
+                        <div class="status-filter-item">
+                            <input type="checkbox" id="filter-military" data-filter="military">
+                            <label for="filter-military">Military</label>
+                        </div>
+                        <div class="status-filter-item">
+                            <input type="checkbox" id="filter-inbound" data-filter="inbound">
+                            <label for="filter-inbound">Inbound</label>
+                        </div>
+                    </div>
                 </div>
                 <div class="filter">
                     <label for="sort-by">Sort By:</label>
@@ -129,6 +134,7 @@
                 </div>
                 <div class="aircraft-header-right">
                     <div class="aircraft-military-badge">MILITARY</div>
+                    <div class="aircraft-approach-badge" title="Aircraft is flying towards your location">INBOUND</div>
                     <div class="aircraft-country">
                         <span class="aircraft-country-flag"></span>
                     </div>
@@ -181,6 +187,11 @@
                 <div class="info-row">
                     <span class="info-label">Heading:</span>
                     <div class="info-value">
+                        <span class="heading-indicator" title="Aircraft heading direction">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 19V5M12 5l-4 4M12 5l4 4"/>
+                            </svg>
+                        </span>
                         <span class="aircraft-heading"></span>
                         <span class="unit">°</span>
                     </div>
@@ -193,12 +204,12 @@
                         <circle cx="12" cy="10" r="3"></circle>
                     </svg>
                 </a>
-                <a href="javascript:void(0)" class="direction-container" title="Direction to aircraft from your location: N°">
+                <span class="direction-indicator" title="Direction to aircraft from your location: N°">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <polygon points="12 2 15 12 12 15 9 12 12 2"></polygon>
                     </svg>
-                </a>
+                </span>
                 <a href="#" class="image-link" target="_blank" title="More Images">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>

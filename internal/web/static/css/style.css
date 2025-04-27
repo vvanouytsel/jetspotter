@@ -191,6 +191,41 @@ header h1 {
     border: 1px solid #ddd;
 }
 
+/* Status filters styling */
+.filter-status {
+    display: flex;
+    flex-direction: column;
+}
+
+.status-filters {
+    display: flex;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+.status-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-filter-item label {
+    cursor: pointer;
+    font-weight: normal;
+    margin-right: 0;
+}
+
+.status-filter-item input[type="checkbox"] {
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .status-filters {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
 /* Aircraft grid */
 .aircraft-grid {
     display: grid;
@@ -226,13 +261,18 @@ header h1 {
     background-color: var(--card-color);
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
 }
 
 .scanning-animation {
     position: relative;
     width: 120px;
     height: 120px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 .radar-circle {
@@ -407,6 +447,22 @@ header h1 {
     display: block;
 }
 
+/* Approaching badge styling */
+.aircraft-approach-badge {
+    background-color: #4CAF50; /* Light green color */
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    display: none;
+    margin-right: 10px;
+}
+
+[data-theme="dark"] .aircraft-approach-badge {
+    background-color: #5cb85c; /* Slightly brighter green for dark mode */
+}
+
 .aircraft-image {
     height: 150px;
     overflow: hidden;
@@ -563,23 +619,55 @@ header h1 {
     background-color: var(--accent-color);
 }
 
-.aircraft-links a.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background-color: var(--button-color);
+/* Heading indicator styling */
+.heading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background-color: var(--secondary-color);
+    border-radius: 50%;
+    margin-right: 8px;
+    transition: transform 0.3s ease;
 }
 
-.aircraft-links a.disabled:hover {
-    transform: none;
-    background-color: var(--button-color);
+.heading-indicator svg {
+    width: 16px;
+    height: 16px;
+    stroke: white;
+    fill: none;
 }
 
-.aircraft-links a svg {
-    width: 28px; /* Slightly smaller icons */
-    height: 28px; /* Slightly smaller icons */
+[data-theme="dark"] .heading-indicator {
+    background-color: #ff9800; /* Same orange as the sun icon */
 }
 
-/* Notification icons */
+/* Direction indicator styling - converted from a-link to span */
+.direction-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--secondary-color);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    transition: transform 0.3s ease;
+}
+
+.direction-indicator svg {
+    width: 28px;
+    height: 28px;
+    stroke: white;
+    fill: none;
+}
+
+[data-theme="dark"] .direction-indicator {
+    background-color: #ff9800;
+}
+
 .aircraft-notifications {
     display: flex;
     padding: 8px 15px;
