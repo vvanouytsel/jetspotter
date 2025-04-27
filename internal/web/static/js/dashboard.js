@@ -168,7 +168,7 @@ function processAircraftInboundStatus() {
             const headingDiff = Math.abs((heading - bearingFromAircraft + 360) % 360);
             
             // Store inbound status on the aircraft object
-            aircraft.Inbound = (headingDiff <= 20);
+            aircraft.Inbound = (headingDiff <= 30);
         } else {
             aircraft.Inbound = false;
         }
