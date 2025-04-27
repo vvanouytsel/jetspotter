@@ -12,6 +12,9 @@ import (
 	"time"
 )
 
+// Global channel to indicate when the first data fetch is complete
+var dataReadyChan = make(chan bool, 1)
+
 func exitWithError(err error) {
 	log.Fatalf("Something went wrong: %v\n", err)
 }
@@ -62,7 +65,7 @@ func sendNotifications(aircraft []jetspotter.AircraftOutput, config configuratio
 	return nil
 }
 
-func jetspotterHandler(alreadySpottedAircraft *[]jetspotter.Aircraft, config configuration.Config) {
+func jetspotterHandler(alreadySpottedAircraft *[]jetspotter.Aircraft, config configuration.Config, isFirstRun bool) {
 	aircraft, err := jetspotter.HandleAircraft(alreadySpottedAircraft, config)
 	if err != nil {
 		exitWithError(err)
@@ -71,6 +74,17 @@ func jetspotterHandler(alreadySpottedAircraft *[]jetspotter.Aircraft, config con
 	err = sendNotifications(aircraft, config)
 	if err != nil {
 		exitWithError(err)
+	}
+
+	// If this is the first successful data fetch, signal that data is ready
+	if isFirstRun {
+		// Signal that data is ready (use non-blocking send)
+		select {
+		case dataReadyChan <- true:
+			log.Println("Notified web UI that aircraft data is now available")
+		default:
+			// Channel already has a value or no receivers yet, that's fine
+		}
 	}
 }
 
@@ -88,8 +102,13 @@ func HandleJetspotter(config configuration.Config) {
 	}
 
 	var alreadySpottedAircraft []jetspotter.Aircraft
+	isFirstRun := true
+
 	for {
-		jetspotterHandler(&alreadySpottedAircraft, config)
+		jetspotterHandler(&alreadySpottedAircraft, config, isFirstRun)
+		if isFirstRun {
+			isFirstRun = false
+		}
 		time.Sleep(time.Duration(config.FetchInterval) * time.Second)
 	}
 }
@@ -128,6 +147,7 @@ func HandleWebUI(config configuration.Config) {
 			ListenPort:    port,
 			APIEndpoint:   apiEndpoint,
 			RefreshPeriod: time.Duration(config.FetchInterval) * time.Second,
+			DataReadyChan: dataReadyChan, // Pass the channel to the web server
 		}
 
 		webServer := web.NewServer(webConfig)
@@ -138,10 +158,18 @@ func HandleWebUI(config configuration.Config) {
 }
 
 func main() {
-	// Log version information at startup
-	log.Printf("Starting Jetspotter version %s (commit: %s, built at: %s)", 
-		version.Version, version.Commit, version.BuildTime)
-	
+	// Display a professional version banner at startup
+	versionBanner := `
+  ╔════════════════════════════════════════════════════════╗
+  ║                      JETSPOTTER                        ║
+  ╠════════════════════════════════════════════════════════╣
+  ║  Version: %-10s                                   ║
+  ║  Commit:  %-10s                                   ║
+  ║  Built:   %-10s                                   ║
+  ╚════════════════════════════════════════════════════════╝
+`
+	log.Printf(versionBanner, version.Version, version.Commit, version.BuildTime)
+
 	config, err := configuration.GetConfig()
 	if err != nil {
 		exitWithError(err)

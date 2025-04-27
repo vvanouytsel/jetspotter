@@ -11,6 +11,9 @@ build:
 run:
 	MAX_RANGE_KILOMETERS=70 go run cmd/jetspotter/*
 	
+run-close:
+	MAX_RANGE_KILOMETERS=1 go run cmd/jetspotter/*
+	
 run-with-extended-scan:
 	MAX_RANGE_KILOMETERS=30 MAX_SCAN_RANGE_KILOMETERS=40 FETCH_INTERVAL=10 go run cmd/jetspotter/*
 

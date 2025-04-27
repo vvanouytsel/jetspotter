@@ -300,15 +300,24 @@ function renderAircraftGrid() {
     // Show/hide the no-aircraft message or loading spinner
     if (isLoading) {
         noAircraftMessage.style.display = 'flex';
-        noAircraftMessage.innerHTML = '<div class="loading-spinner"></div><div class="loading-text">Loading aircraft data...</div>';
-        noAircraftMessage.classList.add('loading');
+        noAircraftMessage.innerHTML = `
+            <div class="scanning-animation">
+                <div class="radar-circle"></div>
+                <div class="radar-sweep"></div>
+            </div>
+            <div class="scanning-text">
+                <div class="scanning-title">Scanning the skies...</div>
+                <div class="scanning-subtitle">Looking for aircraft in your vicinity</div>
+            </div>
+        `;
+        noAircraftMessage.classList.add('loading', 'scanning');
     } else if (filteredAircraft.length === 0) {
         noAircraftMessage.style.display = 'flex';
         noAircraftMessage.innerHTML = 'No aircraft currently spotted';
-        noAircraftMessage.classList.remove('loading');
+        noAircraftMessage.classList.remove('loading', 'scanning');
     } else {
         noAircraftMessage.style.display = 'none';
-        noAircraftMessage.classList.remove('loading');
+        noAircraftMessage.classList.remove('loading', 'scanning');
         
         // Render each aircraft card
         filteredAircraft.forEach(aircraft => {

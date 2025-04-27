@@ -24,23 +24,53 @@ type Config struct {
 	ListenPort    int
 	APIEndpoint   string
 	RefreshPeriod time.Duration
+	DataReadyChan <-chan bool // Channel to signal when data is ready
 }
 
 // Server represents the web frontend server
 type Server struct {
-	config Config
-	router *http.ServeMux
+	config        Config
+	router        *http.ServeMux
+	isDataReady   bool
+	dataReadyMux  http.Handler
+	pendingRoutes http.Handler
 }
 
 // NewServer creates a new web frontend server
 func NewServer(config Config) *Server {
+	pendingMux := http.NewServeMux()
+	pendingMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte("<html><head><title>Jetspotter Loading</title><meta http-equiv=\"refresh\" content=\"5\"></head><body><h1>Jetspotter is starting...</h1><p>Waiting for aircraft data to become available. This page will refresh automatically.</p></body></html>"))
+	})
+
+	mainMux := http.NewServeMux()
+
 	server := &Server{
-		config: config,
-		router: http.NewServeMux(),
+		config:        config,
+		router:        mainMux,
+		isDataReady:   false,
+		dataReadyMux:  pendingMux,
+		pendingRoutes: pendingMux,
 	}
 
 	server.setupRoutes()
+
+	// Set up a goroutine to wait for the data ready signal
+	if config.DataReadyChan != nil {
+		go server.waitForData()
+	}
+
 	return server
+}
+
+// waitForData waits for the data ready signal
+func (s *Server) waitForData() {
+	log.Println("Web UI: Waiting for aircraft data to be available...")
+	<-s.config.DataReadyChan
+	s.isDataReady = true
+	s.dataReadyMux = s.router // Switch to the main router once data is ready
+	log.Println("Web UI: Aircraft data is now available, serving full interface")
 }
 
 // setupRoutes configures the HTTP routes
@@ -63,16 +93,21 @@ func (s *Server) setupRoutes() {
 
 	// API endpoint for configuration
 	s.router.HandleFunc("/api/config", s.handleAPIConfigProxy)
-	
+
 	// Version information endpoint
 	s.router.HandleFunc("/api/version", s.handleVersion)
+}
+
+// ServeHTTP makes Server implement the http.Handler interface
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.dataReadyMux.ServeHTTP(w, r)
 }
 
 // Start runs the web server
 func (s *Server) Start() error {
 	addr := fmt.Sprintf(":%d", s.config.ListenPort)
 	log.Printf("Starting web frontend at http://localhost%s", addr)
-	return http.ListenAndServe(addr, s.router)
+	return http.ListenAndServe(addr, s)
 }
 
 // handleIndex serves the main page
