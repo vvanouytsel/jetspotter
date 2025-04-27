@@ -41,7 +41,330 @@ func NewServer(config Config) *Server {
 	pendingMux := http.NewServeMux()
 	pendingMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte("<html><head><title>Jetspotter Loading</title><meta http-equiv=\"refresh\" content=\"5\"></head><body><h1>Jetspotter is starting...</h1><p>Waiting for aircraft data to become available. This page will refresh automatically.</p></body></html>"))
+		w.Write([]byte(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jetspotter - Starting</title>
+    <meta http-equiv="refresh" content="5">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --background-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #e0e0e0;
+                --secondary-color: #cccccc;
+                --accent-color: #ff6b6b;
+                --background-color: #121212;
+                --card-color: #1e1e1e;
+                --text-color: #e0e0e0;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            width: 100%;
+            border-bottom: 1px solid rgba(125, 125, 125, 0.2);
+        }
+        
+        header h1 {
+            color: var(--secondary-color);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 3rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .scanning-animation {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            margin-bottom: 30px;
+        }
+        
+        .radar-circle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid var(--secondary-color);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.97); opacity: 0.8; }
+            50% { transform: scale(1.03); opacity: 1; }
+            100% { transform: scale(0.97); opacity: 0.8; }
+        }
+        
+        .radar-circle::before, .radar-circle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 2px solid var(--secondary-color);
+            opacity: 0.7;
+        }
+        
+        .radar-circle::before {
+            width: 70%;
+            height: 70%;
+            animation: ripple 3s infinite ease-out;
+        }
+        
+        .radar-circle::after {
+            width: 40%;
+            height: 40%;
+            animation: ripple 3s infinite ease-out 1s;
+        }
+        
+        @keyframes ripple {
+            0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.9); }
+            50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.1); }
+            100% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.9); }
+        }
+        
+        .radar-sweep {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 52%;
+            height: 3px;
+            background-color: var(--secondary-color);
+            transform-origin: left center;
+            animation: radar-sweep 4s linear infinite;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+        }
+        
+        .radar-sweep::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 100%;
+            background: linear-gradient(to right, var(--secondary-color), transparent);
+            border-radius: 3px;
+        }
+        
+        @keyframes radar-sweep {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .aircraft-dots {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            opacity: 0;
+            animation: dot-appear 8s infinite linear;
+        }
+        
+        .aircraft-dot-1 {
+            top: 35%;
+            left: 70%;
+            animation-delay: 1s;
+        }
+        
+        .aircraft-dot-2 {
+            top: 60%;
+            left: 30%;
+            animation-delay: 3.5s;
+        }
+        
+        .aircraft-dot-3 {
+            top: 20%;
+            left: 40%;
+            animation-delay: 6s;
+        }
+        
+        @keyframes dot-appear {
+            0% { opacity: 0; transform: scale(0); }
+            5% { opacity: 1; transform: scale(1); }
+            15% { opacity: 1; transform: scale(1); }
+            20% { opacity: 0; transform: scale(0); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+        
+        .loading-text {
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        .loading-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+        }
+        
+        .loading-message {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+        
+        .loading-progress {
+            width: 100%;
+            height: 4px;
+            background-color: rgba(125, 125, 125, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+            margin-top: 1.5rem;
+        }
+        
+        .loading-progress-bar {
+            position: absolute;
+            height: 100%;
+            background-color: var(--secondary-color);
+            width: 30%;
+            border-radius: 2px;
+            animation: progress-animation 3s infinite ease-in-out;
+        }
+        
+        @keyframes progress-animation {
+            0% { width: 0%; left: 0; }
+            50% { width: 30%; }
+            100% { left: 100%; width: 0%; }
+        }
+        
+        .refresh-note {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem 0;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .radar-circle {
+                border-color: var(--accent-color);
+                box-shadow: 0 0 30px rgba(231, 76, 60, 0.2);
+            }
+            
+            .radar-circle::before, .radar-circle::after {
+                border-color: var(--accent-color);
+            }
+            
+            .radar-sweep {
+                background-color: var(--accent-color);
+                box-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+            }
+            
+            .radar-sweep::after {
+                background: linear-gradient(to right, var(--accent-color), transparent);
+            }
+            
+            .loading-title {
+                color: var(--accent-color);
+            }
+            
+            .loading-progress-bar {
+                background-color: var(--accent-color);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Jetspotter</h1>
+        </header>
+        
+        <div class="loading-container">
+            <div class="scanning-animation">
+                <div class="radar-circle"></div>
+                <div class="radar-sweep"></div>
+                <div class="aircraft-dots aircraft-dot-1"></div>
+                <div class="aircraft-dots aircraft-dot-2"></div>
+                <div class="aircraft-dots aircraft-dot-3"></div>
+            </div>
+            
+            <div class="loading-text">
+                <div class="loading-title">Jetspotter is starting...</div>
+                <div class="loading-message">Initializing systems and waiting for aircraft data to become available.</div>
+                <div class="loading-progress">
+                    <div class="loading-progress-bar"></div>
+                </div>
+                <div class="refresh-note">This page will refresh automatically every 5 seconds.</div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div>&copy; Jetspotter</div>
+    </footer>
+</body>
+</html>`))
 	})
 
 	mainMux := http.NewServeMux()

@@ -138,4 +138,7 @@ type AircraftOutput struct {
 
 	// Specifies if it is a military type aircraft or not
 	Military bool
+
+	// Specifies if the aircraft is traveling towards your location or not
+	Inbound bool
 }

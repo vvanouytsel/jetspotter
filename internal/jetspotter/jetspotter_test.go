@@ -3,6 +3,7 @@ package jetspotter
 import (
 	"jetspotter/internal/aircraft"
 	"jetspotter/internal/configuration"
+	"math"
 	"reflect"
 	"testing"
 
@@ -733,5 +734,273 @@ func TestHandleAircraftWithScanRange(t *testing.T) {
 	// This verifies that the notifications list only includes aircraft within notification range
 	if updatedSpottedAircraft[0].Callsign != "NEAR1" {
 		t.Fatalf("Expected NEAR1 in updatedSpottedAircraft, got %s", updatedSpottedAircraft[0].Callsign)
+	}
+}
+
+// TestIsAircraftInboundDirectly tests aircraft flying directly towards the target location
+func TestIsAircraftInboundDirectly(t *testing.T) {
+	// Set up location and aircraft flying directly towards it
+	// The aircraft's Track should match the bearing from aircraft to location
+	location := geodist.Coord{
+		Lat: 51.0,
+		Lon: 5.0,
+	}
+
+	// Calculate the bearing from aircraft to location
+	aircraftLocation := geodist.Coord{
+		Lat: 51.5,
+		Lon: 5.0,
+	}
+	bearingToTarget := CalculateBearing(aircraftLocation, location)
+
+	aircraft := Aircraft{
+		Lat:   51.5,
+		Lon:   5.0,
+		Track: bearingToTarget, // Aircraft heading directly toward the location
+	}
+
+	// Test with different margins
+	testCases := []struct {
+		margin   float64
+		expected bool
+	}{
+		{0.1, true},  // Very tight margin
+		{5.0, true},  // Small margin
+		{20.0, true}, // Wide margin
+		{90.0, true}, // Very wide margin (should still be true)
+	}
+
+	for _, tc := range testCases {
+		result := IsAircraftInbound(location, aircraft, tc.margin)
+		if result != tc.expected {
+			bearing := CalculateBearing(aircraftLocation, location)
+			diff := math.Abs(bearing - aircraft.Track)
+			if diff > 180 {
+				diff = 360 - diff
+			}
+
+			t.Fatalf("IsAircraftInbound with margin %v: expected %v, got %v. Bearing: %v, Track: %v, diff: %v",
+				tc.margin, tc.expected, result, bearing, aircraft.Track, diff)
+		}
+	}
+}
+
+// TestIsAircraftInboundSlightlyOff tests aircraft flying slightly off from direct path
+func TestIsAircraftInboundSlightlyOff(t *testing.T) {
+	// Set up location and aircraft flying slightly off from direct path
+	location := geodist.Coord{
+		Lat: 51.0,
+		Lon: 5.0,
+	}
+
+	// Calculate the ideal bearing from aircraft to location
+	aircraftLocation := geodist.Coord{
+		Lat: 51.5,
+		Lon: 5.1, // Slightly east of direct north
+	}
+	idealBearing := CalculateBearing(aircraftLocation, location)
+
+	// Aircraft is flying 5 degrees off from ideal bearing
+	aircraft := Aircraft{
+		Lat:   51.5,
+		Lon:   5.1,
+		Track: idealBearing - 5, // 5 degrees off from ideal bearing
+	}
+
+	// Test with different margins
+	testCases := []struct {
+		margin   float64
+		expected bool
+	}{
+		{1.0, false}, // Very tight margin - should fail
+		{5.0, true},  // Small margin - should pass
+		{20.0, true}, // Wide margin - should pass
+	}
+
+	for _, tc := range testCases {
+		result := IsAircraftInbound(location, aircraft, tc.margin)
+		if result != tc.expected {
+			bearing := CalculateBearing(aircraftLocation, location)
+			diff := math.Abs(bearing - aircraft.Track)
+			if diff > 180 {
+				diff = 360 - diff
+			}
+
+			t.Fatalf("IsAircraftInbound with margin %v: expected %v, got %v. Bearing: %v, Track: %v, diff: %v",
+				tc.margin, tc.expected, result, bearing, aircraft.Track, diff)
+		}
+	}
+}
+
+// TestIsAircraftNotInbound tests aircraft flying perpendicular to or away from the target
+func TestIsAircraftNotInbound(t *testing.T) {
+	// Case 1: Aircraft flying perpendicular to the location
+	perpLocation := geodist.Coord{
+		Lat: 51.0,
+		Lon: 5.0,
+	}
+
+	perpAircraftLocation := geodist.Coord{
+		Lat: 51.0,
+		Lon: 6.0, // East of the location
+	}
+	idealBearing := CalculateBearing(perpAircraftLocation, perpLocation)
+
+	perpAircraft := Aircraft{
+		Lat:   51.0,
+		Lon:   6.0,
+		Track: math.Mod(idealBearing+90, 360), // Flying 90 degrees off from ideal bearing
+	}
+
+	// Case 2: Aircraft flying away from the location
+	awayLocation := geodist.Coord{
+		Lat: 51.0,
+		Lon: 5.0,
+	}
+
+	awayAircraftLocation := geodist.Coord{
+		Lat: 50.5,
+		Lon: 5.0, // South of the location
+	}
+	idealBearingAway := CalculateBearing(awayAircraftLocation, awayLocation)
+
+	awayAircraft := Aircraft{
+		Lat:   50.5,
+		Lon:   5.0,
+		Track: math.Mod(idealBearingAway+180, 360), // Flying in the opposite direction
+	}
+
+	// Test both cases with different margins
+	testCases := []struct {
+		location    geodist.Coord
+		aircraft    Aircraft
+		aircraftLoc geodist.Coord
+		margin      float64
+		expected    bool
+		name        string
+	}{
+		{perpLocation, perpAircraft, perpAircraftLocation, 10.0, false, "perpendicular with 10° margin"},
+		{perpLocation, perpAircraft, perpAircraftLocation, 45.0, false, "perpendicular with 45° margin"},
+		{perpLocation, perpAircraft, perpAircraftLocation, 95.0, true, "perpendicular with 95° margin"}, // Should pass with very wide margin
+		{awayLocation, awayAircraft, awayAircraftLocation, 10.0, false, "flying away with 10° margin"},
+		{awayLocation, awayAircraft, awayAircraftLocation, 45.0, false, "flying away with 45° margin"},
+		{awayLocation, awayAircraft, awayAircraftLocation, 179.0, false, "flying away with 179° margin"},
+		{awayLocation, awayAircraft, awayAircraftLocation, 185.0, true, "flying away with 185° margin"}, // Should pass with margin > 180
+	}
+
+	for _, tc := range testCases {
+		result := IsAircraftInbound(tc.location, tc.aircraft, tc.margin)
+		if result != tc.expected {
+			bearing := CalculateBearing(tc.aircraftLoc, tc.location)
+			diff := math.Abs(bearing - tc.aircraft.Track)
+			if diff > 180 {
+				diff = 360 - diff
+			}
+
+			t.Fatalf("%s: expected %v, got %v. Bearing: %v, Track: %v, diff: %v",
+				tc.name, tc.expected, result, bearing, tc.aircraft.Track, diff)
+		}
+	}
+}
+
+// TestIsAircraftInboundRealWorld tests the function with real-world coordinates
+func TestIsAircraftInboundRealWorld(t *testing.T) {
+	// Brussels location
+	brusselsLocation := geodist.Coord{Lat: 50.844987, Lon: 4.349981}
+
+	// Aircraft near Heathrow heading towards Brussels
+	heathrowLocation := geodist.Coord{Lat: 51.470020, Lon: -0.454295}
+	heathrowToBrusselsBearing := CalculateBearing(heathrowLocation, brusselsLocation)
+
+	heathrowAircraft := Aircraft{
+		Lat:   51.470020,
+		Lon:   -0.454295,
+		Track: heathrowToBrusselsBearing, // Exact heading from Heathrow to Brussels
+	}
+
+	// Aircraft heading slightly off from Brussels
+	heathrowAircraftOffCourse := Aircraft{
+		Lat:   51.470020,
+		Lon:   -0.454295,
+		Track: heathrowToBrusselsBearing + 12, // 12 degrees off
+	}
+
+	// JFK to Brussels bearing
+	jfkLocation := geodist.Coord{Lat: 40.639751, Lon: -73.778925}
+	jfkToBrusselsBearing := CalculateBearing(jfkLocation, brusselsLocation)
+
+	// JFK Aircraft heading towards Europe
+	jfkAircraft := Aircraft{
+		Lat:   40.639751,
+		Lon:   -73.778925,
+		Track: jfkToBrusselsBearing, // Exact heading to Brussels
+	}
+
+	// Test with existing locations from test file
+	elisabethToPisBearing := CalculateBearing(locationElisabethPark, locationMannekenPis)
+
+	elisabethParkAircraft := Aircraft{
+		Lat:   locationElisabethPark.Lat,
+		Lon:   locationElisabethPark.Lon,
+		Track: elisabethToPisBearing, // Exact heading to Manneken Pis
+	}
+
+	testCases := []struct {
+		location geodist.Coord
+		aircraft Aircraft
+		margin   float64
+		expected bool
+		name     string
+	}{
+		{
+			location: brusselsLocation,
+			aircraft: heathrowAircraft,
+			margin:   5.0,
+			expected: true,
+			name:     "Heathrow to Brussels with 5° margin (exact heading)",
+		},
+		{
+			location: brusselsLocation,
+			aircraft: heathrowAircraftOffCourse,
+			margin:   5.0,
+			expected: false, // With tight margin, the off-course aircraft fails
+			name:     "Heathrow to Brussels with 5° margin (12° off course)",
+		},
+		{
+			location: brusselsLocation,
+			aircraft: heathrowAircraftOffCourse,
+			margin:   15.0,
+			expected: true, // With wider margin, it passes
+			name:     "Heathrow to Brussels with 15° margin (12° off course)",
+		},
+		{
+			location: brusselsLocation,
+			aircraft: jfkAircraft,
+			margin:   5.0,
+			expected: true,
+			name:     "JFK to Brussels with 5° margin (exact heading)",
+		},
+		{
+			location: locationMannekenPis,
+			aircraft: elisabethParkAircraft,
+			margin:   5.0,
+			expected: true,
+			name:     "Elisabeth Park to Manneken Pis with 5° margin (exact heading)",
+		},
+	}
+
+	for _, tc := range testCases {
+		result := IsAircraftInbound(tc.location, tc.aircraft, tc.margin)
+		if result != tc.expected {
+			aircraftLocation := geodist.Coord{Lat: tc.aircraft.Lat, Lon: tc.aircraft.Lon}
+			bearing := CalculateBearing(aircraftLocation, tc.location)
+			diff := math.Abs(bearing - tc.aircraft.Track)
+			if diff > 180 {
+				diff = 360 - diff
+			}
+
+			t.Fatalf("%s: expected %v, got %v. Bearing: %v, Track: %v, diff: %v",
+				tc.name, tc.expected, result, bearing, tc.aircraft.Track, diff)
+		}
 	}
 }

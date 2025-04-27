@@ -14,6 +14,9 @@ type AircraftOutput struct {
 	// Registration number of the aircraft
 	Registration string
 
+	// Country of the aircraft based on the registration prefix
+	Country string
+
 	// Alitude of the aircraft in feet
 	Altitude float64
 
@@ -47,4 +50,7 @@ type AircraftOutput struct {
 
 	// Specifies if it is a military type aircraft or not
 	Military bool
+
+	// Specifies if the aircraft is traveling towards your location or not
+	Inbound bool
 }

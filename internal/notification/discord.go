@@ -126,6 +126,11 @@ func buildDiscordMessage(aircraft []jetspotter.AircraftOutput, config configurat
 					Inline: true,
 				},
 				{
+					Name:   "Inbound",
+					Value:  getInboundStatus(ac),
+					Inline: true,
+				},
+				{
 					Name:   "Type",
 					Value:  ac.Description,
 					Inline: true,

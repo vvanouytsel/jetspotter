@@ -96,6 +96,10 @@ func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 				},
 				{
 					Type: "mrkdwn",
+					Text: fmt.Sprintf("*Inbound:* %s", getInboundStatus(ac)),
+				},
+				{
+					Type: "mrkdwn",
 					Text: fmt.Sprintf("*Type:* %s", ac.Description),
 				},
 			},

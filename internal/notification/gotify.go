@@ -49,6 +49,7 @@ func buildGotifyMessage(aircraft []jetspotter.AircraftOutput, config configurati
 		message.Message += fmt.Sprintf("**Bearing to location:** %s\n\n", printBearingFromAircraft(ac))
 		message.Message += fmt.Sprintf("**Heading:** %s\n\n", printHeading(ac))
 		message.Message += fmt.Sprintf("**Cloud coverage:** %s\n\n", printCloudCoverage(ac))
+		message.Message += fmt.Sprintf("**Inbound:** %s\n\n", getInboundStatus(ac))
 		message.Message += fmt.Sprintf("**Type:** %s\n\n", ac.Type)
 	}
 

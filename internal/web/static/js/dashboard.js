@@ -32,6 +32,44 @@ document.addEventListener('DOMContentLoaded', () => {
         currentFilters.statuses.inbound = e.target.checked;
         renderAircraftGrid();
     });
+    
+    // Add click handler for the total aircraft stat box
+    document.getElementById('totalAircraftStat').addEventListener('click', () => {
+        // Reset all filters
+        currentFilters.description = '';
+        currentFilters.statuses.military = false;
+        currentFilters.statuses.inbound = false;
+        
+        // Update checkbox states in the UI
+        document.getElementById('filter-description').value = '';
+        document.getElementById('filter-military').checked = false;
+        document.getElementById('filter-inbound').checked = false;
+        
+        // Refresh the grid
+        renderAircraftGrid();
+    });
+    
+    // Add click handler for the military aircraft stat box
+    document.getElementById('militaryAircraftStat').addEventListener('click', () => {
+        // Toggle the military filter checkbox
+        const militaryCheckbox = document.getElementById('filter-military');
+        militaryCheckbox.checked = !militaryCheckbox.checked;
+        
+        // Update filter state and refresh the grid
+        currentFilters.statuses.military = militaryCheckbox.checked;
+        renderAircraftGrid();
+    });
+    
+    // Add click handler for the inbound aircraft stat box
+    document.getElementById('inboundAircraftStat').addEventListener('click', () => {
+        // Toggle the inbound filter checkbox
+        const inboundCheckbox = document.getElementById('filter-inbound');
+        inboundCheckbox.checked = !inboundCheckbox.checked;
+        
+        // Update filter state and refresh the grid
+        currentFilters.statuses.inbound = inboundCheckbox.checked;
+        renderAircraftGrid();
+    });
 
     document.getElementById('sort-by').addEventListener('change', (e) => {
         currentSort = e.target.value;
@@ -130,9 +168,6 @@ async function fetchData() {
         if (JSON.stringify(allAircraft) !== JSON.stringify(newAircraft)) {
             allAircraft = newAircraft;
             
-            // Process inbound status for all aircraft immediately after fetching
-            processAircraftInboundStatus();
-            
             // Update aircraft description dropdown
             updateAircraftDescriptions();
             
@@ -153,26 +188,6 @@ async function fetchData() {
         isLoading = false;
         renderAircraftGrid();
     }
-}
-
-// Process inbound status for all aircraft
-function processAircraftInboundStatus() {
-    // Calculate inbound status for all aircraft
-    allAircraft.forEach(aircraft => {
-        const heading = aircraft.Heading;
-        const bearing = aircraft.BearingFromLocation;
-        
-        if (heading !== undefined && bearing !== undefined && heading !== null && bearing !== null) {
-            const bearingToAircraft = bearing;
-            const bearingFromAircraft = (bearing + 180) % 360; // Opposite direction
-            const headingDiff = Math.abs((heading - bearingFromAircraft + 360) % 360);
-            
-            // Store inbound status on the aircraft object
-            aircraft.Inbound = (headingDiff <= 30);
-        } else {
-            aircraft.Inbound = false;
-        }
-    });
 }
 
 // Update available aircraft descriptions for filtering
@@ -249,21 +264,16 @@ function getAltitudeHeaderClass(altitude) {
 function updateStats() {
     const totalAircraft = allAircraft.length;
     const militaryAircraft = allAircraft.filter(a => a.Military).length;
-    
-    // Find closest aircraft
-    let closestAircraft = "-";
-    
-    if (totalAircraft > 0) {
-        // Sort by distance
-        const sortedByDistance = [...allAircraft].sort((a, b) => (a.Distance || 0) - (b.Distance || 0));
-        const closest = sortedByDistance[0];
-        closestAircraft = `${closest.Callsign || 'Unknown'} (${closest.Distance}km)`;
-    }
+    const inboundAircraft = allAircraft.filter(a => a.Inbound).length;
     
     // Update DOM
     document.getElementById('totalAircraft').textContent = totalAircraft;
     document.getElementById('militaryAircraft').textContent = militaryAircraft;
-    document.getElementById('closestAircraft').textContent = closestAircraft;
+    document.getElementById('inboundAircraft').textContent = inboundAircraft;
+    
+    // Update the active state of the filter tiles based on current filters
+    document.getElementById('inboundAircraftStat').classList.toggle('active', currentFilters.statuses.inbound);
+    document.getElementById('militaryAircraftStat').classList.toggle('active', currentFilters.statuses.military);
 }
 
 // Filter and sort aircraft based on current settings
@@ -324,6 +334,10 @@ function renderAircraftGrid() {
             gridElement.removeChild(child);
         }
     });
+    
+    // Update the active state of the filter tiles based on current filters
+    document.getElementById('inboundAircraftStat').classList.toggle('active', currentFilters.statuses.inbound);
+    document.getElementById('militaryAircraftStat').classList.toggle('active', currentFilters.statuses.military);
     
     // Show/hide the no-aircraft message or loading spinner
     if (isLoading) {
@@ -579,6 +593,7 @@ function getCountryFlagEmoji(countryName) {
         'Belarus': 'BY',
         'Russia': 'RU',
         'Moldova': 'MD',
+        'San Marino': 'SM',
         'Bulgaria': 'BG',
         'Slovakia': 'SK',
         'Austria': 'AT',

@@ -9,6 +9,7 @@ import (
 
 // FormatAircraft prints an Aircraft in a readable manner.
 func FormatAircraft(aircraft jetspotter.AircraftOutput, config configuration.Config) string {
+	inboundStatus := getInboundStatus(aircraft)
 
 	return fmt.Sprintf("Callsign: %s\n"+
 		"Description: %s\n"+
@@ -22,6 +23,7 @@ func FormatAircraft(aircraft jetspotter.AircraftOutput, config configuration.Con
 		"Bearing from location: %.0f°\n"+
 		"Bearing from aircraft: %.0f°\n"+
 		"Heading: %.0f°\n"+
+		"Inbound: %s\n"+
 		"TrackerURL: %s\n"+
 		"ImageURL: %s\n",
 
@@ -29,7 +31,7 @@ func FormatAircraft(aircraft jetspotter.AircraftOutput, config configuration.Con
 		aircraft.Registration, aircraft.Country, int(aircraft.Altitude), jetspotter.ConvertFeetToMeters(aircraft.Altitude),
 		aircraft.Speed, jetspotter.ConvertKnotsToKilometersPerHour(aircraft.Speed),
 		aircraft.Distance, aircraft.CloudCoverage, aircraft.BearingFromLocation,
-		aircraft.BearingFromAircraft, aircraft.Heading, aircraft.TrackerURL, aircraft.ImageURL)
+		aircraft.BearingFromAircraft, aircraft.Heading, inboundStatus, aircraft.TrackerURL, aircraft.ImageURL)
 }
 
 // SendTerminalMessage prints a list of Aircraft in a readable manner.

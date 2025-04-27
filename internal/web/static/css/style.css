@@ -162,6 +162,87 @@ header h1 {
     margin-top: 2px;
 }
 
+/* Clickable stat box styling */
+.stat-box.clickable {
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.stat-box.clickable::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background-color: var(--secondary-color);
+    transition: width 0.3s ease;
+}
+
+[data-theme="dark"] .stat-box.clickable::after {
+    background-color: var(--accent-color); /* Changed from orange to red accent color */
+}
+
+.stat-box.clickable:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.stat-box.clickable:hover::after {
+    width: 100%;
+}
+
+.stat-box.clickable:hover .stat-value {
+    transform: scale(1.05);
+}
+
+[data-theme="dark"] .stat-box.clickable:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Active state for filter tiles (Military and Inbound) */
+#militaryAircraftStat.active,
+#inboundAircraftStat.active {
+    position: relative;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+#militaryAircraftStat.active::before,
+#inboundAircraftStat.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 3px solid var(--secondary-color);
+    border-radius: 8px;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+[data-theme="dark"] #militaryAircraftStat.active::before,
+[data-theme="dark"] #inboundAircraftStat.active::before {
+    border-color: var(--accent-color); /* Changed from orange to red accent color */
+}
+
+/* Color styling for the inbound and military values */
+#inboundAircraftStat .stat-value,
+#militaryAircraftStat .stat-value {
+    color: var(--button-color); /* Changed to button-color to match Total Aircraft */
+    transition: color 0.3s ease;
+}
+
+[data-theme="dark"] #inboundAircraftStat .stat-value,
+[data-theme="dark"] #militaryAircraftStat .stat-value {
+    color: #ffffff; /* White color in dark mode */
+}
+
 /* Filter section */
 .filter-container {
     display: flex;
@@ -582,15 +663,15 @@ header h1 {
     text-decoration: none;
     color: white;
     font-weight: bold;
-    padding: 12px; /* Reduce padding for smaller buttons */
+    padding: 12px;
     border-radius: 50%;
     background-color: var(--button-color);
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 50px; /* Smaller size */
-    height: 50px; /* Smaller size */
+    width: 50px;
+    height: 50px;
 }
 
 /* Style for disabled links */
@@ -609,7 +690,7 @@ header h1 {
 .aircraft-links a:hover {
     opacity: 0.9;
     transform: translateY(-2px);
-    background-color: var(--primary-color);
+    background-color: var(--secondary-color); /* Changed to secondary-color (dark blue) for consistency */
 }
 
 .aircraft-links a.disabled:hover {
@@ -629,24 +710,22 @@ header h1 {
     justify-content: center;
     width: 24px;
     height: 24px;
-    background-color: var(--secondary-color);
-    border-radius: 50%;
-    margin-right: 8px;
+    margin-right: 4px; /* Reduced from 8px to 4px to decrease spacing */
     transition: transform 0.3s ease;
 }
 
 .heading-indicator svg {
-    width: 16px;
-    height: 16px;
-    stroke: white;
+    width: 18px; /* Increased from 16px to 18px */
+    height: 18px; /* Increased from 16px to 18px */
+    stroke: var(--secondary-color);
     fill: none;
 }
 
-[data-theme="dark"] .heading-indicator {
-    background-color: #ff9800; /* Same orange as the sun icon */
+[data-theme="dark"] .heading-indicator svg {
+    stroke: var(--accent-color);
 }
 
-/* Direction indicator styling - converted from a-link to span */
+/* Direction indicator styling */
 .direction-indicator {
     display: flex;
     align-items: center;
@@ -654,23 +733,38 @@ header h1 {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background-color: var(--secondary-color);
+    background-color: var(--secondary-color); /* Changed to secondary-color (dark blue) in light mode */
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-    z-index: 1;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+.direction-indicator:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
 }
 
 .direction-indicator svg {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     stroke: white;
+    fill: white;
+}
+
+.direction-indicator svg circle {
     fill: none;
+    stroke: white;
+}
+
+.direction-indicator svg path {
+    fill: white;
+    stroke: none;
 }
 
 [data-theme="dark"] .direction-indicator {
-    background-color: #ff9800;
+    background-color: var(--accent-color);
 }
 
+/* Aircraft notifications */
 .aircraft-notifications {
     display: flex;
     padding: 8px 15px;
@@ -1108,7 +1202,7 @@ header h1 {
 }
 
 [data-theme="dark"] .theme-toggle svg {
-    fill: #ff9800; /* Changed from white to orange for the sun icon */
+    fill: var(--accent-color); /* Changed from orange to red accent color */
 }
 
 [data-theme="dark"] .theme-toggle .sun-icon {

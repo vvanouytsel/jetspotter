@@ -53,6 +53,7 @@ func buildNtfyMessage(aircraft []jetspotter.AircraftOutput, config configuration
 		message.Message += fmt.Sprintf("Bearing to location: %s\n", printBearingFromAircraft(ac))
 		message.Message += fmt.Sprintf("Heading: %s\n", printHeading(ac))
 		message.Message += fmt.Sprintf("Cloud coverage: %s\n", printCloudCoverage(ac))
+		message.Message += fmt.Sprintf("Inbound: %s\n", getInboundStatus(ac))
 		message.Message += fmt.Sprintf("Type: %s\n", ac.Type)
 	}
 

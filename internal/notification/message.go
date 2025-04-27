@@ -112,3 +112,10 @@ func printBearingFromAircraft(ac jetspotter.AircraftOutput) string {
 func printCloudCoverage(ac jetspotter.AircraftOutput) string {
 	return fmt.Sprintf("%d%%", ac.CloudCoverage)
 }
+
+func getInboundStatus(ac jetspotter.AircraftOutput) string {
+	if ac.Inbound {
+		return "Yes"
+	}
+	return "No"
+}

@@ -350,9 +350,27 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.ImageThumbnailURL = image.ThumbnailLarge.Src
 		acOutput.ImageURL = image.Link
 		acOutput.Military = isAircraftMilitary(ac)
+		acOutput.Inbound = IsAircraftInbound(config.Location, ac, 30)
 		acOutputs = append(acOutputs, acOutput)
 	}
 	return acOutputs, nil
+}
+
+// IsAircraftInbound checks if the aircraft is inbound to the target location
+func IsAircraftInbound(location geodist.Coord, aircraft Aircraft, margin float64) bool {
+	// Calculate bearing from aircraft to location (where the aircraft should be pointing if heading to target)
+	bearingFromAircraft := CalculateBearing(geodist.Coord{Lat: aircraft.Lat, Lon: aircraft.Lon}, location)
+
+	// Calculate the absolute difference between the ideal bearing and actual aircraft heading
+	diff := math.Abs(bearingFromAircraft - aircraft.Track)
+
+	// If the difference is greater than 180 degrees, take the shorter angle
+	if diff > 180 {
+		diff = 360 - diff
+	}
+
+	// If the difference is within the margin, the aircraft is heading toward the target
+	return diff <= margin
 }
 
 // ConvertAircraftToOutput converts a slice of Aircraft to a slice of AircraftOutput
@@ -431,6 +449,10 @@ func GetCountryFromRegistration(registration string) string {
 		"CS-": "Portugal",
 		"EI-": "Ireland",
 		"OE-": "Austria",
+		"4L-": "Georgia",
+		"TF-": "Iceland",
+		"LZ-": "Bulgaria",
+		"T7-": "San Marino",
 		"HB-": "Switzerland",
 		"OO-": "Belgium",
 		"PH-": "Netherlands",

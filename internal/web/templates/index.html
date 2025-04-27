@@ -38,18 +38,18 @@
 
         <div class="dashboard">
             <div class="stats">
-                <div class="stat-box">
+                <div class="stat-box clickable" id="totalAircraftStat">
                     <div class="stat-value" id="totalAircraft">0</div>
                     <div class="stat-label">Total Aircraft</div>
                     <div class="stat-sublabel">within {{.ScanRadius}} kilometers</div>
                 </div>
-                <div class="stat-box">
+                <div class="stat-box clickable" id="inboundAircraftStat">
+                    <div class="stat-value" id="inboundAircraft">0</div>
+                    <div class="stat-label">Inbound Aircraft</div>
+                </div>
+                <div class="stat-box clickable" id="militaryAircraftStat">
                     <div class="stat-value" id="militaryAircraft">0</div>
                     <div class="stat-label">Military Aircraft</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="closestAircraft">-</div>
-                    <div class="stat-label">Closest Aircraft</div>
                 </div>
             </div>
 
@@ -65,12 +65,12 @@
                     <label>Status Filters:</label>
                     <div class="status-filters">
                         <div class="status-filter-item">
-                            <input type="checkbox" id="filter-military" data-filter="military">
-                            <label for="filter-military">Military</label>
-                        </div>
-                        <div class="status-filter-item">
                             <input type="checkbox" id="filter-inbound" data-filter="inbound">
                             <label for="filter-inbound">Inbound</label>
+                        </div>
+                        <div class="status-filter-item">
+                            <input type="checkbox" id="filter-military" data-filter="military">
+                            <label for="filter-military">Military</label>
                         </div>
                     </div>
                 </div>
@@ -207,7 +207,7 @@
                 <span class="direction-indicator" title="Direction to aircraft from your location: N°">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
-                        <polygon points="12 2 15 12 12 15 9 12 12 2"></polygon>
+                        <path d="M12 6l-4 6h8l-4-6z"></path>
                     </svg>
                 </span>
                 <a href="#" class="image-link" target="_blank" title="More Images">

@@ -10,6 +10,9 @@ build:
 
 run:
 	MAX_RANGE_KILOMETERS=70 go run cmd/jetspotter/*
+
+run-bru:
+	MAX_RANGE_KILOMETERS=100  LOCATION_LATITUDE="50.898706483327565" LOCATION_LONGITUDE="4.487719500638235" go run cmd/jetspotter/*
 	
 run-close:
 	MAX_RANGE_KILOMETERS=1 go run cmd/jetspotter/*
