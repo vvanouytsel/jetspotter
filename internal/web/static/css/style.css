@@ -244,7 +244,7 @@ header h1 {
     border-top-color: var(--accent-color);
 }
 
-/* Aircraft cards */
+/* Aircraft styling */
 .aircraft-card {
     background-color: var(--card-color);
     border-radius: 8px;
@@ -275,6 +275,12 @@ header h1 {
     overflow: hidden;
 }
 
+.aircraft-header-right {
+    display: flex;
+    align-items: center;
+    margin-left: auto; /* Push to the right */
+}
+
 .aircraft-callsign {
     font-weight: bold;
     font-size: 1.2rem;
@@ -285,8 +291,6 @@ header h1 {
 .aircraft-country {
     display: flex;
     align-items: center;
-    margin-left: auto; /* Push to the right */
-    margin-right: 10px; /* Space between flag and military badge */
 }
 
 .aircraft-country-flag {
@@ -303,6 +307,7 @@ header h1 {
     font-size: 0.8rem;
     font-weight: bold;
     display: none;
+    margin-right: 10px; /* Add spacing between badge and flag */
 }
 
 .is-military .aircraft-military-badge {
@@ -416,25 +421,69 @@ header h1 {
 
 /* Aircraft links */
 .aircraft-links {
-    padding: 15px;
+    padding: 10px 15px; /* Reduce top/bottom padding to make bar smaller */
     border-top: 1px solid #eee;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    height: 80px; /* Set a fixed height for consistency */
 }
 
 .aircraft-links a {
     text-decoration: none;
     color: white;
     font-weight: bold;
-    padding: 8px 12px;
-    border-radius: 4px;
-    background-color: var(--button-color); /* Use gray button color */
+    padding: 12px; /* Reduce padding for smaller buttons */
+    border-radius: 50%;
+    background-color: var(--button-color);
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px; /* Smaller size */
+    height: 50px; /* Smaller size */
 }
 
 .aircraft-links a:hover {
     opacity: 0.9;
     transform: translateY(-2px);
+    background-color: var(--primary-color);
+}
+
+.aircraft-links a.direction-container {
+    background-color: var(--secondary-color);
+    width: 50px; /* Match other buttons */
+    height: 50px; /* Match other buttons */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+[data-theme="dark"] .aircraft-links a.direction-container {
+    background-color: #ff9800; /* Same orange as the sun icon */
+}
+
+.aircraft-links a.direction-container:hover {
+    background-color: var(--primary-color);
+}
+
+[data-theme="dark"] .aircraft-links a.direction-container:hover {
+    background-color: var(--accent-color);
+}
+
+.aircraft-links a.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--button-color);
+}
+
+.aircraft-links a.disabled:hover {
+    transform: none;
+    background-color: var(--button-color);
+}
+
+.aircraft-links a svg {
+    width: 28px; /* Slightly smaller icons */
+    height: 28px; /* Slightly smaller icons */
 }
 
 /* Notification icons */

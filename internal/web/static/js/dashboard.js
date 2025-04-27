@@ -343,6 +343,10 @@ function createAircraftCard(aircraft) {
     const altitude = aircraft.Altitude || 0;
     aircraftHeader.classList.add(getAltitudeHeaderClass(altitude));
     
+    // Show/hide military badge based on aircraft status
+    const militaryBadge = card.querySelector('.aircraft-military-badge');
+    militaryBadge.style.display = aircraft.Military ? 'block' : 'none';
+    
     // Set the image - use ImageURL as fallback if thumbnail is not available
     // If no image is available, use the aircraft_not_found.png
     const imgElement = card.querySelector('.aircraft-image img');
@@ -378,19 +382,44 @@ function createAircraftCard(aircraft) {
     card.querySelector('.aircraft-distance').textContent = aircraft.Distance || 'Unknown';
     card.querySelector('.aircraft-heading').textContent = aircraft.Heading ? Math.round(aircraft.Heading) : 'Unknown';
     
-    // Set links (using default blue color)
-    const trackerLink = card.querySelector('.tracker-link');
-    if (aircraft.TrackerURL) {
-        trackerLink.href = aircraft.TrackerURL;
-    } else {
-        trackerLink.style.display = 'none';
+    // Set bearing and rotate the compass arrow
+    const bearing = aircraft.BearingFromLocation;
+    
+    if (bearing !== undefined && bearing !== null) {
+        const directionContainer = card.querySelector('.direction-container');
+        const directionArrow = directionContainer.querySelector('svg');
+        
+        // Rotate the SVG for the compass arrow
+        directionArrow.style.transform = `rotate(${bearing}deg)`;
+        
+        // Update the tooltip to show the bearing
+        const bearingRounded = Math.round(bearing);
+        directionContainer.title = `Direction to aircraft from your location: ${bearingRounded}°`;
     }
     
+    // Set up links section with appropriate disabled states for unavailable resources
+    const trackerLink = card.querySelector('.tracker-link');
     const imageLink = card.querySelector('.image-link');
+    
+    // Track Aircraft link
+    if (aircraft.TrackerURL) {
+        trackerLink.href = aircraft.TrackerURL;
+        trackerLink.classList.remove('disabled');
+    } else {
+        trackerLink.href = 'javascript:void(0)';
+        trackerLink.classList.add('disabled');
+        trackerLink.title = 'Tracking not available for this aircraft';
+    }
+    
+    // More Images link
     if (aircraft.ImageURL) {
         imageLink.href = aircraft.ImageURL;
+        imageLink.classList.remove('disabled');
+        imageLink.title = 'More images of this aircraft';
     } else {
-        imageLink.style.display = 'none';
+        imageLink.href = 'javascript:void(0)';
+        imageLink.classList.add('disabled');
+        imageLink.title = 'No additional images available';
     }
     
     return card;
@@ -450,7 +479,88 @@ function getCountryFlagEmoji(countryName) {
         'Bahrain': 'BH',
         'Iran': 'IR',
         'Iraq': 'IQ',
-        'Kuwait': 'KW'
+        'Kuwait': 'KW',
+        // Adding more countries from the Wikipedia list of aircraft registration prefixes
+        'Tunisia': 'TN',
+        'Libya': 'LY',
+        'Jordan': 'JO',
+        'Lebanon': 'LB',
+        'Syria': 'SY',
+        'Yemen': 'YE',
+        'Oman': 'OM',
+        'Afghanistan': 'AF',
+        'Pakistan': 'PK',
+        'Bangladesh': 'BD',
+        'Nepal': 'NP',
+        'Sri Lanka': 'LK',
+        'Myanmar': 'MM',
+        'Vietnam': 'VN',
+        'Philippines': 'PH',
+        'Taiwan': 'TW',
+        'South Korea': 'KR',
+        'North Korea': 'KP',
+        'Mongolia': 'MN',
+        'Kazakhstan': 'KZ',
+        'Uzbekistan': 'UZ',
+        'Turkmenistan': 'TM',
+        'Tajikistan': 'TJ',
+        'Kyrgyzstan': 'KG',
+        'Azerbaijan': 'AZ',
+        'Armenia': 'AM',
+        'Georgia': 'GE',
+        'Ukraine': 'UA',
+        'Belarus': 'BY',
+        'Russia': 'RU',
+        'Moldova': 'MD',
+        'Bulgaria': 'BG',
+        'Slovakia': 'SK',
+        'Austria': 'AT',
+        'Switzerland': 'CH',
+        'Luxembourg': 'LU',
+        'Latvia': 'LV',
+        'Lithuania': 'LT',
+        'Estonia': 'EE',
+        'Iceland': 'IS',
+        'Croatia': 'HR',
+        'Slovenia': 'SI',
+        'Bosnia and Herzegovina': 'BA',
+        'North Macedonia': 'MK',
+        'Albania': 'AL',
+        'Montenegro': 'ME',
+        'Cyprus': 'CY',
+        'Peru': 'PE',
+        'Ecuador': 'EC',
+        'Bolivia': 'BO',
+        'Paraguay': 'PY',
+        'Uruguay': 'UY',
+        'Venezuela': 'VE',
+        'Panama': 'PA',
+        'Costa Rica': 'CR',
+        'Guatemala': 'GT',
+        'El Salvador': 'SV',
+        'Honduras': 'HN',
+        'Nicaragua': 'NI',
+        'Belize': 'BZ',
+        'Jamaica': 'JM',
+        'Cuba': 'CU',
+        'Dominican Republic': 'DO',
+        'Kenya': 'KE',
+        'Tanzania': 'TZ',
+        'Uganda': 'UG',
+        'Rwanda': 'RW',
+        'Ghana': 'GH',
+        'Senegal': 'SN',
+        'Ivory Coast': 'CI',
+        'Cameroon': 'CM',
+        'Zimbabwe': 'ZW',
+        'Mozambique': 'MZ',
+        'Angola': 'AO',
+        'Mauritius': 'MU',
+        'Seychelles': 'SC',
+        'Madagascar': 'MG',
+        'Fiji': 'FJ',
+        'Papua New Guinea': 'PG',
+        'Solomon Islands': 'SB'
     };
     
     // Extract country code from "Unknown (X)" format
