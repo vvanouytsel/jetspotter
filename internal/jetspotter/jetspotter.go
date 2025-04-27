@@ -430,6 +430,8 @@ func GetCountryFromRegistration(registration string) string {
 		"EC-": "Spain",
 		"CS-": "Portugal",
 		"EI-": "Ireland",
+		"OE-": "Austria",
+		"HB-": "Switzerland",
 		"OO-": "Belgium",
 		"PH-": "Netherlands",
 		"SE-": "Sweden",
