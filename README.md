@@ -13,6 +13,10 @@ Jetspotter is a simple program that queries the ADS-B API. It is used to send no
 
 Please have a look at the [documentation](https://vvanouytsel.github.io/jetspotter/) for installation and configuration steps.
 
+## Demo
+
+There is a [demo](https://bru.jetspotter.vvanouytsel.dev/) of the web interface available that shows aircraft in the vicinity of the [BRU international airport](https://bru.jetspotter.vvanouytsel.dev/).
+
 ## Screenshots
 
 ### Web UI

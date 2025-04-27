@@ -593,30 +593,33 @@ header h1 {
     height: 50px; /* Smaller size */
 }
 
+/* Style for disabled links */
+.aircraft-links a.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #999;
+    pointer-events: none;
+}
+
+[data-theme="dark"] .aircraft-links a.disabled {
+    background-color: #444;
+    opacity: 0.5;
+}
+
 .aircraft-links a:hover {
     opacity: 0.9;
     transform: translateY(-2px);
     background-color: var(--primary-color);
 }
 
-.aircraft-links a.direction-container {
-    background-color: var(--secondary-color);
-    width: 50px; /* Match other buttons */
-    height: 50px; /* Match other buttons */
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-    z-index: 1;
+.aircraft-links a.disabled:hover {
+    opacity: 0.5;
+    transform: none;
+    background-color: #999;
 }
 
-[data-theme="dark"] .aircraft-links a.direction-container {
-    background-color: #ff9800; /* Same orange as the sun icon */
-}
-
-.aircraft-links a.direction-container:hover {
-    background-color: var(--primary-color);
-}
-
-[data-theme="dark"] .aircraft-links a.direction-container:hover {
-    background-color: var(--accent-color);
+[data-theme="dark"] .aircraft-links a.disabled:hover {
+    background-color: #444;
 }
 
 /* Heading indicator styling */
