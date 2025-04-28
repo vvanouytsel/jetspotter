@@ -162,6 +162,11 @@ func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Con
 	// Filter the aircraft by the notification range (MaxRangeKilometers)
 	var aircraftInNotificationRange []Aircraft
 	for _, ac := range allAircraftInRange {
+		// Skip aircraft without registration
+		if ac.Registration == "" {
+			continue
+		}
+
 		distance := CalculateDistance(config.Location, geodist.Coord{Lat: ac.Lat, Lon: ac.Lon})
 		if distance <= config.MaxRangeKilometers {
 			aircraftInNotificationRange = append(aircraftInNotificationRange, ac)
@@ -404,7 +409,15 @@ func ConvertAircraftToOutput(aircraft []Aircraft) []AircraftOutput {
 		return []AircraftOutput{}
 	}
 
-	outputs, err := CreateAircraftOutput(aircraft, config)
+	// Filter out aircraft without registration
+	var filteredAircraft []Aircraft
+	for _, ac := range aircraft {
+		if ac.Registration != "" {
+			filteredAircraft = append(filteredAircraft, ac)
+		}
+	}
+
+	outputs, err := CreateAircraftOutput(filteredAircraft, config)
 	if err != nil {
 		log.Printf("Error creating aircraft output for API: %v", err)
 		return []AircraftOutput{}
@@ -483,6 +496,7 @@ func GetCountryFromRegistration(registration string) string {
 		"FA-": "Belgium", // Belgian F16
 		"CT-": "Belgium", // Belgian A400
 		"ST-": "Belgium", // Belgian AERMACCHI
+		"RN-": "Belgium", // Belgian NH-90
 		"YL-": "Latvia",
 		"PH-": "Netherlands",
 		"L-":  "Netherlands", // Dutch PILATUS
@@ -529,6 +543,7 @@ func GetCountryFromRegistration(registration string) string {
 		"ET-":  "Ethiopia",
 		"5N-":  "Nigeria",
 		"7T-":  "Algeria",
+		"TS-":  "Tunisia",
 		"CN-":  "Morocco",
 		"HZ-":  "Saudi Arabia",
 		"A6-":  "United Arab Emirates",

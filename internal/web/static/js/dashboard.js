@@ -450,9 +450,6 @@ function getFilteredAndSortedAircraft() {
     // Apply filters
     let filtered = allAircraft;
     
-    // Filter out aircraft without registration
-    filtered = filtered.filter(aircraft => aircraft.Registration && aircraft.Registration !== 'Unknown');
-    
     // Filter by description
     if (currentFilters.description && currentFilters.description !== '') {
         filtered = filtered.filter(aircraft => {

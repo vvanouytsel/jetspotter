@@ -40,15 +40,22 @@ func SetupAPI(listenPort string, config configuration.Config) {
 
 // handleAircraftAPI returns all currently spotted aircraft as JSON
 func handleAircraftAPI(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	// Get the current spotted aircraft
 	SpottedAircraft.Lock()
-	airplanes := ConvertAircraftToOutput(SpottedAircraft.Aircraft)
-	SpottedAircraft.Unlock()
+	defer SpottedAircraft.Unlock()
 
-	// Return as JSON
-	json.NewEncoder(w).Encode(airplanes)
+	// Filter out aircraft without registration before converting to output
+	var filteredAircraft []Aircraft
+	for _, ac := range SpottedAircraft.Aircraft {
+		if ac.Registration != "" {
+			filteredAircraft = append(filteredAircraft, ac)
+		}
+	}
+
+	// Convert filtered aircraft to output format
+	outputs := ConvertAircraftToOutput(filteredAircraft)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(outputs)
 }
 
 // handleConfigAPI returns the application configuration as JSON
