@@ -141,4 +141,7 @@ type AircraftOutput struct {
 
 	// Specifies if the aircraft is traveling towards your location or not
 	Inbound bool
+	
+	// Specifies if the aircraft is on the ground
+	OnGround bool
 }

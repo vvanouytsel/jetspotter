@@ -243,9 +243,25 @@ func filterAircraftByAltitude(aircraft []Aircraft, maxAltitudeFeet int) []Aircra
 	var filteredAircraft []Aircraft
 
 	for _, ac := range aircraft {
+		// First convert any 'ground' string indicators to float64(0)
+		if ac.AltBaro == "groundft" || ac.AltBaro == "ground" {
+			ac.AltBaro = float64(0)
+		}
+
 		if ac.AltBaro != nil {
-			altitude := int(ac.AltBaro.(float64))
-			if altitude <= maxAltitudeFeet {
+			// Ensure we can safely convert to float64
+			var altitude float64
+			switch v := ac.AltBaro.(type) {
+			case float64:
+				altitude = v
+			case int:
+				altitude = float64(v)
+			default:
+				// Skip aircraft with unhandled altitude type
+				continue
+			}
+
+			if int(altitude) <= maxAltitudeFeet {
 				filteredAircraft = append(filteredAircraft, ac)
 			}
 		}
@@ -351,6 +367,8 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.ImageURL = image.Link
 		acOutput.Military = isAircraftMilitary(ac)
 		acOutput.Inbound = IsAircraftInbound(config.Location, ac, 30)
+		// Check if aircraft is on the ground (altitude is 0)
+		acOutput.OnGround = acOutput.Altitude == 0
 		acOutputs = append(acOutputs, acOutput)
 	}
 	return acOutputs, nil
@@ -455,7 +473,12 @@ func GetCountryFromRegistration(registration string) string {
 		"T7-": "San Marino",
 		"HB-": "Switzerland",
 		"OO-": "Belgium",
+		"FA-": "Belgium", // Belgian F16
+		"CT-": "Belgium", // Belgian A400
+		"ST-": "Belgium", // Belgian AERMACCHI
+		"YL-": "Latvia",
 		"PH-": "Netherlands",
+		"L-":  "Netherlands", // Dutch PILATUS
 		"SE-": "Sweden",
 		"OY-": "Denmark",
 		"OH-": "Finland",

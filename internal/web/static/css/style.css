@@ -513,19 +513,45 @@ header h1 {
     line-height: 1;
 }
 
-.aircraft-military-badge {
+.aircraft-country-flag.military-flag {
     background-color: var(--military-color);
-    color: white;
-    padding: 4px 8px;
     border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    display: none;
-    margin-right: 10px; /* Add spacing between badge and flag */
+    padding: 4px;
+    color: white;
+    margin-left: 8px;
 }
 
-.is-military .aircraft-military-badge {
-    display: block;
+.aircraft-military-badge, .aircraft-approach-badge, .aircraft-ground-badge {
+    display: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-right: 8px;
+    color: white;
+}
+
+.aircraft-military-badge {
+    background-color: var(--military-color);
+}
+
+.aircraft-approach-badge {
+    background-color: var(--inbound-color);
+}
+
+.aircraft-ground-badge {
+    background-color: #757575; /* Grey color instead of steel blue */
+}
+
+/* Add styles for "on ground" altitude text */
+.altitude-on-ground {
+    color: #757575; /* Grey color to match the badge */
+    font-weight: bold;
+}
+
+/* Add styles for on-ground aircraft card */
+.is-on-ground .aircraft-header {
+    border-left: 5px solid #757575; /* Grey color for on-ground indicator */
 }
 
 /* Approaching badge styling */
@@ -1448,4 +1474,10 @@ header h1 {
 
 [data-theme="dark"] .coffee-icon {
     stroke: var(--primary-color);
+}
+
+/* N/A value styling */
+.value-na {
+    color: #999; /* Light grey for N/A values */
+    font-style: italic;
 }

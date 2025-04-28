@@ -543,104 +543,103 @@ func TestFilterAircraftByAltitude(t *testing.T) {
 	}
 }
 
-// TestFilterAircraftByDistanceWithDifferentRanges tests that aircraft outside MaxRangeKilometers
-// but inside MaxScanRangeKilometers are correctly filtered
-func TestFilterAircraftByDistanceWithDifferentRanges(t *testing.T) {
-	// Create a set of test aircraft at different distances
-	testAircraft := []Aircraft{
+// TestFilterAircraftByAltitudeWithGroundValue tests the handling of 'ground' string as altitude
+func TestFilterAircraftByAltitudeWithGroundValue(t *testing.T) {
+	aircraftWithGroundValues := []Aircraft{
 		{
-			ICAO:     "TEST1",
-			Callsign: "NEAR1",
-			Lat:      51.18, // Very close to default location
-			Lon:      5.46,  // Should be in notification range
+			Callsign: "KHARMA11",
+			AltBaro:  "ground", // String value "ground"
 		},
 		{
-			ICAO:     "TEST2",
-			Callsign: "MEDIUM1",
-			Lat:      51.40, // Medium distance - adjusted to be > 20km but < 100km
-			Lon:      5.80,  // Should be in scan range but not notification range
+			Callsign: "KHARMA12",
+			AltBaro:  "groundft", // String value "groundft"
 		},
 		{
-			ICAO:     "TEST3",
-			Callsign: "FAR1",
-			Lat:      52.50, // Far distance - adjusted to be > 100km
-			Lon:      7.00,  // Should be outside both ranges
+			Callsign: "KHARMA13",
+			AltBaro:  float64(3000), // Normal altitude value
+		},
+		{
+			Callsign: "KHARMA14",
+			AltBaro:  float64(8000), // Above our test altitude filter
 		},
 	}
 
-	// Create a simulated location and config
-	location := geodist.Coord{
-		Lat: 51.17348, // Default location from config
-		Lon: 5.45921,
+	maxAltitude := 5000 // Max altitude in feet
+	filtered := filterAircraftByAltitude(aircraftWithGroundValues, maxAltitude)
+
+	// We expect 3 aircraft: the two with ground values and the one at 3000ft
+	expected := []Aircraft{
+		{
+			Callsign: "KHARMA11",
+			AltBaro:  float64(0), // Converted from "ground" to float64(0)
+		},
+		{
+			Callsign: "KHARMA12",
+			AltBaro:  float64(0), // Converted from "groundft" to float64(0)
+		},
+		{
+			Callsign: "KHARMA13",
+			AltBaro:  float64(3000),
+		},
 	}
 
-	// Compute actual distances for verification
-	distances := make([]int, len(testAircraft))
-	for i, ac := range testAircraft {
-		aircraftLoc := geodist.Coord{Lat: ac.Lat, Lon: ac.Lon}
-		distances[i] = CalculateDistance(location, aircraftLoc)
+	if len(filtered) != len(expected) {
+		t.Fatalf("expected %d aircraft, got %d", len(expected), len(filtered))
 	}
 
-	// Set up ranges for testing
-	notificationRange := 20 // 20km notification range
-	scanRange := 100        // 100km scan range
-
-	// Print actual distances for debugging
-	t.Logf("TEST1 distance: %d km", distances[0])
-	t.Logf("TEST2 distance: %d km", distances[1])
-	t.Logf("TEST3 distance: %d km", distances[2])
-
-	// Verify the distances are as expected
-	if distances[0] > notificationRange {
-		t.Fatalf("TEST1 should be within notification range: %d km", distances[0])
-	}
-
-	if distances[1] <= notificationRange || distances[1] > scanRange {
-		t.Fatalf("TEST2 should be outside notification range but inside scan range: %d km", distances[1])
-	}
-
-	if distances[2] <= scanRange {
-		t.Fatalf("TEST3 should be outside both ranges: %d km", distances[2])
-	}
-
-	// Filter manually to generate expected result
-	var expectedInNotificationRange []Aircraft
-	var expectedInScanRange []Aircraft
-
-	for i, ac := range testAircraft {
-		if distances[i] <= notificationRange {
-			expectedInNotificationRange = append(expectedInNotificationRange, ac)
-			expectedInScanRange = append(expectedInScanRange, ac)
-		} else if distances[i] <= scanRange {
-			expectedInScanRange = append(expectedInScanRange, ac)
+	// Check for each aircraft in the expected results
+	for i, expectedAc := range expected {
+		found := false
+		for _, actualAc := range filtered {
+			if actualAc.Callsign == expectedAc.Callsign {
+				found = true
+				// Verify altitude was converted properly
+				if expectedAc.AltBaro != actualAc.AltBaro {
+					t.Fatalf("expected altitude %v for %s, got %v", 
+						expectedAc.AltBaro, expectedAc.Callsign, actualAc.AltBaro)
+				}
+				break
+			}
 		}
-	}
-
-	// Test filtering logic directly
-	var aircraftInNotificationRange []Aircraft
-	for _, ac := range testAircraft {
-		distance := CalculateDistance(location, geodist.Coord{Lat: ac.Lat, Lon: ac.Lon})
-		if distance <= notificationRange {
-			aircraftInNotificationRange = append(aircraftInNotificationRange, ac)
+		if !found {
+			t.Fatalf("expected aircraft %s not found in results at index %d", expectedAc.Callsign, i)
 		}
-	}
-
-	if !reflect.DeepEqual(expectedInNotificationRange, aircraftInNotificationRange) {
-		t.Fatalf("expected '%v' to be in notification range, got '%v'", expectedInNotificationRange, aircraftInNotificationRange)
-	}
-
-	// Verify each aircraft is correctly categorized based on distances
-	if len(expectedInNotificationRange) == 0 {
-		t.Fatal("expected at least one aircraft to be in notification range")
-	}
-
-	if len(expectedInScanRange) <= len(expectedInNotificationRange) {
-		t.Fatal("expected more aircraft to be in scan range than notification range")
 	}
 }
 
-// TestHandleAircraftWithScanRange tests that aircraft are properly filtered based on
-// both scan range and notification range
+// TestFilterAircraftByAltitudeWithUnhandledType tests the handling of unhandled types for altitude
+func TestFilterAircraftByAltitudeWithUnhandledType(t *testing.T) {
+	aircraftWithUnhandledType := []Aircraft{
+		{
+			Callsign: "KHARMA11",
+			AltBaro:  "not a valid altitude", // Unhandled string value
+		},
+		{
+			Callsign: "KHARMA12",
+			AltBaro:  float64(2000), // Valid altitude
+		},
+	}
+
+	maxAltitude := 5000 // Max altitude in feet
+	filtered := filterAircraftByAltitude(aircraftWithUnhandledType, maxAltitude)
+
+	// We expect only the aircraft with valid altitude to be included
+	expected := []Aircraft{
+		{
+			Callsign: "KHARMA12",
+			AltBaro:  float64(2000),
+		},
+	}
+
+	if len(filtered) != len(expected) {
+		t.Fatalf("expected %d aircraft, got %d", len(expected), len(filtered))
+	}
+
+	if filtered[0].Callsign != expected[0].Callsign {
+		t.Fatalf("expected aircraft %s, got %s", expected[0].Callsign, filtered[0].Callsign)
+	}
+}
+
 func TestHandleAircraftWithScanRange(t *testing.T) {
 	// Create test aircraft at different distances
 	testAircraft := []Aircraft{

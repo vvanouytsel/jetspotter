@@ -90,6 +90,9 @@ func printSpeed(ac jetspotter.AircraftOutput) string {
 }
 
 func printAltitude(ac jetspotter.AircraftOutput) string {
+	if ac.OnGround {
+		return "On ground"
+	}
 	return fmt.Sprintf("%vft | %dm", ac.Altitude, jetspotter.ConvertFeetToMeters(ac.Altitude))
 }
 

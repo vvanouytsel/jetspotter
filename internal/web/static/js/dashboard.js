@@ -5,7 +5,8 @@ let currentFilters = {
     description: '',
     statuses: {
         military: false,
-        inbound: false
+        inbound: false,
+        hideGround: false
     }
 };
 let currentSort = 'distance';
@@ -33,6 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAircraftGrid();
     });
     
+    document.getElementById('filter-hide-ground').addEventListener('change', (e) => {
+        currentFilters.statuses.hideGround = e.target.checked;
+        renderAircraftGrid();
+    });
+
     // Add click handler for the total aircraft stat box
     document.getElementById('totalAircraftStat').addEventListener('click', () => {
         // Reset all filters
@@ -152,6 +158,25 @@ async function fetchData() {
             renderAircraftGrid(); // Show loading indicator
         }
         
+        // Check for test mode in URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const testMode = urlParams.get('test');
+        
+        if (testMode === 'true') {
+            // Use demo data instead of fetching from API
+            const demoData = generateDemoData();
+            allAircraft = demoData;
+            
+            // Update UI with demo data
+            lastUpdateTime = new Date();
+            document.getElementById('lastUpdate').textContent = lastUpdateTime.toLocaleTimeString();
+            updateAircraftDescriptions();
+            updateStats();
+            isLoading = false;
+            renderAircraftGrid();
+            return;
+        }
+        
         const response = await fetch('/api/aircraft');
         
         if (!response.ok) {
@@ -188,6 +213,131 @@ async function fetchData() {
         isLoading = false;
         renderAircraftGrid();
     }
+}
+
+// Generate demo aircraft data for testing
+function generateDemoData() {
+    return [
+        // Military aircraft example
+        {
+            Callsign: "ARMY01",
+            Country: "Unknown",
+            Military: true,
+            ICAO: "AE01FF",
+            Altitude: 25000,
+            Speed: 450,
+            Distance: 42.3,
+            Heading: 225,
+            BearingFromLocation: 170,
+            Inbound: false,
+            Type: "C-17A Globemaster III",
+            Description: "Military Transport Aircraft",
+            Registration: "02-1111",
+            TrackerURL: "javascript:void(0)",
+            NotifiedDiscord: true,
+            NotifiedSlack: true
+        },
+        // Military inbound aircraft example
+        {
+            Callsign: "NAVY42",
+            Country: "Unknown",
+            Military: true,
+            ICAO: "AE1234",
+            Altitude: 18000,
+            Speed: 380,
+            Distance: 25.7,
+            Heading: 90,
+            BearingFromLocation: 45,
+            Inbound: true,
+            Type: "F/A-18E Super Hornet",
+            Description: "Military Fighter Aircraft",
+            Registration: "165667",
+            TrackerURL: "javascript:void(0)",
+            NotifiedDiscord: true,
+            NotifiedTerminal: true
+        },
+        // Civilian aircraft example
+        {
+            Callsign: "UAL123",
+            Country: "United States",
+            Military: false,
+            ICAO: "A12345",
+            Altitude: 35000,
+            Speed: 520,
+            Distance: 15.2,
+            Heading: 45,
+            BearingFromLocation: 280,
+            Inbound: false,
+            Type: "Boeing 777-300ER",
+            Description: "Twin-Engine Passenger Jet",
+            Registration: "N12345",
+            TrackerURL: "javascript:void(0)",
+            ImageURL: "https://picsum.photos/600/400",
+            ImageThumbnailURL: "https://picsum.photos/300/200"
+        },
+        // Civilian inbound aircraft example
+        {
+            Callsign: "DAL456",
+            Country: "United States",
+            Military: false,
+            ICAO: "DAL456",
+            Altitude: 10000,
+            Speed: 320,
+            Distance: 8.5,
+            Heading: 180,
+            BearingFromLocation: 90,
+            Inbound: true,
+            Type: "Airbus A320",
+            Description: "Twin-Engine Passenger Jet",
+            Registration: "N987AA",
+            TrackerURL: "javascript:void(0)",
+            ImageURL: "https://picsum.photos/600/400",
+            ImageThumbnailURL: "https://picsum.photos/300/200",
+            NotifiedSlack: true
+        },
+        // Military aircraft on ground example
+        {
+            Callsign: "AF101",
+            Country: "United States",
+            Military: true,
+            ICAO: "AE2468",
+            Altitude: 0,
+            Speed: 0,
+            Distance: 5.1,
+            Heading: 90,
+            BearingFromLocation: 120,
+            Inbound: false,
+            OnGround: true,
+            Type: "F-16 Fighting Falcon",
+            Description: "Military Fighter Aircraft",
+            Registration: "86-0241",
+            TrackerURL: "javascript:void(0)",
+            ImageURL: "https://picsum.photos/600/400",
+            ImageThumbnailURL: "https://picsum.photos/300/200",
+            NotifiedGotify: true
+        },
+        // Civilian aircraft on ground example
+        {
+            Callsign: "UAL789",
+            Country: "United States",
+            Military: false,
+            ICAO: "A54321",
+            Altitude: 0,
+            Speed: 0,
+            Distance: 3.2,
+            Heading: 270,
+            BearingFromLocation: 200,
+            Inbound: false,
+            OnGround: true,
+            Type: "Boeing 737-800",
+            Description: "Twin-Engine Passenger Jet",
+            Registration: "N12346",
+            TrackerURL: "javascript:void(0)",
+            ImageURL: "https://picsum.photos/600/400",
+            ImageThumbnailURL: "https://picsum.photos/300/200",
+            NotifiedNtfy: true
+        }
+    ];
 }
 
 // Update available aircraft descriptions for filtering
@@ -281,6 +431,9 @@ function getFilteredAndSortedAircraft() {
     // Apply filters
     let filtered = allAircraft;
     
+    // Filter out aircraft without registration
+    filtered = filtered.filter(aircraft => aircraft.Registration && aircraft.Registration !== 'Unknown');
+    
     // Filter by description
     if (currentFilters.description && currentFilters.description !== '') {
         filtered = filtered.filter(aircraft => {
@@ -295,6 +448,10 @@ function getFilteredAndSortedAircraft() {
     
     if (currentFilters.statuses.inbound) {
         filtered = filtered.filter(aircraft => aircraft.Inbound);
+    }
+    
+    if (currentFilters.statuses.hideGround) {
+        filtered = filtered.filter(aircraft => !aircraft.OnGround);
     }
     
     // Apply sorting
@@ -396,9 +553,16 @@ function createAircraftCard(aircraft) {
     const countryName = aircraft.Country || 'Unknown';
     card.querySelector('.aircraft-country-info').textContent = countryName;
     
-    // Add a larger flag emoji in the header
-    const flagEmoji = getCountryFlagEmoji(countryName);
-    card.querySelector('.aircraft-country-flag').textContent = flagEmoji;
+    // Add a flag emoji in the header only if country is known
+    const flagElement = card.querySelector('.aircraft-country-flag');
+    if (countryName !== 'Unknown') {
+        flagElement.textContent = getCountryFlagEmoji(countryName);
+        flagElement.style.display = 'inline-block';
+    } else {
+        // Don't show any flag for unknown countries
+        flagElement.textContent = '';
+        flagElement.style.display = 'none';
+    }
     
     // Apply altitude-based color to the header
     const aircraftHeader = card.querySelector('.aircraft-header');
@@ -416,6 +580,15 @@ function createAircraftCard(aircraft) {
         card.classList.add('is-inbound');
     } else {
         approachBadge.style.display = 'none';
+    }
+    
+    // Handle on ground status display
+    const groundBadge = card.querySelector('.aircraft-ground-badge');
+    if (aircraft.OnGround) {
+        groundBadge.style.display = 'block';
+        card.classList.add('is-on-ground');
+    } else {
+        groundBadge.style.display = 'none';
     }
     
     // Set the image - use ImageURL as fallback if thumbnail is not available
@@ -446,22 +619,56 @@ function createAircraftCard(aircraft) {
     
     // Apply altitude color coding and formatting
     const altitudeElement = card.querySelector('.aircraft-altitude');
-    altitudeElement.textContent = aircraft.Altitude ? Math.round(aircraft.Altitude).toLocaleString() : 'Unknown';
-    altitudeElement.classList.add(getAltitudeColorClass(altitude));
+    if (aircraft.OnGround) {
+        altitudeElement.textContent = 'On ground';
+        altitudeElement.classList.add('altitude-on-ground');
+    } else {
+        altitudeElement.textContent = aircraft.Altitude ? Math.round(aircraft.Altitude).toLocaleString() : 'Unknown';
+        altitudeElement.classList.add(getAltitudeColorClass(altitude));
+    }
     
-    card.querySelector('.aircraft-speed').textContent = aircraft.Speed || 'Unknown';
-    card.querySelector('.aircraft-distance').textContent = aircraft.Distance || 'Unknown';
+    // Set speed with special handling for ground aircraft
+    const speedElement = card.querySelector('.aircraft-speed');
+    if (aircraft.OnGround) {
+        speedElement.textContent = 'N/A';
+        speedElement.classList.add('value-na');
+    } else {
+        speedElement.textContent = aircraft.Speed || 'Unknown';
+        speedElement.classList.remove('value-na');
+    }
+    
+    // Set distance with special handling for ground aircraft
+    const distanceElement = card.querySelector('.aircraft-distance');
+    if (aircraft.OnGround) {
+        distanceElement.textContent = 'N/A';
+        distanceElement.classList.add('value-na');
+    } else {
+        distanceElement.textContent = aircraft.Distance || 'Unknown';
+        distanceElement.classList.remove('value-na');
+    }
     
     // Fix: Use aircraft.Heading instead of the undefined 'heading' variable
     const heading = aircraft.Heading;
-    card.querySelector('.aircraft-heading').textContent = heading ? Math.round(heading) : 'Unknown';
+    const headingElement = card.querySelector('.aircraft-heading');
+    const headingIndicator = card.querySelector('.heading-indicator');
     
-    // Set aircraft heading direction indicator
-    if (heading !== undefined && heading !== null) {
-        const headingIndicator = card.querySelector('.heading-indicator');
-        // Rotate the SVG to match the aircraft's heading
-        headingIndicator.style.transform = `rotate(${heading}deg)`;
-        headingIndicator.title = `Aircraft heading direction: ${Math.round(heading)}°`;
+    if (aircraft.OnGround) {
+        // Hide heading information for grounded aircraft
+        headingElement.textContent = 'N/A';
+        headingElement.classList.add('value-na');
+        headingIndicator.style.display = 'none';
+    } else {
+        // Show heading for airborne aircraft
+        headingElement.textContent = heading ? Math.round(heading) : 'Unknown';
+        headingElement.classList.remove('value-na');
+        headingIndicator.style.display = 'flex';
+        
+        // Set aircraft heading direction indicator
+        if (heading !== undefined && heading !== null) {
+            // Rotate the SVG to match the aircraft's heading
+            headingIndicator.style.transform = `rotate(${heading}deg)`;
+            headingIndicator.title = `Aircraft heading direction: ${Math.round(heading)}°`;
+        }
     }
     
     // Set bearing and rotate the compass arrow
@@ -647,11 +854,11 @@ function getCountryFlagEmoji(countryName) {
     
     // Extract country code from "Unknown (X)" format
     if (countryName.startsWith('Unknown (') && countryName.endsWith(')')) {
-        return '🏳️';  // Generic flag for unknown countries
+        return '';  // Return empty string instead of generic flag
     }
     
     const countryCode = countryToISOCode[countryName];
-    if (!countryCode) return '🏳️';  // Generic flag for unknown countries
+    if (!countryCode) return '';  // Return empty string for unknown countries
     
     // Convert ISO country code to country flag emoji
     // Regional Indicator Symbols are Unicode characters U+1F1E6 to U+1F1FF
@@ -663,6 +870,10 @@ function getCountryFlagEmoji(countryName) {
 
 // Add notification icons based on aircraft notification status
 function addNotificationIcons(container, aircraft) {
+    // Always hide the container - this removes notification icons from the aircraft cards
+    container.style.display = 'none';
+    return;
+    
     // If no notifications, hide the container
     if (!aircraft.NotifiedDiscord && !aircraft.NotifiedSlack && 
         !aircraft.NotifiedGotify && !aircraft.NotifiedNtfy && !aircraft.NotifiedTerminal) {
