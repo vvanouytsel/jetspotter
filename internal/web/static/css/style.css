@@ -775,6 +775,13 @@ header h1 {
     stroke: none;
 }
 
+/* Styling for the arrow tail */
+.direction-indicator svg .arrow-tail {
+    fill: none;
+    stroke: white;
+    stroke-width: 2.5;  /* Slightly thicker than the default stroke */
+}
+
 [data-theme="dark"] .direction-indicator {
     background-color: var(--accent-color);
 }
