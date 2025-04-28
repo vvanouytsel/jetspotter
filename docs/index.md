@@ -25,7 +25,7 @@ Documentation how to set up notifications using incoming webhooks can be found i
 [Discord](https://discord.com/) notifications are sent if the `DISCORD_WEBHOOK_URL` environment variable is defined.
 Documentation how to set up notifications using incoming webhooks can be found in the [official discord documentation](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks).
 
-By default the color of the embed message is related to the altitude of the aircraft. The color scheme is the same as on the [ADS-B exchange map](https://globe.adsbexchange.com/). This feature can be disabled in the [configuration](configuration.md) to use the same static color for every embed message.
+By default the color of the embed message is related to the altitude of the aircraft. The color scheme is the same as on the [airplanes map](https://globe.airplanes.live/). This feature can be disabled in the [configuration](configuration.md) to use the same static color for every embed message.
 
 If the altitude color feature is enabled:
 [![Discord notfication](images/jetspotter-discord-1.png)](images/jetspotter-discord-1.png)
