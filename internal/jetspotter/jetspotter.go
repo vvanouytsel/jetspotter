@@ -472,6 +472,7 @@ func GetCountryFromRegistration(registration string) string {
 		"LZ-": "Bulgaria",
 		"T7-": "San Marino",
 		"HB-": "Switzerland",
+		"ER-": "Moldova",
 		"OO-": "Belgium",
 		"FA-": "Belgium", // Belgian F16
 		"CT-": "Belgium", // Belgian A400

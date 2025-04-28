@@ -595,7 +595,7 @@ func TestFilterAircraftByAltitudeWithGroundValue(t *testing.T) {
 				found = true
 				// Verify altitude was converted properly
 				if expectedAc.AltBaro != actualAc.AltBaro {
-					t.Fatalf("expected altitude %v for %s, got %v", 
+					t.Fatalf("expected altitude %v for %s, got %v",
 						expectedAc.AltBaro, expectedAc.Callsign, actualAc.AltBaro)
 				}
 				break
