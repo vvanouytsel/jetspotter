@@ -1003,3 +1003,47 @@ func TestIsAircraftInboundRealWorld(t *testing.T) {
 		}
 	}
 }
+
+// TestAircraftOnGroundIsNeverInbound tests that an aircraft with altitude 0 is never marked as inbound
+func TestAircraftOnGroundIsNeverInbound(t *testing.T) {
+	// Create test aircraft and configuration
+	aircraftOnGround := Aircraft{
+		ICAO:     "TEST1",
+		Callsign: "GROUND1",
+		Lat:      51.18,
+		Lon:      5.46,
+		AltBaro:  float64(0), // Aircraft on the ground
+		Track:    45.0,       // Heading that would normally be considered inbound
+	}
+
+	config := configuration.Config{
+		Location: geodist.Coord{
+			Lat: 51.17348,
+			Lon: 5.45921,
+		},
+	}
+
+	// Prepare the aircraft slice for CreateAircraftOutput
+	aircraft := []Aircraft{aircraftOnGround}
+
+	// Process the aircraft
+	outputs, err := CreateAircraftOutput(aircraft, config)
+	if err != nil {
+		t.Fatalf("Error creating aircraft output: %v", err)
+	}
+
+	// Verify there's exactly one aircraft in the result
+	if len(outputs) != 1 {
+		t.Fatalf("Expected 1 aircraft in output, got %d", len(outputs))
+	}
+
+	// Check that the aircraft is marked as on the ground
+	if !outputs[0].OnGround {
+		t.Error("Expected aircraft to be marked as on the ground (OnGround=true)")
+	}
+
+	// Check that the aircraft is not marked as inbound (regardless of its heading)
+	if outputs[0].Inbound {
+		t.Error("Aircraft on the ground should never be marked as inbound, but was marked as inbound")
+	}
+}

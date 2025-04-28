@@ -275,6 +275,25 @@ function generateDemoData() {
             ImageURL: "https://picsum.photos/600/400",
             ImageThumbnailURL: "https://picsum.photos/300/200"
         },
+        // Civilian aircraft invalid countryexample
+        {
+            Callsign: "ABC123",
+            Country: "Does not exist",
+            Military: false,
+            ICAO: "A12345",
+            Altitude: 35000,
+            Speed: 520,
+            Distance: 15.2,
+            Heading: 45,
+            BearingFromLocation: 280,
+            Inbound: false,
+            Type: "Boeing 777-300ER",
+            Description: "Twin-Engine Passenger Jet",
+            Registration: "ABCD",
+            TrackerURL: "javascript:void(0)",
+            ImageURL: "https://picsum.photos/600/400",
+            ImageThumbnailURL: "https://picsum.photos/300/200"
+        },
         // Civilian inbound aircraft example
         {
             Callsign: "DAL456",

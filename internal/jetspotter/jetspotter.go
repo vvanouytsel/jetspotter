@@ -366,9 +366,14 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		acOutput.ImageThumbnailURL = image.ThumbnailLarge.Src
 		acOutput.ImageURL = image.Link
 		acOutput.Military = isAircraftMilitary(ac)
-		acOutput.Inbound = IsAircraftInbound(config.Location, ac, 30)
 		// Check if aircraft is on the ground (altitude is 0)
 		acOutput.OnGround = acOutput.Altitude == 0
+		// If the aircraft is on the ground, it cannot be inbound
+		if acOutput.OnGround {
+			acOutput.Inbound = false
+		} else {
+			acOutput.Inbound = IsAircraftInbound(config.Location, ac, 30)
+		}
 		acOutputs = append(acOutputs, acOutput)
 	}
 	return acOutputs, nil
@@ -450,6 +455,7 @@ func GetCountryFromRegistration(registration string) string {
 	registryMap := map[string]string{
 		// A few examples from each region
 		// North America
+		"87-": "United States", // Lockheed C-5M
 		"N":   "United States",
 		"C-F": "Canada",
 		"C-G": "Canada",

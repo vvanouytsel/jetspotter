@@ -525,7 +525,7 @@ header h1 {
     display: none;
     padding: 4px 8px;
     border-radius: 4px;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     font-weight: bold;
     margin-right: 8px;
     color: white;
@@ -536,11 +536,11 @@ header h1 {
 }
 
 .aircraft-approach-badge {
-    background-color: var(--inbound-color);
+    background-color: #4CAF50; /* Light green color */
 }
 
 .aircraft-ground-badge {
-    background-color: #757575; /* Grey color instead of steel blue */
+    background-color: #757575; /* Grey color */
 }
 
 /* Add styles for "on ground" altitude text */
@@ -554,18 +554,7 @@ header h1 {
     border-left: 5px solid #757575; /* Grey color for on-ground indicator */
 }
 
-/* Approaching badge styling */
-.aircraft-approach-badge {
-    background-color: #4CAF50; /* Light green color */
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    display: none;
-    margin-right: 10px;
-}
-
+/* Dark mode adjustment for the approach badge */
 [data-theme="dark"] .aircraft-approach-badge {
     background-color: #5cb85c; /* Slightly brighter green for dark mode */
 }
