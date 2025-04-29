@@ -1,12 +1,14 @@
 package jetspotter
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"sync"
 
+	"jetspotter/internal/auth"
 	"jetspotter/internal/configuration"
+
+	"github.com/gin-gonic/gin"
 )
 
 // SpottedAircraft keeps track of all currently spotted aircraft
@@ -25,21 +27,31 @@ func SetupAPI(listenPort string, config configuration.Config) {
 	// Store the configuration for API access
 	Config = config
 
-	// Create API endpoints
-	http.HandleFunc("/api/aircraft", handleAircraftAPI)
-	http.HandleFunc("/api/config", handleConfigAPI)
+	// Set Gin to release mode in production
+	gin.SetMode(gin.ReleaseMode)
+
+	// Create a new Gin router
+	router := gin.Default()
+
+	// Create auth middleware
+	basicAuth := auth.NewBasicAuth()
+
+	// API routes
+	router.GET("/api/aircraft", handleAircraftAPI)
+
+	// Config API endpoint requires authentication
+	router.GET("/api/config", basicAuth.Middleware(), handleConfigAPI)
 
 	// Start HTTP server
 	go func() {
-		err := http.ListenAndServe(":"+listenPort, nil)
-		if err != nil {
+		if err := router.Run(":" + listenPort); err != nil {
 			log.Printf("API server error: %v", err)
 		}
 	}()
 }
 
 // handleAircraftAPI returns all currently spotted aircraft as JSON
-func handleAircraftAPI(w http.ResponseWriter, r *http.Request) {
+func handleAircraftAPI(c *gin.Context) {
 	SpottedAircraft.Lock()
 	defer SpottedAircraft.Unlock()
 
@@ -54,14 +66,11 @@ func handleAircraftAPI(w http.ResponseWriter, r *http.Request) {
 	// Convert filtered aircraft to output format
 	outputs := ConvertAircraftToOutput(filteredAircraft)
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(outputs)
+	c.JSON(http.StatusOK, outputs)
 }
 
 // handleConfigAPI returns the application configuration as JSON
-func handleConfigAPI(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	// Return the configuration as JSON
-	json.NewEncoder(w).Encode(Config)
+func handleConfigAPI(c *gin.Context) {
+	// This endpoint is now protected by the auth middleware
+	c.JSON(http.StatusOK, Config)
 }

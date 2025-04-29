@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }}</title>
+    <meta http-equiv="refresh" content="5">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: var(--background-color);
+        }
+        
+        .scanning-animation {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            margin-bottom: 30px;
+        }
+        
+        .radar-circle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid var(--secondary-color);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.97); opacity: 0.8; }
+            50% { transform: scale(1.03); opacity: 1; }
+            100% { transform: scale(0.97); opacity: 0.8; }
+        }
+        
+        .radar-circle::before, .radar-circle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            border: 2px solid var(--secondary-color);
+            opacity: 0.7;
+        }
+        
+        .radar-circle::before {
+            width: 70%;
+            height: 70%;
+            animation: ripple 3s infinite ease-out;
+        }
+        
+        .radar-circle::after {
+            width: 40%;
+            height: 40%;
+            animation: ripple 3s infinite ease-out 1s;
+        }
+        
+        @keyframes ripple {
+            0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.9); }
+            50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.1); }
+            100% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.9); }
+        }
+        
+        .radar-sweep {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 52%;
+            height: 3px;
+            background-color: var(--secondary-color);
+            transform-origin: left center;
+            animation: radar-sweep 4s linear infinite;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+        }
+        
+        .radar-sweep::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40px;
+            height: 100%;
+            background: linear-gradient(to right, var(--secondary-color), transparent);
+            border-radius: 3px;
+        }
+        
+        @keyframes radar-sweep {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 3rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .loading-text {
+            text-align: center;
+            max-width: 80%;
+        }
+        
+        .loading-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+        }
+        
+        .loading-message {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+        
+        .loading-progress {
+            width: 100%;
+            height: 4px;
+            background-color: rgba(125, 125, 125, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+            margin-top: 1.5rem;
+        }
+        
+        .loading-progress-bar {
+            position: absolute;
+            height: 100%;
+            background-color: var(--secondary-color);
+            width: 30%;
+            border-radius: 2px;
+            animation: progress-animation 3s infinite ease-in-out;
+        }
+        
+        @keyframes progress-animation {
+            0% { width: 0%; left: 0; }
+            50% { width: 30%; }
+            100% { left: 100%; width: 0%; }
+        }
+        
+        .refresh-note {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            opacity: 0.7;
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        
+        /* Dark mode adjustments */
+        [data-theme="dark"] .radar-circle,
+        [data-theme="dark"] .radar-circle::before,
+        [data-theme="dark"] .radar-circle::after,
+        [data-theme="dark"] .radar-sweep,
+        [data-theme="dark"] .loading-progress-bar {
+            border-color: var(--accent-color);
+            background-color: var(--accent-color);
+        }
+        
+        [data-theme="dark"] .loading-title {
+            color: var(--primary-color);
+        }
+        
+        /* Add Jetspotter logo at the top */
+        .jetspotter-logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+        
+        [data-theme="dark"] .jetspotter-logo {
+            color: var(--primary-color);
+        }
+    </style>
+    <script>
+        // Check for saved theme preference
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        });
+    </script>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="jetspotter-logo">Jetspotter</div>
+        
+        <div class="scanning-animation">
+            <div class="radar-circle"></div>
+            <div class="radar-sweep"></div>
+        </div>
+        
+        <div class="loading-text">
+            <div class="loading-title">Jetspotter is starting...</div>
+            <div class="loading-message">Initializing systems and waiting for aircraft data to become available.</div>
+            <div class="loading-progress">
+                <div class="loading-progress-bar"></div>
+            </div>
+            <div class="refresh-note">This page will refresh automatically every 5 seconds.</div>
+        </div>
+    </div>
+</body>
+</html>

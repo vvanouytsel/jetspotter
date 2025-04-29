@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .login-container {
+            max-width: 450px;
+            margin: 40px auto;
+            padding: 40px;
+            background-color: var(--card-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .login-header h2 {
+            color: var(--secondary-color);
+            font-size: 2rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .login-header p {
+            color: var(--text-color);
+            opacity: 0.8;
+            font-size: 1.05rem;
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+        
+        .login-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 1.05rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+            width: 100%;
+            display: block;
+            text-align: center;
+            box-sizing: border-box;
+            margin: 0;
+        }
+        
+        .login-button:hover {
+            background-color: #2474b5;
+        }
+        
+        .error-message {
+            background-color: rgba(231, 76, 60, 0.08);
+            color: #d44a3c;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            text-align: center;
+            border-left: 4px solid #e74c3c;
+            display: none;
+            font-weight: 500;
+            box-shadow: 0 2px 10px rgba(231, 76, 60, 0.05);
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        [data-theme="dark"] .form-group input {
+            border-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(42, 42, 48, 0.7);
+        }
+        
+        [data-theme="dark"] .form-group input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+        }
+        
+        [data-theme="dark"] .login-header h2 {
+            color: var(--primary-color);
+        }
+        
+        [data-theme="dark"] .login-button {
+            background-color: var(--accent-color);
+        }
+        
+        [data-theme="dark"] .login-button:hover {
+            background-color: #c83a2a;
+        }
+        
+        .login-logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        
+        [data-theme="dark"] .login-logo {
+            color: var(--primary-color);
+        }
+        
+        /* Responsive navigation */
+        .nav-links {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .nav-links a.nav-link {
+            display: inline-block;
+            margin: 0 10px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            position: relative;
+            padding: 5px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-links a.nav-link:hover,
+        .nav-links a.nav-link.active {
+            color: var(--secondary-color);
+        }
+        
+        [data-theme="dark"] .nav-links a.nav-link:hover,
+        [data-theme="dark"] .nav-links a.nav-link.active {
+            color: var(--accent-color);
+        }
+        
+        /* Adaptive padding for mobile */
+        @media (max-width: 768px) {
+            .login-container {
+                margin: 30px auto;
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="title-section">
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 11.807A9.002 9.002 0 0 1 10.049 2a9.942 9.942 0 0 0-5.12 2.735c-3.905 3.905-3.905 10.237 0 14.142 3.906 3.906 10.237 3.905 14.143 0a9.943 9.943 0 0 0 2.735-5.119A9.003 9.003 0 0 1 12 11.807z"></path>
+                    </svg>
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M6.995 12c0 2.761 2.246 5.007 5.007 5.007s5.007-2.246 5.007-5.007-2.246-5.007-5.007-5.007S6.995 9.239 6.995 12zM11 19h2v3h-2zm0-17h2v3h-2zm-9 9h3v2H2zm17 0h3v2h-3zM5.637 19.778l-1.414-1.414 2.121-2.121 1.414 1.414zM16.242 6.344l2.122-2.122 1.414 1.414-2.122 2.122zM6.344 7.759 4.223 5.637l1.415-1.414 2.12 2.122zm13.434 10.605-1.414 1.414-2.122-2.122 1.414-1.414z"></path>
+                    </svg>
+                </button>
+                <h1>Jetspotter</h1>
+            </div>
+            <div class="header-right">
+                <div class="nav-links">
+                    <a href="/" class="nav-link">Dashboard</a>
+                    <a href="/login" class="nav-link active">Login</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="login-container">
+            <div class="login-header">
+                <div class="login-logo">Jetspotter</div>
+                <h2>Authentication</h2>
+                <p>Sign in to access configuration</p>
+            </div>
+            
+            <div class="error-message" id="error-message">
+                Invalid username or password. Please try again.
+            </div>
+            
+            <form class="login-form" id="login-form" action="/login" method="POST">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required autocomplete="username" placeholder="Enter your username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Enter your password">
+                </div>
+                
+                <button type="submit" class="login-button">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <a href="https://github.com/vvanouytsel/jetspotter/" target="_blank" class="github-link">
+                    <svg class="github-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    GitHub
+                </a>
+                <div class="version-badge">
+                    <span class="version-text">v<span id="appVersion">-</span></span>
+                </div>
+                <a href="https://buymeacoffee.com/vvanouytsel" target="_blank" class="coffee-link" title="Support this project">
+                    <svg class="coffee-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                        <line x1="6" y1="1" x2="6" y2="4"></line>
+                        <line x1="10" y1="1" x2="10" y2="4"></line>
+                        <line x1="14" y1="1" x2="14" y2="4"></line>
+                    </svg>
+                    Buy me a coffee
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
+            
+            // Check for saved theme preference or use preferred color scheme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // Handle theme toggle click
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+            
+            // Show error message if the URL has ?error=true
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('error') === 'true') {
+                document.getElementById('error-message').classList.add('show');
+            }
+            
+            // Fetch version info
+            fetch('/api/version')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('appVersion').textContent = data.version || 'dev';
+                })
+                .catch(error => {
+                    console.error('Error fetching version:', error);
+                });
+                
+            // Focus the username field for better UX
+            document.getElementById('username').focus();
+        });
+    </script>
+</body>
+</html>

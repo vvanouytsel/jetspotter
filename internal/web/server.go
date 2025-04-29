@@ -10,6 +10,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/memstore"
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/render"
+
+	"jetspotter/internal/auth"
+	"jetspotter/internal/configuration"
 	"jetspotter/internal/jetspotter"
 	"jetspotter/internal/version"
 )
@@ -25,487 +32,288 @@ type Config struct {
 	APIEndpoint   string
 	RefreshPeriod time.Duration
 	DataReadyChan <-chan bool // Channel to signal when data is ready
+	SecureCookies bool        // Enable secure cookies (for HTTPS)
 }
 
 // Server represents the web frontend server
 type Server struct {
-	config        Config
-	router        *http.ServeMux
-	isDataReady   bool
-	dataReadyMux  http.Handler
-	pendingRoutes http.Handler
+	config           Config
+	engine           *gin.Engine
+	isDataReady      bool
+	auth             *auth.BasicAuth
+	jetspotterConfig *configuration.Config // Add jetspotter configuration
 }
 
 // NewServer creates a new web frontend server
 func NewServer(config Config) *Server {
-	pendingMux := http.NewServeMux()
-	pendingMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte(`<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jetspotter - Starting</title>
-    <meta http-equiv="refresh" content="5">
-    <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --accent-color: #e74c3c;
-            --background-color: #f5f7fa;
-            --card-color: #ffffff;
-            --text-color: #333333;
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --primary-color: #e0e0e0;
-                --secondary-color: #cccccc;
-                --accent-color: #ff6b6b;
-                --background-color: #121212;
-                --card-color: #1e1e1e;
-                --text-color: #e0e0e0;
-            }
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1.5rem;
-            width: 100%;
-            border-bottom: 1px solid rgba(125, 125, 125, 0.2);
-        }
-        
-        header h1 {
-            color: var(--secondary-color);
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .loading-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: var(--card-color);
-            border-radius: 12px;
-            padding: 3rem;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .scanning-animation {
-            position: relative;
-            width: 160px;
-            height: 160px;
-            margin-bottom: 30px;
-        }
-        
-        .radar-circle {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 3px solid var(--secondary-color);
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-            animation: pulse 2s infinite ease-in-out;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(0.97); opacity: 0.8; }
-            50% { transform: scale(1.03); opacity: 1; }
-            100% { transform: scale(0.97); opacity: 0.8; }
-        }
-        
-        .radar-circle::before, .radar-circle::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            border: 2px solid var(--secondary-color);
-            opacity: 0.7;
-        }
-        
-        .radar-circle::before {
-            width: 70%;
-            height: 70%;
-            animation: ripple 3s infinite ease-out;
-        }
-        
-        .radar-circle::after {
-            width: 40%;
-            height: 40%;
-            animation: ripple 3s infinite ease-out 1s;
-        }
-        
-        @keyframes ripple {
-            0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.9); }
-            50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.1); }
-            100% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.9); }
-        }
-        
-        .radar-sweep {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 52%;
-            height: 3px;
-            background-color: var(--secondary-color);
-            transform-origin: left center;
-            animation: radar-sweep 4s linear infinite;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-            border-radius: 3px;
-        }
-        
-        .radar-sweep::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 40px;
-            height: 100%;
-            background: linear-gradient(to right, var(--secondary-color), transparent);
-            border-radius: 3px;
-        }
-        
-        @keyframes radar-sweep {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .aircraft-dots {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: var(--accent-color);
-            opacity: 0;
-            animation: dot-appear 8s infinite linear;
-        }
-        
-        .aircraft-dot-1 {
-            top: 35%;
-            left: 70%;
-            animation-delay: 1s;
-        }
-        
-        .aircraft-dot-2 {
-            top: 60%;
-            left: 30%;
-            animation-delay: 3.5s;
-        }
-        
-        .aircraft-dot-3 {
-            top: 20%;
-            left: 40%;
-            animation-delay: 6s;
-        }
-        
-        @keyframes dot-appear {
-            0% { opacity: 0; transform: scale(0); }
-            5% { opacity: 1; transform: scale(1); }
-            15% { opacity: 1; transform: scale(1); }
-            20% { opacity: 0; transform: scale(0); }
-            100% { opacity: 0; transform: scale(0); }
-        }
-        
-        .loading-text {
-            text-align: center;
-            max-width: 80%;
-        }
-        
-        .loading-title {
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--secondary-color);
-        }
-        
-        .loading-message {
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-            color: var(--text-color);
-            opacity: 0.9;
-        }
-        
-        .loading-progress {
-            width: 100%;
-            height: 4px;
-            background-color: rgba(125, 125, 125, 0.2);
-            border-radius: 2px;
-            overflow: hidden;
-            position: relative;
-            margin-top: 1.5rem;
-        }
-        
-        .loading-progress-bar {
-            position: absolute;
-            height: 100%;
-            background-color: var(--secondary-color);
-            width: 30%;
-            border-radius: 2px;
-            animation: progress-animation 3s infinite ease-in-out;
-        }
-        
-        @keyframes progress-animation {
-            0% { width: 0%; left: 0; }
-            50% { width: 30%; }
-            100% { left: 100%; width: 0%; }
-        }
-        
-        .refresh-note {
-            font-size: 0.9rem;
-            color: var(--text-color);
-            opacity: 0.7;
-            margin-top: 1.5rem;
-            text-align: center;
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 2rem;
-            padding: 1rem 0;
-            opacity: 0.7;
-            font-size: 0.9rem;
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            .radar-circle {
-                border-color: var(--accent-color);
-                box-shadow: 0 0 30px rgba(231, 76, 60, 0.2);
-            }
-            
-            .radar-circle::before, .radar-circle::after {
-                border-color: var(--accent-color);
-            }
-            
-            .radar-sweep {
-                background-color: var(--accent-color);
-                box-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
-            }
-            
-            .radar-sweep::after {
-                background: linear-gradient(to right, var(--accent-color), transparent);
-            }
-            
-            .loading-title {
-                color: var(--accent-color);
-            }
-            
-            .loading-progress-bar {
-                background-color: var(--accent-color);
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>Jetspotter</h1>
-        </header>
-        
-        <div class="loading-container">
-            <div class="scanning-animation">
-                <div class="radar-circle"></div>
-                <div class="radar-sweep"></div>
-                <div class="aircraft-dots aircraft-dot-1"></div>
-                <div class="aircraft-dots aircraft-dot-2"></div>
-                <div class="aircraft-dots aircraft-dot-3"></div>
-            </div>
-            
-            <div class="loading-text">
-                <div class="loading-title">Jetspotter is starting...</div>
-                <div class="loading-message">Initializing systems and waiting for aircraft data to become available.</div>
-                <div class="loading-progress">
-                    <div class="loading-progress-bar"></div>
-                </div>
-                <div class="refresh-note">This page will refresh automatically every 5 seconds.</div>
-            </div>
-        </div>
-    </div>
-    
-    <footer>
-        <div>&copy; Jetspotter</div>
-    </footer>
-</body>
-</html>`))
+	// Set Gin to release mode in production
+	gin.SetMode(gin.ReleaseMode)
+
+	// Create a new gin engine
+	engine := gin.New()
+
+	// Use the recovery middleware
+	engine.Use(gin.Recovery())
+
+	// Generate a secure key for session encryption
+	key := generateSecureKey()
+
+	// Configure session middleware with a memory store (server-side sessions)
+	// This is more secure than cookie store as session data is kept on the server
+	store := memstore.NewStore(key)
+	store.Options(sessions.Options{
+		Path:     "/",
+		MaxAge:   86400, // 1 day
+		HttpOnly: true,
+		Secure:   config.SecureCookies,
+		SameSite: http.SameSiteLaxMode,
 	})
+	engine.Use(sessions.Sessions("jetspotter_session", store))
 
-	mainMux := http.NewServeMux()
-
-	server := &Server{
-		config:        config,
-		router:        mainMux,
-		isDataReady:   false,
-		dataReadyMux:  pendingMux,
-		pendingRoutes: pendingMux,
+	// Get the jetspotter configuration
+	jetspotterConfig, err := configuration.GetConfig()
+	if err != nil {
+		log.Printf("Warning: Failed to load jetspotter configuration: %v", err)
 	}
 
+	server := &Server{
+		config:           config,
+		engine:           engine,
+		isDataReady:      false,
+		auth:             auth.NewBasicAuth(),
+		jetspotterConfig: &jetspotterConfig,
+	}
+
+	// Add custom logger middleware that skips static file requests
+	engine.Use(func(c *gin.Context) {
+		// Skip logging for static file requests
+		if len(c.Request.URL.Path) > 8 && c.Request.URL.Path[:8] == "/static/" {
+			c.Next()
+			return
+		}
+		// Log other requests
+		start := time.Now()
+		path := c.Request.URL.Path
+		c.Next()
+		latency := time.Since(start)
+		status := c.Writer.Status()
+		log.Printf("[GIN] %d | %s | %s", status, latency, path)
+	})
+
+	// Configure routes
 	server.setupRoutes()
 
-	// Set up a goroutine to wait for the data ready signal
+	// Set up a handler for when data is not yet ready
 	if config.DataReadyChan != nil {
-		go server.waitForData()
+		go server.waitForData(config.DataReadyChan)
 	}
 
 	return server
 }
 
+// generateSecureKey creates a random key for the cookie store
+func generateSecureKey() []byte {
+	// Use a fixed key for now to ensure sessions remain valid across restarts
+	// In production, this should be stored securely and loaded from environment/config
+	return []byte("jetspotter_secure_cookie_key_change_in_production")
+}
+
 // waitForData waits for the data ready signal
-func (s *Server) waitForData() {
+func (s *Server) waitForData(readyChan <-chan bool) {
 	log.Println("Web UI: Waiting for aircraft data to be available...")
-	<-s.config.DataReadyChan
+	<-readyChan
 	s.isDataReady = true
-	s.dataReadyMux = s.router // Switch to the main router once data is ready
 	log.Println("Web UI: Aircraft data is now available, serving full interface")
 }
 
 // setupRoutes configures the HTTP routes
 func (s *Server) setupRoutes() {
-	// Serve static files
+	// Create a filesystem for static files
 	staticFS, err := fs.Sub(content, "static")
 	if err != nil {
 		log.Fatalf("Failed to create static file server: %v", err)
 	}
-	s.router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))
+	s.engine.StaticFS("/static", http.FS(staticFS))
 
-	// Homepage
-	s.router.HandleFunc("/", s.handleIndex)
+	// Authentication routes
+	s.engine.GET("/login", s.handleLoginGet)
+	s.engine.POST("/login", s.handleLoginPost)
+	s.engine.GET("/logout", s.handleLogout)
 
-	// Configuration page
-	s.router.HandleFunc("/config", s.handleConfig)
+	// Public routes
+	s.engine.GET("/", s.handleIndex)
+	s.engine.GET("/api/aircraft", s.handleAPIProxy)
+	s.engine.GET("/api/version", s.handleVersion)
 
-	// API proxy - forwards to the actual API for AJAX requests
-	s.router.HandleFunc("/api/aircraft", s.handleAPIProxy)
+	// Protected routes using auth middleware
+	protected := s.engine.Group("/")
+	protected.Use(s.authRequired())
+	{
+		protected.GET("/config", s.handleConfig)
+		protected.GET("/api/config", s.handleAPIConfigProxy)
+	}
 
-	// API endpoint for configuration
-	s.router.HandleFunc("/api/config", s.handleAPIConfigProxy)
-
-	// Version information endpoint
-	s.router.HandleFunc("/api/version", s.handleVersion)
+	// Add a NoRoute handler for 404 errors
+	s.engine.NoRoute(func(c *gin.Context) {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Page not found"})
+	})
 }
 
-// ServeHTTP makes Server implement the http.Handler interface
-func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.dataReadyMux.ServeHTTP(w, r)
+// authRequired is a middleware that checks if the user is authenticated
+func (s *Server) authRequired() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		session := sessions.Default(c)
+		user := session.Get("user")
+		if user == nil {
+			// User not logged in, redirect to login page
+			c.Redirect(http.StatusFound, "/login")
+			c.Abort()
+			return
+		}
+		// User is logged in, continue
+		c.Next()
+	}
 }
 
-// Start runs the web server
-func (s *Server) Start() error {
-	addr := fmt.Sprintf(":%d", s.config.ListenPort)
-	log.Printf("Starting web frontend at http://localhost%s", addr)
-	return http.ListenAndServe(addr, s)
+// handleLoginGet handles GET requests to the login page
+func (s *Server) handleLoginGet(c *gin.Context) {
+	// Check if already logged in
+	session := sessions.Default(c)
+	if session.Get("user") != nil {
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+
+	// Show login page
+	showError := c.Query("error") == "true"
+	c.HTML(http.StatusOK, "login.html", gin.H{
+		"Title":     "Login - Jetspotter",
+		"ShowError": showError,
+	})
+}
+
+// handleLoginPost handles POST requests to the login endpoint
+func (s *Server) handleLoginPost(c *gin.Context) {
+	// Get form data
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+
+	// Check credentials
+	if username == s.auth.Username && password == s.auth.Password {
+		// Valid credentials, create session
+		session := sessions.Default(c)
+		session.Set("user", username)
+		session.Save()
+
+		// Redirect to home page
+		c.Redirect(http.StatusFound, "/")
+		return
+	}
+
+	// Invalid credentials
+	c.Redirect(http.StatusFound, "/login?error=true")
+}
+
+// handleLogout logs the user out
+func (s *Server) handleLogout(c *gin.Context) {
+	// Clear the session
+	session := sessions.Default(c)
+	session.Clear()
+	session.Save()
+
+	// Redirect to login page
+	c.Redirect(http.StatusFound, "/login")
 }
 
 // handleIndex serves the main page
-func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
-	tmplFS, err := fs.Sub(content, "templates")
-	if err != nil {
-		http.Error(w, "Failed to load templates", http.StatusInternalServerError)
+func (s *Server) handleIndex(c *gin.Context) {
+	// Check if data is ready
+	if !s.isDataReady && s.config.DataReadyChan != nil {
+		s.serveLoadingPage(c)
 		return
 	}
 
-	tmpl, err := template.ParseFS(tmplFS, "index.html")
-	if err != nil {
-		http.Error(w, "Failed to parse template", http.StatusInternalServerError)
-		return
-	}
-
-	// Get scan radius from the API endpoint
-	resp, err := http.Get(s.config.APIEndpoint + "/api/config")
+	// Get scan radius directly from the configuration
 	var scanRadius int = 30 // Default value
+	if s.jetspotterConfig != nil {
+		// Prefer MaxScanRangeKilometers if available
+		scanRadius = s.jetspotterConfig.MaxScanRangeKilometers
+	}
 
-	if err == nil {
-		defer resp.Body.Close()
-		var configData map[string]interface{}
-		if decodeErr := json.NewDecoder(resp.Body).Decode(&configData); decodeErr == nil {
-			// Prefer MaxScanRangeKilometers if available, otherwise fall back to MaxRangeKilometers
-			if scanRange, ok := configData["MaxScanRangeKilometers"].(float64); ok {
-				scanRadius = int(scanRange)
-			} else if radius, ok := configData["MaxRangeKilometers"].(float64); ok {
-				scanRadius = int(radius)
-			}
+	// Check if user is logged in - safely access session
+	isLoggedIn := false
+	var username string
+
+	// Safely access session data with error handling
+	session := sessions.Default(c)
+	user := session.Get("user")
+	if user != nil {
+		isLoggedIn = true
+		var ok bool
+		username, ok = user.(string)
+		if !ok {
+			// If user value is not a string, handle the error
+			log.Printf("Warning: user session value is not a string type")
+			// Clear invalid session
+			session.Clear()
+			session.Save()
+			isLoggedIn = false
 		}
 	}
 
-	data := map[string]interface{}{
+	// Render template
+	c.HTML(http.StatusOK, "index.html", gin.H{
 		"Title":         "Jetspotter",
 		"RefreshPeriod": int(s.config.RefreshPeriod.Seconds()),
 		"ScanRadius":    scanRadius,
-	}
+		"IsLoggedIn":    isLoggedIn,
+		"Username":      username,
+	})
+}
 
-	w.Header().Set("Content-Type", "text/html")
-	if err := tmpl.Execute(w, data); err != nil {
-		http.Error(w, "Failed to render template", http.StatusInternalServerError)
-	}
+// serveLoadingPage serves the loading page while waiting for data
+func (s *Server) serveLoadingPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "loading.html", gin.H{
+		"Title": "Jetspotter - Starting",
+	})
 }
 
 // handleConfig serves the configuration page
-func (s *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
-	tmplFS, err := fs.Sub(content, "templates")
-	if err != nil {
-		http.Error(w, "Failed to load templates", http.StatusInternalServerError)
+func (s *Server) handleConfig(c *gin.Context) {
+	// User is already authenticated by middleware
+	session := sessions.Default(c)
+	user := session.Get("user")
+
+	// Safe access to username
+	var username string
+	if user != nil {
+		var ok bool
+		username, ok = user.(string)
+		if !ok {
+			log.Printf("Warning: user session value is not a string type")
+			// Redirect to login page if session data is invalid
+			c.Redirect(http.StatusFound, "/login")
+			return
+		}
+	} else {
+		// This shouldn't happen due to authRequired middleware, but handle it anyway
+		c.Redirect(http.StatusFound, "/login")
 		return
 	}
 
-	tmpl, err := template.ParseFS(tmplFS, "config.html")
-	if err != nil {
-		http.Error(w, "Failed to parse template", http.StatusInternalServerError)
-		return
-	}
-
-	data := map[string]interface{}{
-		"Title": "Jetspotter Configuration",
-	}
-
-	w.Header().Set("Content-Type", "text/html")
-	if err := tmpl.Execute(w, data); err != nil {
-		http.Error(w, "Failed to render template", http.StatusInternalServerError)
-	}
+	c.HTML(http.StatusOK, "config.html", gin.H{
+		"Title":      "Jetspotter Configuration",
+		"IsLoggedIn": true,
+		"Username":   username,
+	})
 }
 
 // handleAPIProxy proxies requests to the backend API
-func (s *Server) handleAPIProxy(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleAPIProxy(c *gin.Context) {
 	// Forward the request to the actual API
 	resp, err := http.Get(s.config.APIEndpoint + "/api/aircraft")
 	if err != nil {
-		http.Error(w, "Failed to fetch data from API", http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch data from API"})
 		return
 	}
 	defer resp.Body.Close()
@@ -513,46 +321,128 @@ func (s *Server) handleAPIProxy(w http.ResponseWriter, r *http.Request) {
 	// Parse the response
 	var aircraft []jetspotter.AircraftOutput
 	if err := json.NewDecoder(resp.Body).Decode(&aircraft); err != nil {
-		http.Error(w, "Failed to parse API response", http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse API response"})
 		return
 	}
 
 	// Return the response as JSON
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(aircraft); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-	}
+	c.JSON(http.StatusOK, aircraft)
 }
 
 // handleAPIConfigProxy proxies requests to the backend API for configuration
-func (s *Server) handleAPIConfigProxy(w http.ResponseWriter, r *http.Request) {
-	// Forward the request to the actual API
-	resp, err := http.Get(s.config.APIEndpoint + "/api/config")
+func (s *Server) handleAPIConfigProxy(c *gin.Context) {
+	// Create a new request to forward to the API
+	req, err := http.NewRequest("GET", s.config.APIEndpoint+"/api/config", nil)
 	if err != nil {
-		http.Error(w, "Failed to fetch config data from API", http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create request for config API"})
+		return
+	}
+
+	// User is already authenticated via middleware
+	// Use the web UI credentials for API auth
+	req.SetBasicAuth(s.auth.Username, s.auth.Password)
+
+	// Execute the request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch config data from API"})
 		return
 	}
 	defer resp.Body.Close()
 
-	// Set the content type
-	w.Header().Set("Content-Type", "application/json")
-
-	// Copy the response body to the output
-	var config interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&config); err != nil {
-		http.Error(w, "Failed to parse API config response", http.StatusInternalServerError)
+	// If the API returns unauthorized, pass that status back to the client
+	if resp.StatusCode == http.StatusUnauthorized {
+		c.Header("WWW-Authenticate", resp.Header.Get("WWW-Authenticate"))
+		c.Status(http.StatusUnauthorized)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(config); err != nil {
-		http.Error(w, "Failed to encode config response", http.StatusInternalServerError)
+	// Parse the response
+	var config interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&config); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse API config response"})
+		return
 	}
+
+	// Return the response as JSON
+	c.JSON(http.StatusOK, config)
 }
 
 // handleVersion serves the application version information
-func (s *Server) handleVersion(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(version.GetFullVersionInfo()); err != nil {
-		http.Error(w, "Failed to encode version information", http.StatusInternalServerError)
+func (s *Server) handleVersion(c *gin.Context) {
+	c.JSON(http.StatusOK, version.GetFullVersionInfo())
+}
+
+// Start runs the web server
+func (s *Server) Start() error {
+	addr := fmt.Sprintf(":%d", s.config.ListenPort)
+	log.Printf("Starting web frontend at http://localhost%s", addr)
+
+	// Setup template rendering
+	tmplFS, err := fs.Sub(content, "templates")
+	if err != nil {
+		return fmt.Errorf("failed to create template filesystem: %v", err)
 	}
+
+	// Create HTML template renderer
+	htmlRenderer, err := newTemplateRenderer(tmplFS)
+	if err != nil {
+		return fmt.Errorf("failed to create template renderer: %v", err)
+	}
+	s.engine.HTMLRender = htmlRenderer
+
+	// Start the server
+	return s.engine.Run(addr)
+}
+
+// templateRenderer implements gin.HTMLRender interface
+type templateRenderer struct {
+	templates map[string]*template.Template
+}
+
+// newTemplateRenderer creates a new template renderer with templates from the given filesystem
+func newTemplateRenderer(templateFS fs.FS) (render.HTMLRender, error) {
+	r := &templateRenderer{
+		templates: make(map[string]*template.Template),
+	}
+
+	// Load templates from the embedded filesystem
+	templateFiles := []string{"index.html", "config.html", "login.html", "loading.html"}
+	for _, file := range templateFiles {
+		tmpl, err := template.ParseFS(templateFS, file)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse template %s: %v", file, err)
+		}
+		r.templates[file] = tmpl
+	}
+
+	return r, nil
+}
+
+// Instance implements the gin.HTMLRender interface
+func (t *templateRenderer) Instance(name string, data interface{}) render.Render {
+	return &templateInstance{
+		Name:     name,
+		Data:     data,
+		Template: t.templates[name],
+	}
+}
+
+// templateInstance represents a single template instance with data
+type templateInstance struct {
+	Name     string
+	Data     interface{}
+	Template *template.Template
+}
+
+// Render implements the gin.Render interface
+func (t *templateInstance) Render(w http.ResponseWriter) error {
+	t.WriteContentType(w)
+	return t.Template.Execute(w, t.Data)
+}
+
+// WriteContentType writes the content type header to the response
+func (t *templateInstance) WriteContentType(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 }

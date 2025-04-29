@@ -108,6 +108,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Theme toggle button event listener
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 
+    // Add event listener to the user dropdown button
+    const userDropdownButton = document.getElementById('userDropdownButton');
+    if (userDropdownButton) {
+        userDropdownButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropdown = this.closest('.user-dropdown');
+            dropdown.classList.toggle('active');
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!dropdown.contains(e.target)) {
+                    dropdown.classList.remove('active');
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+        });
+    }
+
     // Fetch version information
     fetchVersionInfo();
     

@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Fetch configuration data
     fetchConfigData();
+    
+    // Initialize user dropdown menu
+    initUserDropdown();
 });
 
 // Initialize the theme toggle functionality
@@ -256,5 +259,26 @@ function applyDarkThemeToMap() {
         L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
         }).addTo(map);
+    }
+}
+
+// Initialize the user dropdown menu functionality
+function initUserDropdown() {
+    const userDropdownButton = document.getElementById('userDropdownButton');
+    if (userDropdownButton) {
+        userDropdownButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropdown = this.closest('.user-dropdown');
+            dropdown.classList.toggle('active');
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!dropdown.contains(e.target)) {
+                    dropdown.classList.remove('active');
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+        });
     }
 }
