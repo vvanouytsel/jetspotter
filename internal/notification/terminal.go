@@ -9,29 +9,27 @@ import (
 
 // FormatAircraft prints an Aircraft in a readable manner.
 func FormatAircraft(aircraft jetspotter.AircraftOutput, config configuration.Config) string {
-	inboundStatus := getInboundStatus(aircraft)
-
 	return fmt.Sprintf("Callsign: %s\n"+
 		"Description: %s\n"+
 		"Type: %s\n"+
 		"Tail number: %s\n"+
 		"Country: %s\n"+
-		"Altitude: %dft | %dm\n"+
-		"Speed: %dkn | %dkm/h\n"+
-		"Distance: %dkm\n"+
-		"Cloud coverage: %d%%\n"+
-		"Bearing from location: %.0f°\n"+
-		"Bearing from aircraft: %.0f°\n"+
-		"Heading: %.0f°\n"+
+		"Altitude: %s\n"+
+		"Speed: %s\n"+
+		"Distance: %s\n"+
+		"Cloud coverage: %s\n"+
+		"Bearing from location: %s\n"+
+		"Bearing from aircraft: %s\n"+
+		"Heading: %s\n"+
 		"Inbound: %s\n"+
 		"TrackerURL: %s\n"+
 		"ImageURL: %s\n",
 
 		aircraft.Callsign, aircraft.Description, aircraft.Type,
-		aircraft.Registration, aircraft.Country, int(aircraft.Altitude), jetspotter.ConvertFeetToMeters(aircraft.Altitude),
-		aircraft.Speed, jetspotter.ConvertKnotsToKilometersPerHour(aircraft.Speed),
-		aircraft.Distance, aircraft.CloudCoverage, aircraft.BearingFromLocation,
-		aircraft.BearingFromAircraft, aircraft.Heading, inboundStatus, aircraft.TrackerURL, aircraft.ImageURL)
+		aircraft.Registration, aircraft.Country, printAltitude(aircraft),
+		printSpeed(aircraft), printDistance(aircraft), printCloudCoverage(aircraft),
+		printBearingFromLocation(aircraft), printBearingFromAircraft(aircraft),
+		printHeading(aircraft), getInboundStatus(aircraft), aircraft.TrackerURL, aircraft.ImageURL)
 }
 
 // SendTerminalMessage prints a list of Aircraft in a readable manner.
