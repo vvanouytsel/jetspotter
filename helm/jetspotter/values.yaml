@@ -25,6 +25,8 @@ webUI:
   enabled: true
   # Port to expose the web UI on
   port: 8080
+  # Password for the admin user
+  password: jetspotter
 
 # Ingress configuration
 ingress:
