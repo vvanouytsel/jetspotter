@@ -614,14 +614,26 @@ function createAircraftCard(aircraft) {
         imgElement.src = aircraft.ImageThumbnailURL;
         imgElement.alt = `${aircraft.Type || 'Aircraft'} - ${aircraft.Registration || ''}`;
         imgElement.classList.remove('fallback-image');
+        
+        // Add photographer information as tooltip if available
+        if (aircraft.Photographer) {
+            imgElement.title = `Photo by: ${aircraft.Photographer}`;
+        }
     } else if (aircraft.ImageURL) {
         imgElement.src = aircraft.ImageURL;
         imgElement.alt = `${aircraft.Type || 'Aircraft'} - ${aircraft.Registration || ''}`;
         imgElement.classList.remove('fallback-image');
+        
+        // Add photographer information as tooltip if available
+        if (aircraft.Photographer) {
+            imgElement.title = `Photo by: ${aircraft.Photographer}`;
+        }
     } else {
         imgElement.src = '/static/images/aircraft_not_found.png';
         imgElement.alt = 'No image available';
         imgElement.classList.add('fallback-image');
+        // Clear any existing title since there's no photographer for fallback image
+        imgElement.title = '';
     }
     
     // Add notification icons

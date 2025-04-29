@@ -368,8 +368,11 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		}
 		acOutput.BearingFromLocation = CalculateBearing(config.Location, aircraftLocation)
 		acOutput.BearingFromAircraft = CalculateBearing(aircraftLocation, config.Location)
-		acOutput.ImageThumbnailURL = image.ThumbnailLarge.Src
-		acOutput.ImageURL = image.Link
+		if image != nil {
+			acOutput.ImageThumbnailURL = image.ThumbnailLarge.Src
+			acOutput.ImageURL = image.Link
+			acOutput.Photographer = image.Photographer
+		}
 		acOutput.Military = isAircraftMilitary(ac)
 		// Check if aircraft is on the ground (altitude is 0)
 		acOutput.OnGround = acOutput.Altitude == 0
@@ -553,6 +556,7 @@ func GetCountryFromRegistration(registration string) string {
 		"YI-":  "Iraq",
 		"9K-":  "Kuwait",
 		"4K-":  "Azerbaijan",
+		"9XR-": "Rwanda",
 	}
 
 	// Check for matching prefixes

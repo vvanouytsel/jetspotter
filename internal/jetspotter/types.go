@@ -124,6 +124,9 @@ type AircraftOutput struct {
 	// ImageURL is the URL showing more images of the aircraft
 	ImageURL string
 
+	// Specifies the photographer of the image
+	Photographer string
+
 	// Percentage of cloud coverage, lower cloud coverage means that you have more chance to spot the aircraft
 	CloudCoverage int
 
