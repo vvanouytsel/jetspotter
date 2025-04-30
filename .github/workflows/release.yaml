@@ -155,25 +155,12 @@ jobs:
     name: Send notification on failure
     needs: [build, release, image]
     if: failure()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - name: Send alert to slack
-        id: slack
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "Jetspotter failed build",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|GitHub action> for jetspotter failed"
-                  }
-                }
-              ]
-            }
+      - name: Discord notification
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_GOOSE }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          curl -X POST -H 'Content-Type: application/json' -d '{
+            "content": "Build failed for Jetspotter. Commit message: ${{ github.event.head_commit.message }}. View the failed job at ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
+          }' $DISCORD_WEBHOOK
