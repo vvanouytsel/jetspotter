@@ -15,6 +15,7 @@ let lastUpdateTime = null;
 let countdownInterval = null;
 let isLoading = true; // New variable to track loading state
 let appVersion = 'dev'; // Variable to store app version
+let configCoordinates = { latitude: null, longitude: null }; // Store coordinates for map link
 
 // DOM elements
 document.addEventListener('DOMContentLoaded', () => {
@@ -39,6 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAircraftGrid();
     });
 
+    // Update map link with coordinates
+    updateMapLink();
+    
     // Add click handler for the total aircraft stat box
     document.getElementById('totalAircraftStat').addEventListener('click', () => {
         // Reset all filters
@@ -909,7 +913,7 @@ function getCountryFlagEmoji(countryName) {
     
     // Convert ISO country code to country flag emoji
     // Regional Indicator Symbols are Unicode characters U+1F1E6 to U+1F1FF
-    // which represent the letters A-Z
+    // which represent
     const offset = 127397; // Offset to convert ASCII letter to Regional Indicator Symbol
     const codePoints = [...countryCode].map(char => char.charCodeAt(0) + offset);
     return String.fromCodePoint(...codePoints);
@@ -1069,5 +1073,44 @@ async function fetchVersionInfo() {
         console.error('Error fetching version information:', error);
         // Fall back to default 'dev' version if there's an error
         document.getElementById('appVersion').textContent = 'dev';
+    }
+}
+
+// Initialize map link with coordinates
+async function initializeMapLink() {
+    try {
+        // Fetch coordinates from the API
+        const response = await fetch('/api/config');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const config = await response.json();
+        
+        // Store coordinates for future use
+        if (config.Latitude && config.Longitude) {
+            configCoordinates.latitude = config.Latitude;
+            configCoordinates.longitude = config.Longitude;
+            
+            // Update map link
+            updateMapLink();
+        }
+    } catch (error) {
+        console.error('Error fetching configuration for map link:', error);
+    }
+}
+
+// Update the map link with the current coordinates
+function updateMapLink() {
+    const mapLink = document.getElementById('mapLink');
+    if (!mapLink) return;
+    
+    // Use coordinates from the template variables
+    if (typeof SITE_LATITUDE !== 'undefined' && typeof SITE_LONGITUDE !== 'undefined') {
+        const url = `https://globe.airplanes.live/?lat=${SITE_LATITUDE}&lon=${SITE_LONGITUDE}&SiteLat=${SITE_LATITUDE}&SiteLon=${SITE_LONGITUDE}&zoom=11&enableLabels&extendedLabels=1&hideSidebar`;
+        mapLink.href = url;
+    } else {
+        mapLink.href = 'https://globe.airplanes.live/';
     }
 }

@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Title}}</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <script>
+        // Location coordinates from server
+        const SITE_LATITUDE = {{.Latitude}};
+        const SITE_LONGITUDE = {{.Longitude}};
+    </script>
     <style>
         .login-container {
             max-width: 450px;
@@ -199,8 +204,28 @@
             </div>
             <div class="header-right">
                 <div class="nav-links">
-                    <a href="/" class="nav-link">Dashboard</a>
-                    <a href="/login" class="nav-link active">Login</a>
+                    <a href="/" class="nav-link" title="Dashboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="9"></rect>
+                            <rect x="14" y="3" width="7" height="5"></rect>
+                            <rect x="14" y="12" width="7" height="9"></rect>
+                            <rect x="3" y="16" width="7" height="5"></rect>
+                        </svg>
+                    </a>
+                    <a href="#" id="mapLink" class="nav-link" target="_blank" title="View on airplanes.live">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 7l6 3 6-3 6 3v8l-6-3-6 3-6-3V7z"/>
+                            <path d="M9 10v8"/>
+                            <path d="M15 7v8"/>
+                        </svg>
+                    </a>
+                    <a href="/login" class="nav-link active" title="Login">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
+                    </a>
                 </div>
             </div>
         </header>
@@ -276,25 +301,29 @@
                 localStorage.setItem('theme', newTheme);
             });
             
+            // Update map link with coordinates
+            updateMapLink();
+            
             // Show error message if the URL has ?error=true
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('error') === 'true') {
                 document.getElementById('error-message').classList.add('show');
             }
-            
-            // Fetch version info
-            fetch('/api/version')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('appVersion').textContent = data.version || 'dev';
-                })
-                .catch(error => {
-                    console.error('Error fetching version:', error);
-                });
-                
-            // Focus the username field for better UX
-            document.getElementById('username').focus();
         });
+
+        // Update the map link with the current coordinates
+        function updateMapLink() {
+            const mapLink = document.getElementById('mapLink');
+            if (!mapLink) return;
+            
+            // Use coordinates from the template variables
+            if (typeof SITE_LATITUDE !== 'undefined' && typeof SITE_LONGITUDE !== 'undefined') {
+                const url = `https://globe.airplanes.live/?lat=${SITE_LATITUDE}&lon=${SITE_LONGITUDE}&SiteLat=${SITE_LATITUDE}&SiteLon=${SITE_LONGITUDE}&zoom=11&enableLabels&extendedLabels=1&hideSidebar`;
+                mapLink.href = url;
+            } else {
+                mapLink.href = 'https://globe.airplanes.live/';
+            }
+        }
     </script>
 </body>
 </html>

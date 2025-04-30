@@ -5,6 +5,7 @@ let map;
 let notificationCircle;
 let scanCircle;
 let locationMarker;
+let configCoordinates = { latitude: null, longitude: null }; // Store coordinates for map link
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize theme toggle 
@@ -15,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Fetch configuration data
     fetchConfigData();
+    
+    // Update map link with coordinates
+    updateMapLink();
     
     // Initialize user dropdown menu
     initUserDropdown();
@@ -280,5 +284,43 @@ function initUserDropdown() {
                 }
             });
         });
+    }
+}
+
+// Initialize map link with coordinates
+async function initializeMapLink() {
+    try {
+        const response = await fetch('/api/config');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const config = await response.json();
+        
+        // Store coordinates for future use
+        if (config.Location?.Lat && config.Location?.Lon) {
+            configCoordinates.latitude = config.Location.Lat;
+            configCoordinates.longitude = config.Location.Lon;
+            
+            // Update map link
+            updateMapLink();
+        }
+    } catch (error) {
+        console.error('Error fetching configuration for map link:', error);
+    }
+}
+
+// Update the map link with the current coordinates
+function updateMapLink() {
+    const mapLink = document.getElementById('mapLink');
+    if (!mapLink) return;
+    
+    // Use coordinates from the template variables
+    if (typeof SITE_LATITUDE !== 'undefined' && typeof SITE_LONGITUDE !== 'undefined') {
+        const url = `https://globe.airplanes.live/?lat=${SITE_LATITUDE}&lon=${SITE_LONGITUDE}&SiteLat=${SITE_LATITUDE}&SiteLon=${SITE_LONGITUDE}&zoom=11&enableLabels&extendedLabels=1&hideSidebar`;
+        mapLink.href = url;
+    } else {
+        mapLink.href = 'https://globe.airplanes.live/';
     }
 }

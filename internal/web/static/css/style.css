@@ -1,7 +1,7 @@
 /* Main styling */
 :root {
     --primary-color: #3498db;
-    --secondary-color: #2c3e50;
+    --secondary-color: #2980b9; /* Changed to a nice blue color */
     --accent-color: #e74c3c;
     --background-color: #f5f7fa;
     --card-color: #ffffff;
@@ -893,6 +893,17 @@ header h1 {
 .nav-link.active {
     color: var(--secondary-color);
     font-weight: bold;
+}
+
+/* Active navigation icon styling */
+.nav-link.active svg {
+    stroke: var(--secondary-color);
+    stroke-width: 2.25; /* Slightly thicker for better visibility */
+    transform: scale(1.15);
+}
+
+[data-theme="dark"] .nav-link.active svg {
+    stroke: var(--accent-color);
 }
 
 /* Configuration page styles */

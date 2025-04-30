@@ -184,11 +184,21 @@ func (s *Server) handleLoginGet(c *gin.Context) {
 		return
 	}
 
+	// Get coordinates for the map link
+	var latitude, longitude float64
+	if s.jetspotterConfig != nil {
+		// Location is a geodist.Coord struct, not a pointer
+		latitude = s.jetspotterConfig.Location.Lat
+		longitude = s.jetspotterConfig.Location.Lon
+	}
+
 	// Show login page
 	showError := c.Query("error") == "true"
 	c.HTML(http.StatusOK, "login.html", gin.H{
 		"Title":     "Login - Jetspotter",
 		"ShowError": showError,
+		"Latitude":  latitude,
+		"Longitude": longitude,
 	})
 }
 
@@ -235,9 +245,14 @@ func (s *Server) handleIndex(c *gin.Context) {
 
 	// Get scan radius directly from the configuration
 	var scanRadius int = 30 // Default value
+	var latitude, longitude float64
 	if s.jetspotterConfig != nil {
 		// Prefer MaxScanRangeKilometers if available
 		scanRadius = s.jetspotterConfig.MaxScanRangeKilometers
+		// Get location coordinates for the map link
+		// Location is a geodist.Coord struct, not a pointer, so we can access its fields directly
+		latitude = s.jetspotterConfig.Location.Lat
+		longitude = s.jetspotterConfig.Location.Lon
 	}
 
 	// Check if user is logged in - safely access session
@@ -268,6 +283,8 @@ func (s *Server) handleIndex(c *gin.Context) {
 		"ScanRadius":    scanRadius,
 		"IsLoggedIn":    isLoggedIn,
 		"Username":      username,
+		"Latitude":      latitude,
+		"Longitude":     longitude,
 	})
 }
 
@@ -301,10 +318,20 @@ func (s *Server) handleConfig(c *gin.Context) {
 		return
 	}
 
+	// Get location coordinates for the map link
+	var latitude, longitude float64
+	if s.jetspotterConfig != nil {
+		// Location is a geodist.Coord struct, not a pointer
+		latitude = s.jetspotterConfig.Location.Lat
+		longitude = s.jetspotterConfig.Location.Lon
+	}
+
 	c.HTML(http.StatusOK, "config.html", gin.H{
 		"Title":      "Jetspotter Configuration",
 		"IsLoggedIn": true,
 		"Username":   username,
+		"Latitude":   latitude,
+		"Longitude":  longitude,
 	})
 }
 
