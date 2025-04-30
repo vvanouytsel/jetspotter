@@ -192,7 +192,6 @@ async function fetchData() {
             
             // Update UI with demo data
             lastUpdateTime = new Date();
-            document.getElementById('lastUpdate').textContent = lastUpdateTime.toLocaleTimeString();
             updateAircraftDescriptions();
             updateStats();
             isLoading = false;
@@ -210,7 +209,6 @@ async function fetchData() {
         
         // Always update last update timestamp - this is key to fixing the countdown timer
         lastUpdateTime = new Date();
-        document.getElementById('lastUpdate').textContent = lastUpdateTime.toLocaleTimeString();
         
         // Only update the UI if data has changed
         if (JSON.stringify(allAircraft) !== JSON.stringify(newAircraft)) {
@@ -1030,10 +1028,10 @@ function startCountdownTimer() {
 
 // Update the countdown display
 function updateCountdown() {
-    const nextUpdateCountdown = document.getElementById('nextUpdateCountdown');
+    const countdownElement = document.getElementById('nextUpdateCountdown');
     
     if (!lastUpdateTime) {
-        nextUpdateCountdown.textContent = '-';
+        countdownElement.textContent = '-';
         return;
     }
     
@@ -1044,11 +1042,22 @@ function updateCountdown() {
     
     // Format the countdown
     if (secondsLeft <= 0) {
-        nextUpdateCountdown.textContent = 'Refreshing...';
+        countdownElement.textContent = 'Refreshing...';
+        countdownElement.classList.add('refreshing');
+        countdownElement.parentElement.title = 'Refreshing data...';
     } else {
         const minutes = Math.floor(secondsLeft / 60);
         const seconds = secondsLeft % 60;
-        nextUpdateCountdown.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        countdownElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        countdownElement.classList.remove('refreshing');
+        
+        // Update tooltip with more detailed information
+        if (minutes > 0) {
+            countdownElement.parentElement.title = `Next refresh in ${minutes} minute${minutes !== 1 ? 's' : ''} and ${seconds} second${seconds !== 1 ? 's' : ''}`;
+        } else {
+            countdownElement.parentElement.title = `Next refresh in ${seconds} second${seconds !== 1 ? 's' : ''}`;
+        }
     }
 }
 

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Title}}</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script>
         // Location coordinates from server
         const SITE_LATITUDE = {{.Latitude}};
@@ -143,9 +146,11 @@
         
         .login-logo {
             font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--secondary-color);
+            font-weight: 600;
+            color: var(--text-color);
             margin-bottom: 15px;
+            font-family: var(--title-font);
+            letter-spacing: -0.02em;
         }
         
         [data-theme="dark"] .login-logo {
@@ -309,6 +314,9 @@
             if (urlParams.get('error') === 'true') {
                 document.getElementById('error-message').classList.add('show');
             }
+            
+            // Fetch version info
+            fetchVersionInfo();
         });
 
         // Update the map link with the current coordinates
@@ -323,6 +331,26 @@
             } else {
                 mapLink.href = 'https://globe.airplanes.live/';
             }
+        }
+        
+        // Fetch version information from the server
+        function fetchVersionInfo() {
+            fetch('/api/version')
+                .then(response => response.json())
+                .then(versionData => {
+                    const appVersion = versionData.version || 'dev';
+                    const appVersionElement = document.getElementById('appVersion');
+                    if (appVersionElement) {
+                        appVersionElement.textContent = appVersion;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching version:', error);
+                    const appVersionElement = document.getElementById('appVersion');
+                    if (appVersionElement) {
+                        appVersionElement.textContent = 'dev';
+                    }
+                });
         }
     </script>
 </body>

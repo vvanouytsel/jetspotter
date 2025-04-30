@@ -26,6 +26,9 @@
     /* GitHub link colors */
     --github-link-color: #333333;
     --github-link-hover-color: #0366d6;
+    
+    /* Loading screen colors */
+    --loading-title-color: #000000; /* Black color for the loading title */
 }
 
 /* Dark mode colors */
@@ -43,6 +46,9 @@
     /* GitHub link colors for dark mode */
     --github-link-color: #e0e0e0;
     --github-link-hover-color: #58a6ff;
+    
+    /* Loading screen colors for dark mode */
+    --loading-title-color: #000000; /* Keep it black even in dark mode */
 }
 
 * {
@@ -87,38 +93,80 @@ header {
 .title-section {
     display: flex;
     align-items: center;
+    height: 60px; /* Added fixed height for better vertical alignment */
 }
 
 .title-section .theme-toggle {
-    margin-right: 10px;
+    margin-right: 15px; /* Increased margin for better spacing */
     margin-left: 0;
 }
 
 header h1 {
-    color: var(--secondary-color);
+    color: var(--text-color);
+    font-family: var(--title-font);
+    font-weight: 600;
+    font-size: 2.2rem; /* Increased font size */
+    letter-spacing: -0.02em; /* Slight negative letter spacing for a modern look */
+    position: relative;
+    top: 2px; /* Fine-tune vertical position */
 }
 
 [data-theme="dark"] header h1 {
-    color: #e0e0e0; /* Changed back to a professional white-ish color */
+    color: #e0e0e0;
 }
 
 /* Adjust status-info for new layout */
 .status-info {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    text-align: right;
-    font-size: 0.9rem;
-    color: #666;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 5px;
 }
 
 [data-theme="dark"] .status-info {
     color: #999;
 }
 
+/* Refresh indicator styling - more minimal and fits better with the UI */
+.refresh-indicator {
+    font-size: 0.85rem;
+    color: var(--button-color);
+    transition: all 0.2s ease;
+    cursor: default;
+}
+
+.refresh-countdown-container {
+    display: inline-block;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+#nextUpdateCountdown {
+    position: relative;
+}
+
+#nextUpdateCountdown::before {
+    content: "↻";
+    display: inline-block;
+    margin-right: 4px;
+    font-weight: bold;
+    transition: transform 0.3s ease;
+}
+
+#nextUpdateCountdown.refreshing::before {
+    animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Remove old elements */
 .last-update, .next-update {
-    font-size: 0.9rem;
-    color: #666;
+    display: none;
 }
 
 /* Dashboard stats */
@@ -1231,7 +1279,7 @@ header h1 {
 .theme-toggle svg {
     width: 24px;
     height: 24px;
-    fill: currentColor;
+    fill: var(--secondary-color); /* Changed from currentColor to secondary-color for color swap */
 }
 
 [data-theme="dark"] .theme-toggle svg {
