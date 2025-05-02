@@ -495,13 +495,27 @@ func TestCallsignStartsEmptySpace(t *testing.T) {
 	}
 }
 
-// TestCallsignNoEmptySpace tests that the callsign is not changed if it does not start with empty spaces
-func TestCallsignNoEmptySpace(t *testing.T) {
+// TestCallsignEndsEmptySpace that the callsign is not changed if it does not start with empty spaces
+func TestCallsignEndsEmptySpace(t *testing.T) {
 	aircraft := Aircraft{
 		Callsign: "x  x  ",
 	}
 
-	expected := "x  x  "
+	expected := "x  x"
+	actual := validateFields(aircraft).Callsign
+
+	if expected != actual {
+		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+	}
+}
+
+// TestCallsignNoEmptySpace tests that the callsign is not changed if it does not start or end with empty spaces
+func TestCallsignNoEmptySpace(t *testing.T) {
+	aircraft := Aircraft{
+		Callsign: "x  x x",
+	}
+
+	expected := "x  x x"
 	actual := validateFields(aircraft).Callsign
 
 	if expected != actual {
@@ -675,7 +689,6 @@ func TestHandleAircraftWithScanRange(t *testing.T) {
 		MaxRangeKilometers:     20,  // Should only include TEST1
 		MaxScanRangeKilometers: 100, // Should include TEST1 and TEST2, but not TEST3
 		AircraftTypes:          []string{"ALL"},
-		MaxAltitudeFeet:        0, // No altitude filtering
 	}
 
 	// Filter aircraft based on distance from the location
@@ -1027,7 +1040,7 @@ func TestAircraftOnGroundIsNeverInbound(t *testing.T) {
 	aircraft := []Aircraft{aircraftOnGround}
 
 	// Process the aircraft
-	outputs, err := CreateAircraftOutput(aircraft, config)
+	outputs, err := CreateAircraftOutput(aircraft, config, false)
 	if err != nil {
 		t.Fatalf("Error creating aircraft output: %v", err)
 	}

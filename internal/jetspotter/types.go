@@ -147,4 +147,53 @@ type AircraftOutput struct {
 
 	// Specifies if the aircraft is on the ground
 	OnGround bool
+
+	// Airline of the aircraft
+	Airline Airline
+
+	// Origin of the flight
+	Origin Airport
+
+	// Destination of the flight
+	Destination Airport
+}
+
+// FlightRouteResponse represents the structure of the response from the adsbdb.com API
+type FlightRouteResponse struct {
+	Response struct {
+		FlightRoute FlightRoute `json:"flightroute"`
+	} `json:"response"`
+}
+
+// FlightRoute contains detailed information about a flight route
+type FlightRoute struct {
+	Callsign     string  `json:"callsign"`
+	CallsignICAO string  `json:"callsign_icao"`
+	CallsignIATA string  `json:"callsign_iata"`
+	Airline      Airline `json:"airline"`
+	Origin       Airport `json:"origin"`
+	Destination  Airport `json:"destination"`
+}
+
+// Airline contains information about an airline
+type Airline struct {
+	Name       string `json:"name"`
+	ICAO       string `json:"icao"`
+	IATA       string `json:"iata"`
+	Country    string `json:"country"`
+	CountryISO string `json:"country_iso"`
+	Callsign   string `json:"callsign"`
+}
+
+// Airport contains information about an airport
+type Airport struct {
+	CountryISOName string  `json:"country_iso_name"`
+	CountryName    string  `json:"country_name"`
+	Elevation      int     `json:"elevation"`
+	IATACode       string  `json:"iata_code"`
+	ICAOCode       string  `json:"icao_code"`
+	Latitude       float64 `json:"latitude"`
+	Longitude      float64 `json:"longitude"`
+	Municipality   string  `json:"municipality"`
+	Name           string  `json:"name"`
 }

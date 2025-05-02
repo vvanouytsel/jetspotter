@@ -22,6 +22,9 @@ func FormatAircraft(aircraft jetspotter.AircraftOutput, config configuration.Con
 		"Bearing from aircraft: %s\n"+
 		"Heading: %s\n"+
 		"Inbound: %s\n"+
+		"Origin: %s\n"+
+		"Destination: %s\n"+
+		"Airline: %s\n"+
 		"TrackerURL: %s\n"+
 		"ImageURL: %s\n",
 
@@ -29,7 +32,8 @@ func FormatAircraft(aircraft jetspotter.AircraftOutput, config configuration.Con
 		aircraft.Registration, aircraft.Country, printAltitude(aircraft),
 		printSpeed(aircraft), printDistance(aircraft), printCloudCoverage(aircraft),
 		printBearingFromLocation(aircraft), printBearingFromAircraft(aircraft),
-		printHeading(aircraft), getInboundStatus(aircraft), aircraft.TrackerURL, aircraft.ImageURL)
+		printHeading(aircraft), getInboundStatus(aircraft), printOriginName(aircraft),
+		printDestinationName(aircraft), printAirlineName(aircraft), aircraft.TrackerURL, aircraft.ImageURL)
 }
 
 // SendTerminalMessage prints a list of Aircraft in a readable manner.

@@ -135,6 +135,21 @@ func buildDiscordMessage(aircraft []jetspotter.AircraftOutput, config configurat
 					Value:  ac.Description,
 					Inline: true,
 				},
+				{
+					Name:   "Origin",
+					Value:  printOriginName(ac),
+					Inline: true,
+				},
+				{
+					Name:   "Destination",
+					Value:  printDestinationName(ac),
+					Inline: true,
+				},
+				{
+					Name:   "Airline",
+					Value:  printAirlineName(ac),
+					Inline: true,
+				},
 			},
 		}
 
