@@ -78,7 +78,7 @@ func SendMessage(aircraft []jetspotter.AircraftOutput, notification Notification
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
 		log.Printf("%s\n", string(data))
-		return fmt.Errorf(fmt.Sprintf("Received status code %v", resp.StatusCode))
+		return fmt.Errorf("received status code %v", resp.StatusCode)
 	}
 
 	log.Printf("A %s notification has been sent!\n", notification.Type)
@@ -121,4 +121,25 @@ func getInboundStatus(ac jetspotter.AircraftOutput) string {
 		return "Yes"
 	}
 	return "No"
+}
+
+func printOriginName(ac jetspotter.AircraftOutput) string {
+	if ac.Origin.Name == "" {
+		return "N/A"
+	}
+	return ac.Origin.Name
+}
+
+func printDestinationName(ac jetspotter.AircraftOutput) string {
+	if ac.Destination.Name == "" {
+		return "N/A"
+	}
+	return ac.Destination.Name
+}
+
+func printAirlineName(ac jetspotter.AircraftOutput) string {
+	if ac.Airline.Name == "" {
+		return "N/A"
+	}
+	return ac.Airline.Name
 }

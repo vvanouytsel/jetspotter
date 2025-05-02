@@ -55,6 +55,11 @@ func buildNtfyMessage(aircraft []jetspotter.AircraftOutput, config configuration
 		message.Message += fmt.Sprintf("Cloud coverage: %s\n", printCloudCoverage(ac))
 		message.Message += fmt.Sprintf("Inbound: %s\n", getInboundStatus(ac))
 		message.Message += fmt.Sprintf("Type: %s\n", ac.Type)
+		message.Message += fmt.Sprintf("Origin: %s\n", printOriginName(ac))
+		message.Message += fmt.Sprintf("Destination: %s\n", printDestinationName(ac))
+		message.Message += fmt.Sprintf("Airline: %s\n", printAirlineName(ac))
+		message.Message += fmt.Sprintf("TrackerURL: %s\n", ac.TrackerURL)
+		message.Message += fmt.Sprintf("ImageURL: %s\n", ac.ImageURL)
 	}
 
 	return message, nil

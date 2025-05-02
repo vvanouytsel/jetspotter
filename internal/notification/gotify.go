@@ -10,7 +10,7 @@ import (
 
 // SendGotifyMessage sends a gotify message containing metadata of a list of aircraft
 func SendGotifyMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
-	message, err := buildGotifyMessage(aircraft, config)
+	message, err := buildGotifyMessage(aircraft)
 	if err != nil {
 		return err
 	}
@@ -29,7 +29,7 @@ func SendGotifyMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 	return nil
 }
 
-func buildGotifyMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) (message models.MessageExternal, err error) {
+func buildGotifyMessage(aircraft []jetspotter.AircraftOutput) (message models.MessageExternal, err error) {
 	message.Title = "An aircraft has been spotted!"
 	message.Extras = map[string]interface{}{
 		"client::display": map[string]interface{}{
@@ -51,6 +51,11 @@ func buildGotifyMessage(aircraft []jetspotter.AircraftOutput, config configurati
 		message.Message += fmt.Sprintf("**Cloud coverage:** %s\n\n", printCloudCoverage(ac))
 		message.Message += fmt.Sprintf("**Inbound:** %s\n\n", getInboundStatus(ac))
 		message.Message += fmt.Sprintf("**Type:** %s\n\n", ac.Type)
+		message.Message += fmt.Sprintf("**TrackerURL:** %s\n\n", ac.TrackerURL)
+		message.Message += fmt.Sprintf("**ImageURL:** %s\n\n", ac.ImageURL)
+		message.Message += fmt.Sprintf("**Origin:** %s\n\n", printOriginName(ac))
+		message.Message += fmt.Sprintf("**Destination:** %s\n\n", printDestinationName(ac))
+		message.Message += fmt.Sprintf("**Airline:** %s\n\n", printAirlineName(ac))
 	}
 
 	return message, nil

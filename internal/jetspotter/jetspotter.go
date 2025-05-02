@@ -23,8 +23,8 @@ import (
 
 // Vars
 var (
-	baseURL = "https://api.adsb.one/v2"
-	// baseURL = "https://api.airplanes.live/v2"
+	baseURL     = "https://api.adsb.one/v2"
+	baseInfoURL = "https://api.adsbdb.com/v0"
 )
 
 // CalculateDistance returns the rounded distance between two coordinates in kilometers
@@ -38,39 +38,45 @@ func convertKilometersToNauticalMiles(kilometers float64) int {
 	return int(kilometers / 1.852)
 }
 
-// getMilitaryAircraftInRange gets all the military aircraft on the map, loops over each aircraft and returns
-// only the aircraft that are within the specified maxRangeKilometers.
-func getMilitaryAircraftInRange(location geodist.Coord, maxRangeKilometers int) (aircraft []Aircraft, err error) {
-	var flightData FlightData
-	endpoint, err := url.JoinPath(baseURL, "mil")
+// getFlightRoute returns the extra information about an aircraft.
+func getFlightRoute(callsign string) (route *FlightRoute, err error) {
+	endpoint, err := url.JoinPath(baseInfoURL, "callsign", callsign)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to build URL: %w", err)
 	}
 
 	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to execute request: %w", err)
 	}
-
 	defer res.Body.Close()
-	body, _ := io.ReadAll(res.Body)
-	err = json.Unmarshal(body, &flightData)
-	if err != nil {
-		return nil, err
-	}
 
-	for _, ac := range flightData.AC {
-		distance := CalculateDistance(location, geodist.Coord{Lat: ac.Lat, Lon: ac.Lon})
-		if distance <= maxRangeKilometers {
-			aircraft = append(aircraft, ac)
+	// Check HTTP status code
+	if res.StatusCode >= 400 {
+		if res.StatusCode == 404 {
+			return nil, nil
+		} else {
+			return nil, fmt.Errorf("API call to %s returned error: %s", endpoint, res.Status)
 		}
 	}
-	return aircraft, nil
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	// Use the FlightRouteResponse type from types.go
+	var resp FlightRouteResponse
+	if err := json.Unmarshal(body, &resp); err != nil {
+		return nil, fmt.Errorf("failed to parse API response: %w", err)
+	}
+
+	return &resp.Response.FlightRoute, nil
 }
 
 // getAllAircraftInRange returns all aircraft within maxRange kilometers of the location.
@@ -185,14 +191,14 @@ func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Con
 	}
 
 	// Process newly spotted aircraft for metrics
-	newlySpottedAircraftOutput, err := CreateAircraftOutput(newlySpottedAircraft, config)
+	newlySpottedAircraftOutput, err := CreateAircraftOutput(newlySpottedAircraft, config, false)
 	if err != nil {
 		return nil, err
 	}
 	handleMetrics(newlySpottedAircraftOutput)
 
 	// Generate output for notifications (filtered by AIRCRAFT_TYPES)
-	notificationOutputs, err := CreateAircraftOutput(filteredForNotifications, config)
+	notificationOutputs, err := CreateAircraftOutput(filteredForNotifications, config, true)
 	if err != nil {
 		return nil, err
 	}
@@ -322,6 +328,8 @@ func validateFields(aircraft Aircraft) Aircraft {
 		aircraft.Callsign = "UNKNOWN"
 	}
 
+	aircraft.Callsign = strings.TrimSpace(aircraft.Callsign)
+
 	if aircraft.AltBaro == "groundft" || aircraft.AltBaro == "ground" || aircraft.AltBaro == nil {
 		aircraft.AltBaro = float64(0)
 	}
@@ -336,7 +344,8 @@ func validateFields(aircraft Aircraft) Aircraft {
 }
 
 // CreateAircraftOutput returns a list of AircraftOutput objects that will be used to print metadata.
-func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acOutputs []AircraftOutput, err error) {
+// Specify true for extraInfo to include additional information such as flight route, origin, and destination.
+func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config, extraInfo bool) (acOutputs []AircraftOutput, err error) {
 	var acOutput AircraftOutput
 	cloudForecastSucceeded := true
 
@@ -382,6 +391,19 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config) (acO
 		} else {
 			acOutput.Inbound = IsAircraftInbound(config.Location, ac, 30)
 		}
+
+		if extraInfo && ac.Callsign != "UNKNOWN" {
+			// Fetch flight route information
+			flightRoute, err := getFlightRoute(ac.Callsign)
+			if err == nil && flightRoute != nil {
+				acOutput.Airline = flightRoute.Airline
+				acOutput.Origin = flightRoute.Origin
+				acOutput.Destination = flightRoute.Destination
+			} else if err != nil {
+				log.Printf("Error getting flight route information for %s: %v", ac.Callsign, err)
+			}
+		}
+
 		acOutputs = append(acOutputs, acOutput)
 	}
 	return acOutputs, nil
@@ -420,7 +442,7 @@ func ConvertAircraftToOutput(aircraft []Aircraft) []AircraftOutput {
 		}
 	}
 
-	outputs, err := CreateAircraftOutput(filteredAircraft, config)
+	outputs, err := CreateAircraftOutput(filteredAircraft, config, false)
 	if err != nil {
 		log.Printf("Error creating aircraft output for API: %v", err)
 		return []AircraftOutput{}
