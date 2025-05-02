@@ -45,6 +45,10 @@ func formatCallsign(ac jetspotter.AircraftOutput, notificationType string) strin
 // Format whether to display a hyperlink for the registration or not
 func formatRegistration(ac jetspotter.AircraftOutput, notificationType string) string {
 	if notificationType == Markdown {
+		if ac.ImageURL == "" {
+			return ac.Registration
+		}
+
 		return fmt.Sprintf("[%s](%s)", ac.Registration, ac.ImageURL)
 	}
 
