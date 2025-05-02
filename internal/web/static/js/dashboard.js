@@ -628,13 +628,32 @@ function createAircraftCard(aircraft) {
         groundBadge.style.display = 'none';
     }
     
-    // Set the image - use ImageURL as fallback if thumbnail is not available
-    // If no image is available, use the aircraft_not_found.png
-    const imgElement = card.querySelector('.aircraft-image img');
+    // Get the image container
+    const imageContainer = card.querySelector('.aircraft-image');
+    // Clear the container first
+    imageContainer.innerHTML = '';
+    
+    // Create link element that will wrap the image
+    const imageLink = document.createElement('a');
+    imageLink.href = aircraft.ImageURL || 'javascript:void(0)'; 
+    imageLink.target = '_blank';
+    imageLink.style.display = 'block';
+    imageLink.style.width = '100%';
+    imageLink.style.height = '100%';
+    
+    // If the URL isn't available, make it non-clickable
+    if (!aircraft.ImageURL) {
+        imageLink.style.cursor = 'default';
+        imageLink.onclick = (e) => e.preventDefault();
+    } else {
+        imageLink.title = 'Click to view more images of this aircraft';
+    }
+    
+    // Create the image element
+    const imgElement = document.createElement('img');
     if (aircraft.ImageThumbnailURL) {
         imgElement.src = aircraft.ImageThumbnailURL;
         imgElement.alt = `${aircraft.Type || 'Aircraft'} - ${aircraft.Registration || ''}`;
-        imgElement.classList.remove('fallback-image');
         
         // Add photographer information as tooltip if available
         if (aircraft.Photographer) {
@@ -643,7 +662,6 @@ function createAircraftCard(aircraft) {
     } else if (aircraft.ImageURL) {
         imgElement.src = aircraft.ImageURL;
         imgElement.alt = `${aircraft.Type || 'Aircraft'} - ${aircraft.Registration || ''}`;
-        imgElement.classList.remove('fallback-image');
         
         // Add photographer information as tooltip if available
         if (aircraft.Photographer) {
@@ -653,9 +671,12 @@ function createAircraftCard(aircraft) {
         imgElement.src = '/static/images/aircraft_not_found.png';
         imgElement.alt = 'No image available';
         imgElement.classList.add('fallback-image');
-        // Clear any existing title since there's no photographer for fallback image
-        imgElement.title = '';
     }
+
+    // Add the image to the link
+    imageLink.appendChild(imgElement);
+    // Add the link to the image container
+    imageContainer.appendChild(imageLink);
     
     // Add notification icons
     const notificationsContainer = card.querySelector('.aircraft-notifications');
@@ -736,7 +757,7 @@ function createAircraftCard(aircraft) {
     
     // Set up links section with appropriate disabled states for unavailable resources
     const trackerLink = card.querySelector('.tracker-link');
-    const imageLink = card.querySelector('.image-link');
+    const bottomImageLink = card.querySelector('.image-link');
     
     // Track Aircraft link
     if (aircraft.TrackerURL) {
@@ -748,15 +769,48 @@ function createAircraftCard(aircraft) {
         trackerLink.title = 'Tracking not available for this aircraft';
     }
     
-    // More Images link
+    // More Images link (bottom toolbar)
     if (aircraft.ImageURL) {
-        imageLink.href = aircraft.ImageURL;
-        imageLink.classList.remove('disabled');
-        imageLink.title = 'More images of this aircraft';
+        bottomImageLink.href = aircraft.ImageURL;
+        bottomImageLink.classList.remove('disabled');
+        bottomImageLink.title = 'More images of this aircraft';
+        bottomImageLink.target = '_blank';
     } else {
-        imageLink.href = 'javascript:void(0)';
-        imageLink.classList.add('disabled');
-        imageLink.title = 'No additional images available';
+        bottomImageLink.href = 'javascript:void(0)';
+        bottomImageLink.classList.add('disabled');
+        bottomImageLink.title = 'No additional images available';
+        bottomImageLink.target = '_self';
+    }
+
+    // Remove any existing click handlers for the flight details button
+    bottomImageLink.removeEventListener('click', showFlightDetails);
+    
+    // Check if this aircraft has flight details (origin/destination)
+    const hasFlightDetails = aircraft.Origin && (
+        (typeof aircraft.Origin === 'string' && aircraft.Origin !== 'null' && aircraft.Origin.length > 2) || 
+        (typeof aircraft.Origin === 'object' && aircraft.Origin !== null)
+    );
+    
+    // Convert from flight image button to flight details button if flight information exists
+    if (hasFlightDetails) {
+        bottomImageLink.title = 'Show flight details';
+        bottomImageLink.classList.remove('disabled');
+        bottomImageLink.href = 'javascript:void(0)';
+        bottomImageLink.target = '_self';
+        
+        // Add click event listener for flight details
+        bottomImageLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showFlightDetails(aircraft);
+        });
+    } else {
+        // If the aircraft has no flight details but has images, keep it as an image button
+        if (!aircraft.ImageURL) {
+            bottomImageLink.href = 'javascript:void(0)';
+            bottomImageLink.classList.add('disabled');
+            bottomImageLink.title = 'No flight details available';
+            bottomImageLink.target = '_self';
+        }
     }
     
     return card;
@@ -1122,4 +1176,382 @@ function updateMapLink() {
     } else {
         mapLink.href = 'https://globe.airplanes.live/';
     }
+}
+
+// Parse and clean airport name, handling placeholder values
+function cleanAirportName(name) {
+    // Check for placeholder values and other invalid patterns
+    if (!name || name === 'null' || name === '@@@@@' || name.includes('@@@')) {
+        return 'Unknown Airport';
+    }
+    return name;
+}
+
+// Generate consistent flight progress percentage based on ICAO or callsign
+function getConsistentFlightProgress(aircraft) {
+    // Use ICAO or callsign as a seed for consistent position
+    const seed = aircraft.ICAO || aircraft.Callsign || '';
+    
+    // Create a simple hash from the seed string
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+        hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    
+    // Generate a value between 10 and 90 (avoid extremes)
+    return Math.abs(hash % 81) + 10; 
+}
+
+// Flight details popup handler
+function showFlightDetails(aircraft) {
+    // Create overlay
+    let overlay = document.querySelector('.flight-details-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'flight-details-overlay';
+        document.body.appendChild(overlay);
+    }
+
+    // Create popup if it doesn't exist
+    let popup = document.querySelector('.flight-details-popup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.className = 'flight-details-popup';
+        document.body.appendChild(popup);
+    }
+
+    // Parse origin data
+    let originDisplay = 'Unknown';
+    let originName = '';
+    let originCity = '';
+    let originDetails = '';
+    let originCountryCode = '';
+    let originIataCode = 'N/A';
+    let originIcaoCode = '';
+    let originCountryName = '';
+    let originCoordinates = null;
+    
+    if (aircraft.Origin) {
+        try {
+            const origin = typeof aircraft.Origin === 'string' 
+                ? JSON.parse(aircraft.Origin) 
+                : aircraft.Origin;
+            
+            if (origin) {
+                originName = cleanAirportName(origin.name);
+                originCity = origin.municipality || '';
+                originCountryName = origin.country_name || '';
+                
+                originDisplay = originName;
+                originDetails = originCity ? (originCountryName ? `${originCity}, ${originCountryName}` : originCity) : originCountryName;
+                originCountryCode = origin.country_iso_name || '';
+                originIataCode = origin.iata_code || (origin.icao_code ? origin.icao_code.substring(1) : '?');
+                originIcaoCode = origin.icao_code || '';
+                
+                // Get coordinates if available
+                if (origin.longitude_deg !== undefined && origin.latitude_deg !== undefined) {
+                    originCoordinates = {
+                        lat: origin.latitude_deg,
+                        lng: origin.longitude_deg
+                    };
+                }
+            }
+        } catch (e) {
+            console.error('Error parsing origin data:', e);
+            originDisplay = String(aircraft.Origin);
+        }
+    }
+    
+    // Parse destination data
+    let destinationDisplay = 'Unknown';
+    let destinationName = '';
+    let destinationCity = '';
+    let destinationDetails = '';
+    let destinationCountryCode = '';
+    let destinationIataCode = 'N/A';
+    let destinationIcaoCode = '';
+    let destinationCountryName = '';
+    let destinationCoordinates = null;
+    
+    if (aircraft.Destination) {
+        try {
+            const destination = typeof aircraft.Destination === 'string' 
+                ? JSON.parse(aircraft.Destination) 
+                : aircraft.Destination;
+            
+            if (destination) {
+                destinationName = cleanAirportName(destination.name);
+                destinationCity = destination.municipality || '';
+                destinationCountryName = destination.country_name || '';
+                
+                destinationDisplay = destinationName;
+                destinationDetails = destinationCity ? (destinationCountryName ? `${destinationCity}, ${destinationCountryName}` : destinationCity) : destinationCountryName;
+                destinationCountryCode = destination.country_iso_name || '';
+                destinationIataCode = destination.iata_code || (destination.icao_code ? destination.icao_code.substring(1) : '?');
+                destinationIcaoCode = destination.icao_code || '';
+                
+                // Get coordinates if available
+                if (destination.longitude_deg !== undefined && destination.latitude_deg !== undefined) {
+                    destinationCoordinates = {
+                        lat: destination.latitude_deg,
+                        lng: destination.longitude_deg
+                    };
+                }
+            }
+        } catch (e) {
+            console.error('Error parsing destination data:', e);
+            destinationDisplay = String(aircraft.Destination);
+        }
+    }
+    
+    // Parse airline data
+    let airlineDisplay = 'Unknown';
+    let airlineDetails = '';
+    let airlineCountryCode = '';
+    let airlineCodeDetails = [];
+    
+    if (aircraft.Airline) {
+        try {
+            const airline = typeof aircraft.Airline === 'string' 
+                ? JSON.parse(aircraft.Airline) 
+                : aircraft.Airline;
+            
+            if (airline && airline.name) {
+                airlineDisplay = airline.name;
+                if (airline.iata) airlineCodeDetails.push(`IATA: ${airline.iata}`);
+                if (airline.icao) airlineCodeDetails.push(`ICAO: ${airline.icao}`);
+                airlineDetails = airlineCodeDetails.join(' | ');
+                airlineCountryCode = airline.country_iso || '';
+            }
+        } catch (e) {
+            console.error('Error parsing airline data:', e);
+            airlineDisplay = String(aircraft.Airline);
+        }
+    }
+    
+    // Create Google Maps URLs
+    const originMapsUrl = originCoordinates 
+        ? `https://www.google.com/maps?q=${originCoordinates.lat},${originCoordinates.lng}` 
+        : null;
+        
+    const destinationMapsUrl = destinationCoordinates 
+        ? `https://www.google.com/maps?q=${destinationCoordinates.lat},${destinationCoordinates.lng}` 
+        : null;
+
+    // Get country flags
+    const originFlag = createFlagEmoji(originCountryCode);
+    const destinationFlag = createFlagEmoji(destinationCountryCode);
+    const airlineFlag = createFlagEmoji(airlineCountryCode);
+
+    // Always position the flight progress animation in the middle (50%)
+    const flightProgressPercent = 50;
+    
+    // Estimate distance between airports if we have coordinates
+    let flightDistanceText = '';
+    if (originCoordinates && destinationCoordinates) {
+        // Using Haversine formula for a rough distance calculation
+        const R = 6371; // Radius of the Earth in km
+        const dLat = (destinationCoordinates.lat - originCoordinates.lat) * Math.PI / 180;
+        const dLon = (destinationCoordinates.lng - originCoordinates.lng) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(originCoordinates.lat * Math.PI / 180) * Math.cos(destinationCoordinates.lat * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const distance = Math.round(R * c);
+        
+        flightDistanceText = `${distance.toLocaleString()} km`;
+    }
+    
+    // Determine flight time estimate (very rough approximation)
+    const flightTimeText = flightDistanceText ? `~${Math.max(1, Math.round(parseInt(flightDistanceText) / 800))}h ${Math.round(Math.random() * 59)}m` : '';
+    
+    // Flight number/callsign
+    const flightNumberDisplay = aircraft.Callsign || 'Unknown';
+    
+    // Registration with formatting
+    let registrationDisplay = aircraft.Registration || 'Unknown';
+    if (registrationDisplay && !registrationDisplay.includes('-') && registrationDisplay.length > 2) {
+        // For registrations like N12345 that don't have hyphens, keep as is
+        if (!registrationDisplay.startsWith('N')) {
+            // For other registration formats, try to add hyphen for better readability
+            // This is a simple heuristic and might not work for all registration formats
+            registrationDisplay = `${registrationDisplay.substring(0, 2)}-${registrationDisplay.substring(2)}`;
+        }
+    }
+    
+    // SVG icons
+    const planeIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21,16v-2l-8-5V3.5C13,2.67,12.33,2,11.5,2S10,2.67,10,3.5V9l-8,5v2l8-2.5V19l-2,1.5V22l3.5-1l3.5,1v-1.5L13,19v-5.5L21,16z"/>
+    </svg>`;
+    
+    const locationIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+    </svg>`;
+    
+    const distanceIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 1 1-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5m14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5"/>
+    </svg>`;
+    
+    const timeIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/>
+    </svg>`;
+
+    // Populate popup with flight details
+    popup.innerHTML = `
+        <div class="flight-details-header">
+            <div class="flight-details-title">
+                ${planeIcon}
+                <span class="callsign">${aircraft.Callsign}</span>
+                <span class="aircraft-type">${aircraft.Type || 'Unknown Aircraft'}</span>
+            </div>
+            <button class="flight-details-close" aria-label="Close">&times;</button>
+        </div>
+        <div class="flight-details-route">
+            <div class="flight-route-line">
+                <div class="route-airport origin">
+                    <div class="airport-flag">
+                        ${originFlag || ''}
+                    </div>
+                    <div class="airport-code">${originIataCode}</div>
+                    <div class="airport-name">${originName}</div>
+                    <div class="airport-city">${originCity}</div>
+                    <div class="airport-location-icon">
+                        ${originCoordinates ? `<a href="${originMapsUrl}" target="_blank" class="airport-map-link" title="View on Google Maps">${locationIcon}</a>` : ''}
+                    </div>
+                </div>
+                <div class="route-line">
+                    <div class="route-progress" style="width: ${flightProgressPercent}%"></div>
+                    <div class="route-aircraft" style="left: ${flightProgressPercent}%">
+                        ${planeIcon}
+                    </div>
+                </div>
+                <div class="route-airport destination">
+                    <div class="airport-flag">
+                        ${destinationFlag || ''}
+                    </div>
+                    <div class="airport-code">${destinationIataCode}</div>
+                    <div class="airport-name">${destinationName}</div>
+                    <div class="airport-city">${destinationCity}</div>
+                    <div class="airport-location-icon">
+                        ${destinationCoordinates ? `<a href="${destinationMapsUrl}" target="_blank" class="airport-map-link" title="View on Google Maps">${locationIcon}</a>` : ''}
+                    </div>
+                </div>
+            </div>
+            ${(flightDistanceText || flightTimeText) ? `
+                <div class="flight-info-badge">
+                    ${flightDistanceText ? `
+                        <span title="Flight distance">
+                            ${distanceIcon} 
+                            ${flightDistanceText}
+                        </span>
+                    ` : ''}
+                    ${flightTimeText && flightDistanceText ? ' • ' : ''}
+                    ${flightTimeText ? `
+                        <span title="Estimated flight time">
+                            ${timeIcon} 
+                            ${flightTimeText}
+                        </span>
+                    ` : ''}
+                </div>
+            ` : ''}
+        </div>
+        <div class="flight-details-content">
+            <div class="flight-details-section flight-details-airline">
+                <div class="flight-details-label">Airline</div>
+                <div class="flight-details-value">
+                    ${airlineFlag ? `<span class="country-flag">${airlineFlag}</span>` : ''}
+                    ${airlineDisplay}
+                </div>
+                ${airlineDetails ? `<div class="flight-details-subvalue">${airlineDetails}</div>` : ''}
+            </div>
+            <div class="flight-details-section flight-details-flight">
+                <div class="flight-details-label">Flight</div>
+                <div class="flight-details-value">${flightNumberDisplay}</div>
+                <div class="flight-details-subvalue">Callsign</div>
+            </div>
+            <div class="flight-details-section flight-details-aircraft">
+                <div class="flight-details-label">Aircraft</div>
+                <div class="flight-details-value">${aircraft.Type || 'Unknown'}</div>
+                <div class="flight-details-subvalue">${aircraft.Description || ''}</div>
+            </div>
+            <div class="flight-details-section flight-details-registration">
+                <div class="flight-details-label">Registration</div>
+                <div class="flight-details-value">${registrationDisplay}</div>
+                <div class="flight-details-subvalue">${aircraft.Country || 'Unknown'}</div>
+            </div>
+            <div class="flight-details-section flight-details-distance">
+                <div class="flight-details-label">Current Position</div>
+                <div class="flight-details-value">${aircraft.Distance || '?'} km from you</div>
+                <div class="flight-details-subvalue">Altitude: ${Math.round(aircraft.Altitude).toLocaleString() || '?'} ft • Speed: ${aircraft.Speed || '?'} knots</div>
+            </div>
+        </div>
+        <div class="flight-details-actions">
+            <a href="${aircraft.TrackerURL || 'javascript:void(0)'}" target="_blank" class="action-button track-aircraft-button ${!aircraft.TrackerURL ? 'disabled' : ''}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path>
+                    <path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"></path>
+                    <path d="M12 9l0 -2"></path>
+                    <path d="M12 15l0 2"></path>
+                    <path d="M9 12l-2 0"></path>
+                    <path d="M15 12l2 0"></path>
+                </svg>
+                Track Aircraft
+            </a>
+            ${aircraft.ImageURL ? `
+                <a href="${aircraft.ImageURL}" target="_blank" class="action-button view-image-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 8h.01"></path>
+                        <path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"></path>
+                        <path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"></path>
+                        <path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"></path>
+                    </svg>
+                    View Image
+                </a>
+            ` : ''}
+        </div>
+    `;
+
+    // Add event listeners
+    const closeButton = popup.querySelector('.flight-details-close');
+    closeButton.addEventListener('click', closeFlightDetailsPopup);
+    
+    // Close when clicking outside the popup
+    overlay.addEventListener('click', closeFlightDetailsPopup);
+
+    // Show the popup and overlay with a slight delay for better animation
+    setTimeout(() => {
+        popup.classList.add('active');
+        overlay.classList.add('active');
+    }, 10);
+}
+
+// Create flag emoji from country code
+function createFlagEmoji(countryCode) {
+    if (!countryCode || countryCode.length !== 2) {
+        return '';
+    }
+    
+    // Convert ISO country code to country flag emoji
+    // Regional Indicator Symbols are Unicode characters U+1F1E6 to U+1F1FF
+    const offset = 127397; // Offset to convert ASCII letter to Regional Indicator Symbol
+    const codePoints = [...countryCode.toUpperCase()].map(char => char.charCodeAt(0) + offset);
+    
+    try {
+        return String.fromCodePoint(...codePoints);
+    } catch (e) {
+        console.error('Error creating flag emoji:', e);
+        return '';
+    }
+}
+
+// Close flight details popup
+function closeFlightDetailsPopup() {
+    const popup = document.querySelector('.flight-details-popup');
+    const overlay = document.querySelector('.flight-details-overlay');
+    
+    if (popup) popup.classList.remove('active');
+    if (overlay) overlay.classList.remove('active');
 }

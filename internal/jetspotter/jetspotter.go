@@ -60,9 +60,13 @@ func getFlightRoute(callsign string) (route *FlightRoute, err error) {
 	if res.StatusCode >= 400 {
 		if res.StatusCode == 404 {
 			return nil, nil
-		} else {
-			return nil, fmt.Errorf("API call to %s returned error: %s", endpoint, res.Status)
 		}
+
+		if res.StatusCode == 429 {
+			return nil, fmt.Errorf("API rate limit exceeded: %s", res.Status)
+		}
+
+		return nil, fmt.Errorf("API call to %s returned error: %s", endpoint, res.Status)
 	}
 
 	body, err := io.ReadAll(res.Body)
@@ -356,6 +360,9 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config, extr
 	}
 
 	for _, ac := range aircraft {
+		// Reset aircraft output for new aircraft
+		acOutput = AircraftOutput{} // Reset to empty to prevent data leakage between iterations
+
 		ac = validateFields(ac)
 		aircraftLocation := geodist.Coord{Lat: ac.Lat, Lon: ac.Lon}
 		image := planespotter.GetImageFromAPI(ac.ICAO, ac.Registration)
@@ -392,14 +399,22 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config, extr
 			acOutput.Inbound = IsAircraftInbound(config.Location, ac, 30)
 		}
 
-		if extraInfo && ac.Callsign != "UNKNOWN" {
+		if extraInfo && ac.Callsign != "UNKNOWN" && len(ac.Callsign) > 3 {
 			// Fetch flight route information
 			flightRoute, err := getFlightRoute(ac.Callsign)
 			if err == nil && flightRoute != nil {
-				acOutput.Airline = flightRoute.Airline
-				acOutput.Origin = flightRoute.Origin
-				acOutput.Destination = flightRoute.Destination
-			} else if err != nil {
+				// Validate that the flight route matches this aircraft
+				if isValidFlightRouteForAircraft(flightRoute, ac) {
+					acOutput.Airline = flightRoute.Airline
+					acOutput.Origin = flightRoute.Origin
+					acOutput.Destination = flightRoute.Destination
+				} else {
+					// Flight route doesn't match this aircraft, log a message for debugging
+					log.Printf("Flight route for callsign %s doesn't match aircraft (ICAO: %s, Reg: %s)",
+						ac.Callsign, ac.ICAO, ac.Registration)
+				}
+			} else if err != nil && !strings.Contains(err.Error(), "API rate limit exceeded") {
+				// Only log errors that aren't rate limit related
 				log.Printf("Error getting flight route information for %s: %v", ac.Callsign, err)
 			}
 		}
@@ -407,6 +422,48 @@ func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config, extr
 		acOutputs = append(acOutputs, acOutput)
 	}
 	return acOutputs, nil
+}
+
+// isValidFlightRouteForAircraft validates whether a flight route likely matches the given aircraft
+// by checking for ICAO/IATA code consistency, registration consistency, or other relevant factors
+func isValidFlightRouteForAircraft(route *FlightRoute, aircraft Aircraft) bool {
+	// Skip validation if we're missing essential data
+	if route == nil {
+		return false
+	}
+
+	// Basic validation: ensure origin and destination aren't empty
+	if route.Origin.Name == "" || route.Destination.Name == "" {
+		return false
+	}
+
+	// Check if the airline ICAO code prefix matches the aircraft callsign prefix
+	// Many airlines use their ICAO code as the callsign prefix
+	if route.Airline.ICAO != "" && len(aircraft.Callsign) >= 3 {
+		// Many airlines' callsigns start with their ICAO code
+		airlinePrefix := strings.ToUpper(aircraft.Callsign[:3])
+		if strings.EqualFold(airlinePrefix, route.Airline.ICAO) {
+			return true
+		}
+	}
+
+	// Check if registration matches callsign (some private flights use registration as callsign)
+	if aircraft.Registration != "" {
+		regWithoutHyphen := strings.ReplaceAll(aircraft.Registration, "-", "")
+		if strings.Contains(strings.ToUpper(aircraft.Callsign), regWithoutHyphen) {
+			return true
+		}
+	}
+
+	// Check if callsign is in expected format for scheduled flights
+	// Most commercial flights use a format like "ABC123" where ABC is airline code
+	if len(aircraft.Callsign) >= 5 && len(route.CallsignICAO) >= 3 &&
+		strings.ToUpper(aircraft.Callsign[:3]) == strings.ToUpper(route.CallsignICAO[:3]) {
+		return true
+	}
+
+	// If all validation checks fail, consider it a mismatch
+	return false
 }
 
 // IsAircraftInbound checks if the aircraft is inbound to the target location
@@ -442,7 +499,7 @@ func ConvertAircraftToOutput(aircraft []Aircraft) []AircraftOutput {
 		}
 	}
 
-	outputs, err := CreateAircraftOutput(filteredAircraft, config, false)
+	outputs, err := CreateAircraftOutput(filteredAircraft, config, true)
 	if err != nil {
 		log.Printf("Error creating aircraft output for API: %v", err)
 		return []AircraftOutput{}
@@ -518,6 +575,7 @@ func GetCountryFromRegistration(registration string) string {
 		"HB-": "Switzerland",
 		"ER-": "Moldova",
 		"9A-": "Croatia",
+		"ES-": "Estonia",
 		"OO-": "Belgium",
 		"FA-": "Belgium", // Belgian F16
 		"CT-": "Belgium", // Belgian A400

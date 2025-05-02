@@ -23,20 +23,32 @@ const (
 
 // SendDiscordMessage sends a discord message containing metadata of a list of aircraft
 func SendDiscordMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
-	message, err := buildDiscordMessage(aircraft, config)
-	if err != nil {
-		return err
-	}
+	// Discord has a limit of 10 embeds per message, so we need to split larger batches
+	const maxEmbedsPerMessage = 10
 
-	notification := Notification{
-		Message: message,
-		Type:    Discord,
-		URL:     config.DiscordWebHookURL,
-	}
+	// If we have more than maxEmbedsPerMessage aircraft, split them into batches
+	for i := 0; i < len(aircraft); i += maxEmbedsPerMessage {
+		end := i + maxEmbedsPerMessage
+		if end > len(aircraft) {
+			end = len(aircraft)
+		}
 
-	err = SendMessage(aircraft, notification)
-	if err != nil {
-		return err
+		batch := aircraft[i:end]
+		message, err := buildDiscordMessage(batch, config)
+		if err != nil {
+			return err
+		}
+
+		notification := Notification{
+			Message: message,
+			Type:    Discord,
+			URL:     config.DiscordWebHookURL,
+		}
+
+		err = SendMessage(batch, notification)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -64,7 +64,19 @@ func handleAircraftAPI(c *gin.Context) {
 	}
 
 	// Convert filtered aircraft to output format
-	outputs := ConvertAircraftToOutput(filteredAircraft)
+	config, err := configuration.GetConfig()
+	if err != nil {
+		log.Printf("Error getting config for API: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get configuration"})
+		return
+	}
+
+	outputs, err := CreateAircraftOutput(filteredAircraft, config, true)
+	if err != nil {
+		log.Printf("Error creating aircraft output for API: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process aircraft data"})
+		return
+	}
 
 	c.JSON(http.StatusOK, outputs)
 }
