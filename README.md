@@ -15,7 +15,7 @@ Please have a look at the [documentation](https://vvanouytsel.github.io/jetspott
 
 ## Demo
 
-There is a [demo](https://ebbr.jetspotter.vvanouytsel.dev/) of the web interface available that shows aircraft in the vicinity of the [Brussels airport](https://ebbr.jetspotter.vvanouytsel.dev/).
+There is a [demo](https://bru.jetspotter.vvanouytsel.dev/) of the web interface available that shows aircraft in the vicinity of the [Brussels airport](https://bru.jetspotter.vvanouytsel.dev/).
 
 ## Screenshots
 
