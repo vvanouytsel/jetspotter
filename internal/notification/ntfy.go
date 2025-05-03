@@ -22,22 +22,27 @@ type NtfyNotification struct {
 	Tags     []string     `json:"tags,omitempty"`
 }
 
-// SendNtfyMessage sends a ntfy message containing metadata of a list of aircraft
+// SendNtfyMessage sends a ntfy message containing metadata of aircraft
+// Each aircraft will have its own separate notification
 func SendNtfyMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
-	message, err := buildNtfyMessage(aircraft, config)
-	if err != nil {
-		return err
-	}
+	// Send a separate message for each aircraft
+	for _, ac := range aircraft {
+		// Build a message for a single aircraft
+		singleAircraftMessage, err := buildNtfyMessage([]jetspotter.AircraftOutput{ac}, config)
+		if (err != nil) {
+			return err
+		}
 
-	notification := Notification{
-		Message: message,
-		Type:    Ntfy,
-		URL:     config.NtfyServer,
-	}
+		notification := Notification{
+			Message: singleAircraftMessage,
+			Type:    Ntfy,
+			URL:     config.NtfyServer,
+		}
 
-	err = SendMessage(aircraft, notification)
-	if err != nil {
-		return err
+		err = SendMessage([]jetspotter.AircraftOutput{ac}, notification)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
