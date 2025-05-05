@@ -533,6 +533,7 @@ func GetCountryFromRegistration(registration string) string {
 		"ES-": "Estonia",
 		"OO-": "Belgium",
 		"FA-": "Belgium", // Belgian F16
+		"FB-": "Belgium", // Belgian F16
 		"CT-": "Belgium", // Belgian A400
 		"ST-": "Belgium", // Belgian AERMACCHI
 		"RN-": "Belgium", // Belgian NH-90
