@@ -99,6 +99,12 @@ type Aircraft struct {
 	// Type of the aircraft
 	Type string
 
+	// Latitude of the aircraft in decimal degrees
+	Latitude float64
+
+	// Longitude of the aircraft in decimal degrees
+	Longitude float64
+
 	// Registration number of the aircraft
 	Registration string
 

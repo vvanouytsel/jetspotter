@@ -65,7 +65,7 @@ func sendNotifications(aircraft []jetspotter.Aircraft, config configuration.Conf
 	return nil
 }
 
-func jetspotterHandler(alreadySpottedAircraft *[]jetspotter.AircraftRaw, config configuration.Config, isFirstRun bool) {
+func jetspotterHandler(alreadySpottedAircraft *[]jetspotter.Aircraft, config configuration.Config, isFirstRun bool) {
 	aircraft, err := jetspotter.HandleAircraft(alreadySpottedAircraft, config)
 	if err != nil {
 		exitWithError(err)
@@ -101,7 +101,7 @@ func HandleJetspotter(config configuration.Config) {
 		log.Printf("Only showing aircraft at or below %d feet.", config.MaxAltitudeFeet)
 	}
 
-	var alreadySpottedAircraft []jetspotter.AircraftRaw
+	var alreadySpottedAircraft []jetspotter.Aircraft
 	isFirstRun := true
 
 	for {

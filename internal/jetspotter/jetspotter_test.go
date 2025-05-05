@@ -11,72 +11,78 @@ import (
 )
 
 var (
-	jets = []AircraftRaw{
+	jets = []Aircraft{
 		{
-			ICAO:      "ABC",
-			Callsign:  "JACKAL51",
-			PlaneType: "F16",
+			ICAO:     "ABC",
+			Callsign: "JACKAL51",
+			Type:     "F16",
 		},
 		{
-			ICAO:      "DEF",
-			Callsign:  "XSG432",
-			PlaneType: "CESSNA",
+			ICAO:     "DEF",
+			Callsign: "XSG432",
+			Type:     "CESSNA",
 		},
 		{
-			ICAO:      "HAH",
-			Callsign:  "VIKING11",
-			PlaneType: "F18",
+			ICAO:     "HAH",
+			Callsign: "VIKING11",
+			Type:     "F18",
 		},
 	}
 
-	jackal51Aircraft = AircraftRaw{
-		ICAO:      "ABC",
-		Callsign:  "JACKAL51",
-		PlaneType: "F16",
+	jackal51Aircraft = Aircraft{
+		ICAO:     "ABC",
+		Callsign: "JACKAL51",
+		Type:     "F16",
 	}
 
-	planesWithAltitude = []AircraftRaw{
+	planesWithAltitude = []Aircraft{
 		{
 			Callsign: "KHARMA11",
-			AltBaro:  4000.0,
+			Altitude: 4000.0,
 		},
 		{
 			Callsign: "KHARMA12",
-			AltBaro:  9000.0,
+			Altitude: 9000.0,
 		},
 		{
 			Callsign: "KHARMA13",
+			Altitude: 7000.0,
 		},
 	}
 
-	planes = []AircraftRaw{
+	planes = []Aircraft{
 		{
-			Callsign:  "APEX11",
-			PlaneType: aircraft.F16.Identifier,
-			Desc:      aircraft.F16.Description,
-			DbFlags:   1,
+			Callsign:     "APEX11",
+			Type:         "F16",
+			Registration: "ABC",
+			Description:  aircraft.F16.Description,
+			Military:     true,
 		},
 		{
-			Callsign:  "APEX12",
-			PlaneType: aircraft.F16.Identifier,
-			Desc:      aircraft.F16.Description,
-			DbFlags:   1,
+			Callsign:     "APEX12",
+			Type:         "F16",
+			Registration: "ABC",
+			Description:  aircraft.F16.Description,
+			Military:     true,
 		},
 		{
-			Callsign:  "XSG123",
-			PlaneType: aircraft.B77L.Identifier,
-			Desc:      aircraft.B77L.Description,
+			Callsign:     "XSG123",
+			Type:         "B77L",
+			Registration: "ABC",
+			Description:  aircraft.B77L.Description,
 		},
 		{
-			Callsign:  "ABC987",
-			PlaneType: aircraft.A320.Identifier,
-			Desc:      aircraft.A320.Description,
+			Callsign:     "ABC987",
+			Type:         "A320",
+			Registration: "ABC",
+			Description:  aircraft.A320.Description,
 		},
 		{
-			Callsign:  "GRZLY11",
-			PlaneType: aircraft.A400.Identifier,
-			Desc:      aircraft.A400.Description,
-			DbFlags:   1,
+			Callsign:     "GRZLY11",
+			Type:         "A400",
+			Registration: "ABC",
+			Description:  aircraft.A400.Description,
+			Military:     true,
 		},
 	}
 
@@ -102,66 +108,54 @@ var (
 )
 
 func TestFilterAircraftByTypeF16(t *testing.T) {
-	expected := []AircraftRaw{
+	expected := []Aircraft{
 		{
-			Callsign:  "APEX11",
-			PlaneType: aircraft.F16.Identifier,
-			Desc:      aircraft.F16.Description,
-			DbFlags:   1,
+			Callsign:     "APEX11",
+			Type:         aircraft.F16.Identifier,
+			Description:  aircraft.F16.Description,
+			Registration: "ABC",
+			Military:     true,
 		},
 		{
-			Callsign:  "APEX12",
-			PlaneType: aircraft.F16.Identifier,
-			Desc:      aircraft.F16.Description,
-			DbFlags:   1,
+			Callsign:     "APEX12",
+			Type:         aircraft.F16.Identifier,
+			Description:  aircraft.F16.Description,
+			Registration: "ABC",
+			Military:     true,
 		},
 	}
 
 	config := configuration.Config{
-		AircraftTypes: []string{aircraft.F16.Identifier},
+		AircraftTypes: []string{"F16"},
 	}
 	actual := filterAircraftByTypes(planes, config.AircraftTypes)
 
 	if !reflect.DeepEqual(expected, actual) {
-		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+		t.Fatalf("expected \n'%v'\n to be the same as \n'%v'\n", expected, actual)
 	}
 }
 
 func TestFilterAircraftByTypeAll(t *testing.T) {
 	config := configuration.Config{
-		AircraftTypes: []string{aircraft.ALL.Identifier},
+		AircraftTypes: []string{"ALL"},
 	}
 	expected := planes
 	actual := filterAircraftByTypes(planes, config.AircraftTypes)
 
 	if !reflect.DeepEqual(expected, actual) {
-		t.Fatalf("expected '%v' to be the same as '%v'", expected, actual)
+		t.Fatalf("expected \n'%v'\n to be the same as \n'%v'\n", expected, actual)
 	}
 }
 
 func TestFilterAircraftByTypeMilitary(t *testing.T) {
 	config := configuration.Config{
-		AircraftTypes: []string{aircraft.MILITARY.Identifier},
+		AircraftTypes: []string{"MILITARY"},
 	}
-	expected := []AircraftRaw{
-		{
-			Callsign:  "APEX11",
-			PlaneType: aircraft.F16.Identifier,
-			Desc:      aircraft.F16.Description,
-			DbFlags:   1,
-		},
-		{
-			Callsign:  "APEX12",
-			PlaneType: aircraft.F16.Identifier,
-			Desc:      aircraft.F16.Description,
-			DbFlags:   1,
-		},
-		{
-			Callsign:  "GRZLY11",
-			PlaneType: aircraft.A400.Identifier,
-			Desc:      aircraft.A400.Description,
-			DbFlags:   1,
-		},
+	// The expected results should match the actual structure of military planes from the 'planes' variable
+	expected := []Aircraft{
+		planes[0], // APEX11 (F16)
+		planes[1], // APEX12 (F16)
+		planes[4], // GRZLY11 (A400)
 	}
 
 	actual := filterAircraftByTypes(planes, config.AircraftTypes)
@@ -176,30 +170,11 @@ func TestFilterAircraftByTypeMilitaryAndA320(t *testing.T) {
 		AircraftTypes: []string{aircraft.MILITARY.Identifier, aircraft.A320.Identifier},
 	}
 
-	expected := []AircraftRaw{
-		{
-			Callsign:  "APEX11",
-			PlaneType: aircraft.F16.Identifier,
-			Desc:      aircraft.F16.Description,
-			DbFlags:   1,
-		},
-		{
-			Callsign:  "APEX12",
-			PlaneType: aircraft.F16.Identifier,
-			Desc:      aircraft.F16.Description,
-			DbFlags:   1,
-		},
-		{
-			Callsign:  "ABC987",
-			PlaneType: aircraft.A320.Identifier,
-			Desc:      aircraft.A320.Description,
-		},
-		{
-			Callsign:  "GRZLY11",
-			PlaneType: aircraft.A400.Identifier,
-			Desc:      aircraft.A400.Description,
-			DbFlags:   1,
-		},
+	expected := []Aircraft{
+		planes[0], // APEX11 (F16, military)
+		planes[1], // APEX12 (F16, military)
+		planes[3], // ABC987 (A320)
+		planes[4], // GRZLY11 (A400, military)
 	}
 
 	actual := filterAircraftByTypes(planes, config.AircraftTypes)
@@ -248,30 +223,15 @@ func TestCalculateDistance2(t *testing.T) {
 }
 
 func TestFilterAircraftByTypes(t *testing.T) {
-	expected := []AircraftRaw{
-		{
-			Callsign:  "APEX11",
-			PlaneType: aircraft.F16.Identifier,
-			Desc:      aircraft.F16.Description,
-			DbFlags:   1,
-		},
-		{
-			Callsign:  "APEX12",
-			PlaneType: aircraft.F16.Identifier,
-			Desc:      aircraft.F16.Description,
-			DbFlags:   1,
-		},
-		{
-			Callsign:  "GRZLY11",
-			PlaneType: aircraft.A400.Identifier,
-			Desc:      aircraft.A400.Description,
-			DbFlags:   1,
-		},
-	}
-
 	config := configuration.Config{
 		AircraftTypes: []string{aircraft.F16.Identifier, aircraft.A400.Identifier},
 	}
+	expected := []Aircraft{
+		planes[0], // APEX11 (F16)
+		planes[1], // APEX12 (F16)
+		planes[4], // GRZLY11 (A400)
+	}
+
 	actual := filterAircraftByTypes(planes, config.AircraftTypes)
 
 	if !reflect.DeepEqual(expected, actual) {
@@ -381,7 +341,7 @@ func TestCalculateBearing5(t *testing.T) {
 
 func TestNewlySpotted(t *testing.T) {
 
-	newAircaft := AircraftRaw{
+	newAircaft := Aircraft{
 		ICAO:     "ZYX",
 		Type:     "A400",
 		Callsign: "NEW11",
@@ -406,65 +366,65 @@ func TestAlreadySpotted(t *testing.T) {
 
 func TestAlreadySpottedAircraftAreFiltered(t *testing.T) {
 
-	aircraft := []AircraftRaw{
+	aircraft := []Aircraft{
 		{
-			ICAO:      "VVO",
-			Callsign:  "DEMON81",
-			PlaneType: "F16",
+			ICAO:     "VVO",
+			Callsign: "DEMON81",
+			Type:     "F16",
 		},
 		{
-			ICAO:      "DEF",
-			Callsign:  "LDS431",
-			PlaneType: "CESSNA",
+			ICAO:     "DEF",
+			Callsign: "LDS431",
+			Type:     "CESSNA",
 		},
 		{
-			ICAO:      "RPQ",
-			Callsign:  "JESTER41",
-			PlaneType: "F18",
-		},
-	}
-
-	alreadySpottedAircraft := []AircraftRaw{
-		{
-			ICAO:      "DEF",
-			Callsign:  "LDS431",
-			PlaneType: "CESSNA",
-		},
-		{
-			ICAO:      "X123",
-			Callsign:  "GOOSE11",
-			PlaneType: "F22",
+			ICAO:     "RPQ",
+			Callsign: "JESTER41",
+			Type:     "F18",
 		},
 	}
 
-	expectedNewlySpotted := []AircraftRaw{
+	alreadySpottedAircraft := []Aircraft{
 		{
-			ICAO:      "VVO",
-			Callsign:  "DEMON81",
-			PlaneType: "F16",
+			ICAO:     "DEF",
+			Callsign: "LDS431",
+			Type:     "CESSNA",
 		},
 		{
-			ICAO:      "RPQ",
-			Callsign:  "JESTER41",
-			PlaneType: "F18",
+			ICAO:     "X123",
+			Callsign: "GOOSE11",
+			Type:     "F22",
 		},
 	}
 
-	expectedSpottedAircraft := []AircraftRaw{
+	expectedNewlySpotted := []Aircraft{
 		{
-			ICAO:      "DEF",
-			Callsign:  "LDS431",
-			PlaneType: "CESSNA",
+			ICAO:     "VVO",
+			Callsign: "DEMON81",
+			Type:     "F16",
 		},
 		{
-			ICAO:      "VVO",
-			Callsign:  "DEMON81",
-			PlaneType: "F16",
+			ICAO:     "RPQ",
+			Callsign: "JESTER41",
+			Type:     "F18",
+		},
+	}
+
+	expectedSpottedAircraft := []Aircraft{
+		{
+			ICAO:     "DEF",
+			Callsign: "LDS431",
+			Type:     "CESSNA",
 		},
 		{
-			ICAO:      "RPQ",
-			Callsign:  "JESTER41",
-			PlaneType: "F18",
+			ICAO:     "VVO",
+			Callsign: "DEMON81",
+			Type:     "F16",
+		},
+		{
+			ICAO:     "RPQ",
+			Callsign: "JESTER41",
+			Type:     "F18",
 		},
 	}
 
@@ -540,10 +500,10 @@ func TestConvertKilometersToMiles(t *testing.T) {
 }
 
 func TestFilterAircraftByAltitude(t *testing.T) {
-	expected := []AircraftRaw{
+	expected := []Aircraft{
 		{
 			Callsign: "KHARMA11",
-			AltBaro:  4000.0,
+			Altitude: 4000.0,
 		},
 	}
 
@@ -559,22 +519,18 @@ func TestFilterAircraftByAltitude(t *testing.T) {
 
 // TestFilterAircraftByAltitudeWithGroundValue tests the handling of 'ground' string as altitude
 func TestFilterAircraftByAltitudeWithGroundValue(t *testing.T) {
-	aircraftWithGroundValues := []AircraftRaw{
+	aircraftWithGroundValues := []Aircraft{
 		{
 			Callsign: "KHARMA11",
-			AltBaro:  "ground", // String value "ground"
-		},
-		{
-			Callsign: "KHARMA12",
-			AltBaro:  "groundft", // String value "groundft"
+			Altitude: 0,
 		},
 		{
 			Callsign: "KHARMA13",
-			AltBaro:  float64(3000), // Normal altitude value
+			Altitude: float64(3000), // Normal altitude value
 		},
 		{
 			Callsign: "KHARMA14",
-			AltBaro:  float64(8000), // Above our test altitude filter
+			Altitude: float64(8000), // Above our test altitude filter
 		},
 	}
 
@@ -582,18 +538,14 @@ func TestFilterAircraftByAltitudeWithGroundValue(t *testing.T) {
 	filtered := filterAircraftByAltitude(aircraftWithGroundValues, maxAltitude)
 
 	// We expect 3 aircraft: the two with ground values and the one at 3000ft
-	expected := []AircraftRaw{
+	expected := []Aircraft{
 		{
 			Callsign: "KHARMA11",
-			AltBaro:  float64(0), // Converted from "ground" to float64(0)
-		},
-		{
-			Callsign: "KHARMA12",
-			AltBaro:  float64(0), // Converted from "groundft" to float64(0)
+			Altitude: float64(0),
 		},
 		{
 			Callsign: "KHARMA13",
-			AltBaro:  float64(3000),
+			Altitude: float64(3000),
 		},
 	}
 
@@ -608,9 +560,9 @@ func TestFilterAircraftByAltitudeWithGroundValue(t *testing.T) {
 			if actualAc.Callsign == expectedAc.Callsign {
 				found = true
 				// Verify altitude was converted properly
-				if expectedAc.AltBaro != actualAc.AltBaro {
+				if expectedAc.Altitude != actualAc.Altitude {
 					t.Fatalf("expected altitude %v for %s, got %v",
-						expectedAc.AltBaro, expectedAc.Callsign, actualAc.AltBaro)
+						expectedAc.Altitude, expectedAc.Callsign, actualAc.Altitude)
 				}
 				break
 			}
@@ -621,62 +573,29 @@ func TestFilterAircraftByAltitudeWithGroundValue(t *testing.T) {
 	}
 }
 
-// TestFilterAircraftByAltitudeWithUnhandledType tests the handling of unhandled types for altitude
-func TestFilterAircraftByAltitudeWithUnhandledType(t *testing.T) {
-	aircraftWithUnhandledType := []AircraftRaw{
-		{
-			Callsign: "KHARMA11",
-			AltBaro:  "not a valid altitude", // Unhandled string value
-		},
-		{
-			Callsign: "KHARMA12",
-			AltBaro:  float64(2000), // Valid altitude
-		},
-	}
-
-	maxAltitude := 5000 // Max altitude in feet
-	filtered := filterAircraftByAltitude(aircraftWithUnhandledType, maxAltitude)
-
-	// We expect only the aircraft with valid altitude to be included
-	expected := []AircraftRaw{
-		{
-			Callsign: "KHARMA12",
-			AltBaro:  float64(2000),
-		},
-	}
-
-	if len(filtered) != len(expected) {
-		t.Fatalf("expected %d aircraft, got %d", len(expected), len(filtered))
-	}
-
-	if filtered[0].Callsign != expected[0].Callsign {
-		t.Fatalf("expected aircraft %s, got %s", expected[0].Callsign, filtered[0].Callsign)
-	}
-}
-
 func TestHandleAircraftWithScanRange(t *testing.T) {
 	// Create test aircraft at different distances
-	testAircraft := []AircraftRaw{
+	testAircraft := []Aircraft{
 		{
-			ICAO:     "TEST1",
-			Callsign: "NEAR1",
-			Lat:      51.18,
-			Lon:      5.46,
-			AltBaro:  float64(1000),
+			ICAO:      "TEST1",
+			Callsign:  "NEAR1",
+			Latitude:  51.18,
+			Longitude: 5.46,
+			Altitude:  float64(1000),
 		},
 		{
-			ICAO:     "TEST2",
-			Callsign: "MEDIUM1",
-			Lat:      51.40,
-			Lon:      5.80,
-			AltBaro:  float64(2000),
+			ICAO:      "TEST2",
+			Callsign:  "MEDIUM1",
+			Latitude:  51.40,
+			Longitude: 5.80,
+			Altitude:  float64(2000),
 		},
 		{
-			ICAO:     "TEST3",
-			Callsign: "FAR1",
-			Lat:      52.50,
-			Lon:      7.00,
-			AltBaro:  float64(3000),
+			ICAO:      "TEST3",
+			Callsign:  "FAR1",
+			Latitude:  52.50,
+			Longitude: 7.00,
+			Altitude:  float64(3000),
 		},
 	}
 
@@ -692,18 +611,18 @@ func TestHandleAircraftWithScanRange(t *testing.T) {
 	}
 
 	// Filter aircraft based on distance from the location
-	var aircraftInScanRange []AircraftRaw
+	var aircraftInScanRange []Aircraft
 	for _, ac := range testAircraft {
-		distance := CalculateDistance(config.Location, geodist.Coord{Lat: ac.Lat, Lon: ac.Lon})
+		distance := CalculateDistance(config.Location, geodist.Coord{Lat: ac.Latitude, Lon: ac.Longitude})
 		if distance <= config.MaxScanRangeKilometers {
 			aircraftInScanRange = append(aircraftInScanRange, ac)
 		}
 	}
 
 	// Manually apply the same filtering logic as in HandleAircraft function
-	var aircraftInNotificationRange []AircraftRaw
+	var aircraftInNotificationRange []Aircraft
 	for _, ac := range aircraftInScanRange {
-		distance := CalculateDistance(config.Location, geodist.Coord{Lat: ac.Lat, Lon: ac.Lon})
+		distance := CalculateDistance(config.Location, geodist.Coord{Lat: ac.Latitude, Lon: ac.Longitude})
 		if distance <= config.MaxRangeKilometers {
 			aircraftInNotificationRange = append(aircraftInNotificationRange, ac)
 		}
@@ -724,7 +643,7 @@ func TestHandleAircraftWithScanRange(t *testing.T) {
 
 	// Now test the actual distance-based filtering in the HandleAircraft function
 	// by simulating its behavior with our test data
-	var alreadySpottedAircraft []AircraftRaw
+	var alreadySpottedAircraft []Aircraft
 
 	// Simulate the main filtering logic from HandleAircraft
 	newlySpottedAircraft, updatedSpottedAircraft := validateAircraft(aircraftInNotificationRange, &alreadySpottedAircraft)
