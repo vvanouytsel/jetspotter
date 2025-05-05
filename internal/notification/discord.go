@@ -22,7 +22,7 @@ const (
 )
 
 // SendDiscordMessage sends a discord message containing metadata of a list of aircraft
-func SendDiscordMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
+func SendDiscordMessage(aircraft []jetspotter.Aircraft, config configuration.Config) error {
 	// Discord has a limit of 10 embeds per message, so we need to split larger batches
 	const maxEmbedsPerMessage = 10
 
@@ -81,7 +81,7 @@ func getColorByAltitude(altitude int) int {
 	}
 }
 
-func buildDiscordMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) (message discordgo.Message, err error) {
+func buildDiscordMessage(aircraft []jetspotter.Aircraft, config configuration.Config) (message discordgo.Message, err error) {
 	message.Content = ":airplane: A jet has been spotted! :airplane:"
 	var embeds []*discordgo.MessageEmbed
 	for _, ac := range aircraft {

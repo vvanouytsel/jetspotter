@@ -83,8 +83,8 @@ func getFlightRoute(callsign string) (route *FlightRoute, err error) {
 	return &resp.Response.FlightRoute, nil
 }
 
-// getAllAircraftInRange returns all aircraft within maxRange kilometers of the location.
-func getAllAircraftInRange(location geodist.Coord, maxRangeKilometers int) (aircraft []Aircraft, err error) {
+// getAllAircrafRawtInRange returns all aircraft within maxRange kilometers of the location directly from the ADSB API.
+func getAllAircrafRawtInRange(location geodist.Coord, maxRangeKilometers int) (aircraft []AircraftRaw, err error) {
 	var flightData FlightData
 	miles := convertKilometersToNauticalMiles(float64(maxRangeKilometers))
 	endpoint, err := url.JoinPath(baseURL, "point",
@@ -116,12 +116,12 @@ func getAllAircraftInRange(location geodist.Coord, maxRangeKilometers int) (airc
 }
 
 // newlySpotted returns true if the aircraft has not been spotted during the last interval.
-func newlySpotted(aircraft Aircraft, spottedAircraft []Aircraft) bool {
+func newlySpotted(aircraft AircraftRaw, spottedAircraft []AircraftRaw) bool {
 	return !containsAircraft(aircraft, spottedAircraft)
 }
 
 // containsAircraft checks if the aircraft exists in the list of aircraft.
-func containsAircraft(aircraft Aircraft, aircraftList []Aircraft) bool {
+func containsAircraft(aircraft AircraftRaw, aircraftList []AircraftRaw) bool {
 	for _, ac := range aircraftList {
 		if ac.ICAO == aircraft.ICAO {
 			return true
@@ -131,7 +131,7 @@ func containsAircraft(aircraft Aircraft, aircraftList []Aircraft) bool {
 }
 
 // updateSpottedAircraft removed the previously spotted aircraft that are no longer in range.
-func updateSpottedAircraft(alreadySpottedAircraft, filteredAircraft []Aircraft) (aircraft []Aircraft) {
+func updateSpottedAircraft(alreadySpottedAircraft, filteredAircraft []AircraftRaw) (aircraft []AircraftRaw) {
 	for _, ac := range alreadySpottedAircraft {
 		if containsAircraft(ac, filteredAircraft) {
 			aircraft = append(aircraft, ac)
@@ -146,7 +146,7 @@ func updateSpottedAircraft(alreadySpottedAircraft, filteredAircraft []Aircraft) 
 // in the last attempt are removed from the already spotted list.
 // In practice this means that if an aircraft leaves the spotting range, it is removed from the already spotted list
 // and thus the next time they appear in range, a notification will be sent for that aircraft.
-func validateAircraft(allFilteredAircraft []Aircraft, alreadySpottedAircraft *[]Aircraft) (newlySpottedAircraft, updatedSpottedAircraft []Aircraft) {
+func validateAircraft(allFilteredAircraft []AircraftRaw, alreadySpottedAircraft *[]AircraftRaw) (newlySpottedAircraft, updatedSpottedAircraft []AircraftRaw) {
 	for _, ac := range allFilteredAircraft {
 		if newlySpotted(ac, *alreadySpottedAircraft) {
 			newlySpottedAircraft = append(newlySpottedAircraft, ac)
@@ -160,17 +160,17 @@ func validateAircraft(allFilteredAircraft []Aircraft, alreadySpottedAircraft *[]
 
 // HandleAircraft return a list of aircraft that have been filtered by range, type and altitude.
 // Aircraft that have been spotted are removed from the list.
-func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Config) (aircraft []AircraftOutput, err error) {
-	var newlySpottedAircraft []Aircraft
+func HandleAircraft(alreadySpottedAircraft *[]AircraftRaw, config configuration.Config) (aircraft []Aircraft, err error) {
+	var newlySpottedAircraftRaw []AircraftRaw
 
 	// Use MaxScanRangeKilometers for scanning (API query)
-	allAircraftInRange, err := getAllAircraftInRange(config.Location, config.MaxScanRangeKilometers)
+	allAircraftInRange, err := getAllAircrafRawtInRange(config.Location, config.MaxScanRangeKilometers)
 	if err != nil {
 		return nil, err
 	}
 
 	// Filter the aircraft by the notification range (MaxRangeKilometers)
-	var aircraftInNotificationRange []Aircraft
+	var aircraftInNotificationRange []AircraftRaw
 	for _, ac := range allAircraftInRange {
 		// Skip aircraft without registration
 		if ac.Registration == "" {
@@ -184,10 +184,10 @@ func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Con
 	}
 
 	// For notifications, we need to track what's new and filter by type
-	newlySpottedAircraft, *alreadySpottedAircraft = validateAircraft(aircraftInNotificationRange, alreadySpottedAircraft)
+	newlySpottedAircraftRaw, *alreadySpottedAircraft = validateAircraft(aircraftInNotificationRange, alreadySpottedAircraft)
 
 	// Only filter by types for notifications, not for the full output
-	filteredForNotifications := filterAircraftByTypes(newlySpottedAircraft, config.AircraftTypes)
+	filteredForNotifications := filterAircraftByTypes(newlySpottedAircraftRaw, config.AircraftTypes)
 
 	// Apply altitude filter if configured
 	if config.MaxAltitudeFeet > 0 {
@@ -195,14 +195,14 @@ func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Con
 	}
 
 	// Process newly spotted aircraft for metrics
-	newlySpottedAircraftOutput, err := CreateAircraftOutput(newlySpottedAircraft, config, false)
+	newlySpottedAircraft, err := ConvertToAircraft(newlySpottedAircraftRaw, config, false)
 	if err != nil {
 		return nil, err
 	}
-	handleMetrics(newlySpottedAircraftOutput)
+	handleMetrics(newlySpottedAircraft)
 
 	// Generate output for notifications (filtered by AIRCRAFT_TYPES)
-	notificationOutputs, err := CreateAircraftOutput(filteredForNotifications, config, true)
+	notificationOutputs, err := ConvertToAircraft(filteredForNotifications, config, true)
 	if err != nil {
 		return nil, err
 	}
@@ -216,17 +216,17 @@ func HandleAircraft(alreadySpottedAircraft *[]Aircraft, config configuration.Con
 	return notificationOutputs, nil
 }
 
-func handleMetrics(aircraft []AircraftOutput) {
+func handleMetrics(aircraft []Aircraft) {
 	for _, ac := range aircraft {
 		metrics.IncrementMetrics(ac.Type, ac.Description, strconv.FormatBool(ac.Military), ac.Altitude)
 	}
 }
 
-func isAircraftMilitary(aircraft Aircraft) bool {
+func isAircraftMilitary(aircraft AircraftRaw) bool {
 	return aircraft.DbFlags == 1
 }
 
-func isAircraftDesired(aircraft Aircraft, aircraftType string) bool {
+func isAircraftDesired(aircraft AircraftRaw, aircraftType string) bool {
 	if aircraftType == "MILITARY" && aircraft.DbFlags == 1 {
 		return true
 	}
@@ -239,8 +239,8 @@ func isAircraftDesired(aircraft Aircraft, aircraftType string) bool {
 }
 
 // filterAircraftByTypes returns a list of Aircraft that match the aircraftTypes.
-func filterAircraftByTypes(aircraft []Aircraft, types []string) []Aircraft {
-	var filteredAircraft []Aircraft
+func filterAircraftByTypes(aircraft []AircraftRaw, types []string) []AircraftRaw {
+	var filteredAircraft []AircraftRaw
 
 	for _, ac := range aircraft {
 		for _, aircraftType := range types {
@@ -254,8 +254,8 @@ func filterAircraftByTypes(aircraft []Aircraft, types []string) []Aircraft {
 }
 
 // filterAircraftByAltitude returns a list of Aircraft that are below the maxAltitudeFeet.
-func filterAircraftByAltitude(aircraft []Aircraft, maxAltitudeFeet int) []Aircraft {
-	var filteredAircraft []Aircraft
+func filterAircraftByAltitude(aircraft []AircraftRaw, maxAltitudeFeet int) []AircraftRaw {
+	var filteredAircraft []AircraftRaw
 
 	for _, ac := range aircraft {
 		// First convert any 'ground' string indicators to float64(0)
@@ -327,7 +327,7 @@ func getHighestValue(numbers ...int) (highest int) {
 	return highest
 }
 
-func validateFields(aircraft Aircraft) Aircraft {
+func validateFields(aircraft AircraftRaw) AircraftRaw {
 	if aircraft.Callsign == "" || strings.HasPrefix(aircraft.Callsign, " ") {
 		aircraft.Callsign = "UNKNOWN"
 	}
@@ -347,86 +347,90 @@ func validateFields(aircraft Aircraft) Aircraft {
 	return aircraft
 }
 
-// CreateAircraftOutput returns a list of AircraftOutput objects that will be used to print metadata.
+// ConvertToAircraft converts the AircraftRaw data to Aircraft data. This is the data that we will use in our application.
 // Specify true for extraInfo to include additional information such as flight route, origin, and destination.
-func CreateAircraftOutput(aircraft []Aircraft, config configuration.Config, extraInfo bool) (acOutputs []AircraftOutput, err error) {
-	var acOutput AircraftOutput
+func ConvertToAircraft(aircraftRaw []AircraftRaw, config configuration.Config, extraInfo bool) (aircraft []Aircraft, err error) {
+	var ac Aircraft
 	cloudForecastSucceeded := true
-
 	weather, err := weather.GetCloudForecast(config.Location)
 	if err != nil {
 		log.Printf("Error getting cloud forecast: %v\n", err)
 		cloudForecastSucceeded = false
 	}
 
-	for _, ac := range aircraft {
+	for _, acRaw := range aircraftRaw {
+		// Skip aircraft without registration
+		if acRaw.Registration == "" {
+			continue
+		}
+
 		// Reset aircraft output for new aircraft
-		acOutput = AircraftOutput{} // Reset to empty to prevent data leakage between iterations
+		ac = Aircraft{} // Reset to empty to prevent data leakage between iterations
 
-		ac = validateFields(ac)
-		aircraftLocation := geodist.Coord{Lat: ac.Lat, Lon: ac.Lon}
-		image := planespotter.GetImageFromAPI(ac.ICAO, ac.Registration)
+		acRaw = validateFields(acRaw)
+		aircraftLocation := geodist.Coord{Lat: acRaw.Lat, Lon: acRaw.Lon}
+		image := planespotter.GetImageFromAPI(acRaw.ICAO, acRaw.Registration)
 
-		acOutput.Altitude = ac.AltBaro.(float64)
-		acOutput.Callsign = ac.Callsign
-		acOutput.Description = ac.Desc
-		acOutput.Distance = CalculateDistance(config.Location, aircraftLocation)
-		acOutput.Speed = int(ac.GS)
-		acOutput.Registration = ac.Registration
-		acOutput.Country = GetCountryFromRegistration(ac.Registration)
-		acOutput.Type = ac.PlaneType
-		acOutput.ICAO = ac.ICAO
-		acOutput.Heading = ac.Track
-		acOutput.TrackerURL = fmt.Sprintf("https://globe.airplanes.live/?icao=%v&SiteLat=%f&SiteLon=%f&zoom=11&enableLabels&extendedLabels=1&noIsolation",
-			ac.ICAO, config.Location.Lat, config.Location.Lon)
+		ac.Altitude = acRaw.AltBaro.(float64)
+		ac.Callsign = acRaw.Callsign
+		ac.Description = acRaw.Desc
+		ac.Distance = CalculateDistance(config.Location, aircraftLocation)
+		ac.Speed = int(acRaw.GS)
+		ac.Registration = acRaw.Registration
+		ac.Country = GetCountryFromRegistration(acRaw.Registration)
+		ac.Type = acRaw.PlaneType
+		ac.ICAO = acRaw.ICAO
+		ac.Heading = acRaw.Track
+		ac.TrackerURL = fmt.Sprintf("https://globe.airplanes.live/?icao=%v&SiteLat=%f&SiteLon=%f&zoom=11&enableLabels&extendedLabels=1&noIsolation",
+			acRaw.ICAO, config.Location.Lat, config.Location.Lon)
 		if cloudForecastSucceeded {
-			acOutput.CloudCoverage = getCloudCoverage(*weather, acOutput.Altitude)
+			ac.CloudCoverage = getCloudCoverage(*weather, ac.Altitude)
 		}
-		acOutput.BearingFromLocation = CalculateBearing(config.Location, aircraftLocation)
-		acOutput.BearingFromAircraft = CalculateBearing(aircraftLocation, config.Location)
+		ac.BearingFromLocation = CalculateBearing(config.Location, aircraftLocation)
+		ac.BearingFromAircraft = CalculateBearing(aircraftLocation, config.Location)
 		if image != nil {
-			acOutput.ImageThumbnailURL = image.ThumbnailLarge.Src
-			acOutput.ImageURL = image.Link
-			acOutput.Photographer = image.Photographer
+			ac.ImageThumbnailURL = image.ThumbnailLarge.Src
+			ac.ImageURL = image.Link
+			ac.Photographer = image.Photographer
 		}
-		acOutput.Military = isAircraftMilitary(ac)
+		ac.Military = isAircraftMilitary(acRaw)
 		// Check if aircraft is on the ground (altitude is 0)
-		acOutput.OnGround = acOutput.Altitude == 0
+		ac.OnGround = ac.Altitude == 0
 		// If the aircraft is on the ground, it cannot be inbound
-		if acOutput.OnGround {
-			acOutput.Inbound = false
+		if ac.OnGround {
+			ac.Inbound = false
 		} else {
-			acOutput.Inbound = IsAircraftInbound(config.Location, ac, 30)
+			ac.Inbound = IsAircraftInbound(config.Location, acRaw, 30)
 		}
 
-		if extraInfo && ac.Callsign != "UNKNOWN" && len(ac.Callsign) > 3 {
+		if extraInfo && acRaw.Callsign != "UNKNOWN" && len(acRaw.Callsign) > 3 {
 			// Fetch flight route information
-			flightRoute, err := getFlightRoute(ac.Callsign)
+			flightRoute, err := getFlightRoute(acRaw.Callsign)
 			if err == nil && flightRoute != nil {
 				// Validate that the flight route matches this aircraft
-				if isValidFlightRouteForAircraft(flightRoute, ac) {
-					acOutput.Airline = flightRoute.Airline
-					acOutput.Origin = flightRoute.Origin
-					acOutput.Destination = flightRoute.Destination
+				if isValidFlightRouteForAircraft(flightRoute, acRaw) {
+					ac.Airline = flightRoute.Airline
+					ac.Origin = flightRoute.Origin
+					ac.Destination = flightRoute.Destination
 				} else {
 					// Flight route doesn't match this aircraft, log a message for debugging
 					log.Printf("Flight route for callsign %s doesn't match aircraft (ICAO: %s, Reg: %s)",
-						ac.Callsign, ac.ICAO, ac.Registration)
+						acRaw.Callsign, acRaw.ICAO, acRaw.Registration)
 				}
 			} else if err != nil && !strings.Contains(err.Error(), "API rate limit exceeded") {
 				// Only log errors that aren't rate limit related
-				log.Printf("Error getting flight route information for %s: %v", ac.Callsign, err)
+				log.Printf("Error getting flight route information for %s: %v", acRaw.Callsign, err)
 			}
 		}
 
-		acOutputs = append(acOutputs, acOutput)
+		aircraft = append(aircraft, ac)
 	}
-	return acOutputs, nil
+	return aircraft, nil
 }
 
 // isValidFlightRouteForAircraft validates whether a flight route likely matches the given aircraft
 // by checking for ICAO/IATA code consistency, registration consistency, or other relevant factors
-func isValidFlightRouteForAircraft(route *FlightRoute, aircraft Aircraft) bool {
+func isValidFlightRouteForAircraft(route *FlightRoute, aircraft AircraftRaw) bool {
 	// Skip validation if we're missing essential data
 	if route == nil {
 		return false
@@ -467,7 +471,7 @@ func isValidFlightRouteForAircraft(route *FlightRoute, aircraft Aircraft) bool {
 }
 
 // IsAircraftInbound checks if the aircraft is inbound to the target location
-func IsAircraftInbound(location geodist.Coord, aircraft Aircraft, margin float64) bool {
+func IsAircraftInbound(location geodist.Coord, aircraft AircraftRaw, margin float64) bool {
 	// Calculate bearing from aircraft to location (where the aircraft should be pointing if heading to target)
 	bearingFromAircraft := CalculateBearing(geodist.Coord{Lat: aircraft.Lat, Lon: aircraft.Lon}, location)
 
@@ -483,33 +487,8 @@ func IsAircraftInbound(location geodist.Coord, aircraft Aircraft, margin float64
 	return diff <= margin
 }
 
-// ConvertAircraftToOutput converts a slice of Aircraft to a slice of AircraftOutput
-func ConvertAircraftToOutput(aircraft []Aircraft) []AircraftOutput {
-	config, err := configuration.GetConfig()
-	if err != nil {
-		log.Printf("Error getting config for API: %v", err)
-		return []AircraftOutput{}
-	}
-
-	// Filter out aircraft without registration
-	var filteredAircraft []Aircraft
-	for _, ac := range aircraft {
-		if ac.Registration != "" {
-			filteredAircraft = append(filteredAircraft, ac)
-		}
-	}
-
-	outputs, err := CreateAircraftOutput(filteredAircraft, config, true)
-	if err != nil {
-		log.Printf("Error creating aircraft output for API: %v", err)
-		return []AircraftOutput{}
-	}
-
-	return outputs
-}
-
 // SortByDistance sorts a slice of aircraft to show the closest aircraft first
-func SortByDistance(aircraft []AircraftOutput) []AircraftOutput {
+func SortByDistance(aircraft []Aircraft) []Aircraft {
 	sort.Slice(aircraft, func(i, j int) bool {
 		return aircraft[i].Distance < aircraft[j].Distance
 	})

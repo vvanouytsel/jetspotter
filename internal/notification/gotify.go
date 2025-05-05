@@ -9,7 +9,7 @@ import (
 )
 
 // SendGotifyMessage sends a gotify message containing metadata of a list of aircraft
-func SendGotifyMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
+func SendGotifyMessage(aircraft []jetspotter.Aircraft, config configuration.Config) error {
 	message, err := buildGotifyMessage(aircraft)
 	if err != nil {
 		return err
@@ -29,7 +29,7 @@ func SendGotifyMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 	return nil
 }
 
-func buildGotifyMessage(aircraft []jetspotter.AircraftOutput) (message models.MessageExternal, err error) {
+func buildGotifyMessage(aircraft []jetspotter.Aircraft) (message models.MessageExternal, err error) {
 	message.Title = "An aircraft has been spotted!"
 	message.Extras = map[string]interface{}{
 		"client::display": map[string]interface{}{

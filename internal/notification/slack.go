@@ -33,7 +33,7 @@ type Field struct {
 	Text string `json:"text,omitempty"`
 }
 
-func buildSlackMessage(aircraft []jetspotter.AircraftOutput) (SlackMessage, error) {
+func buildSlackMessage(aircraft []jetspotter.Aircraft) (SlackMessage, error) {
 
 	var blocks []Block
 	blocks = append(blocks, Block{
@@ -148,7 +148,7 @@ func buildSlackMessage(aircraft []jetspotter.AircraftOutput) (SlackMessage, erro
 }
 
 // SendSlackMessage sends a slack message containing metadata of a list of aircraft
-func SendSlackMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
+func SendSlackMessage(aircraft []jetspotter.Aircraft, config configuration.Config) error {
 	// Split aircraft into chunks to stay within Slack's block limit (max 50 blocks per message)
 	// Each aircraft uses approximately 4 blocks (2 sections + image + divider)
 	const maxAircraftPerMessage = 10

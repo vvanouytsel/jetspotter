@@ -351,7 +351,7 @@ func (s *Server) handleAPIProxy(c *gin.Context) {
 	defer resp.Body.Close()
 
 	// Parse the response
-	var aircraft []jetspotter.AircraftOutput
+	var aircraft []jetspotter.Aircraft
 	if err := json.NewDecoder(resp.Body).Decode(&aircraft); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse API response"})
 		return

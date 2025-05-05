@@ -30,7 +30,7 @@ const (
 )
 
 // Format the callsign whether to display a hyperlink or not
-func formatCallsign(ac jetspotter.AircraftOutput, notificationType string) string {
+func formatCallsign(ac jetspotter.Aircraft, notificationType string) string {
 	if notificationType == Markdown {
 		return fmt.Sprintf("[%s](%s)", ac.Callsign, ac.TrackerURL)
 	}
@@ -43,7 +43,7 @@ func formatCallsign(ac jetspotter.AircraftOutput, notificationType string) strin
 }
 
 // Format whether to display a hyperlink for the registration or not
-func formatRegistration(ac jetspotter.AircraftOutput, notificationType string) string {
+func formatRegistration(ac jetspotter.Aircraft, notificationType string) string {
 	if notificationType == Markdown {
 		if ac.ImageURL == "" {
 			return ac.Registration
@@ -89,59 +89,59 @@ func SendMessage(notification Notification) error {
 	return nil
 }
 
-func printSpeed(ac jetspotter.AircraftOutput) string {
+func printSpeed(ac jetspotter.Aircraft) string {
 	return fmt.Sprintf("%dkn | %dkm/h", ac.Speed, jetspotter.ConvertKnotsToKilometersPerHour(ac.Speed))
 }
 
-func printAltitude(ac jetspotter.AircraftOutput) string {
+func printAltitude(ac jetspotter.Aircraft) string {
 	if ac.OnGround {
 		return "On ground"
 	}
 	return fmt.Sprintf("%vft | %dm", ac.Altitude, jetspotter.ConvertFeetToMeters(ac.Altitude))
 }
 
-func printDistance(ac jetspotter.AircraftOutput) string {
+func printDistance(ac jetspotter.Aircraft) string {
 	return fmt.Sprintf("%dkm", ac.Distance)
 }
 
-func printBearingFromLocation(ac jetspotter.AircraftOutput) string {
+func printBearingFromLocation(ac jetspotter.Aircraft) string {
 	return fmt.Sprintf("%.0f°", ac.BearingFromLocation)
 }
 
-func printHeading(ac jetspotter.AircraftOutput) string {
+func printHeading(ac jetspotter.Aircraft) string {
 	return fmt.Sprintf("%.0f°", ac.Heading)
 }
 
-func printBearingFromAircraft(ac jetspotter.AircraftOutput) string {
+func printBearingFromAircraft(ac jetspotter.Aircraft) string {
 	return fmt.Sprintf("%.0f°", ac.BearingFromAircraft)
 }
 
-func printCloudCoverage(ac jetspotter.AircraftOutput) string {
+func printCloudCoverage(ac jetspotter.Aircraft) string {
 	return fmt.Sprintf("%d%%", ac.CloudCoverage)
 }
 
-func getInboundStatus(ac jetspotter.AircraftOutput) string {
+func getInboundStatus(ac jetspotter.Aircraft) string {
 	if ac.Inbound {
 		return "Yes"
 	}
 	return "No"
 }
 
-func printOriginName(ac jetspotter.AircraftOutput) string {
+func printOriginName(ac jetspotter.Aircraft) string {
 	if ac.Origin.Name == "" {
 		return "N/A"
 	}
 	return ac.Origin.Name
 }
 
-func printDestinationName(ac jetspotter.AircraftOutput) string {
+func printDestinationName(ac jetspotter.Aircraft) string {
 	if ac.Destination.Name == "" {
 		return "N/A"
 	}
 	return ac.Destination.Name
 }
 
-func printAirlineName(ac jetspotter.AircraftOutput) string {
+func printAirlineName(ac jetspotter.Aircraft) string {
 	if ac.Airline.Name == "" {
 		return "N/A"
 	}

@@ -14,7 +14,7 @@ import (
 // SpottedAircraft keeps track of all currently spotted aircraft
 var SpottedAircraft struct {
 	sync.Mutex
-	Aircraft []Aircraft
+	Aircraft []AircraftRaw
 }
 
 // Config holds the application configuration for API access
@@ -56,7 +56,7 @@ func handleAircraftAPI(c *gin.Context) {
 	defer SpottedAircraft.Unlock()
 
 	// Filter out aircraft without registration before converting to output
-	var filteredAircraft []Aircraft
+	var filteredAircraft []AircraftRaw
 	for _, ac := range SpottedAircraft.Aircraft {
 		if ac.Registration != "" {
 			filteredAircraft = append(filteredAircraft, ac)
@@ -71,7 +71,7 @@ func handleAircraftAPI(c *gin.Context) {
 		return
 	}
 
-	outputs, err := CreateAircraftOutput(filteredAircraft, config, true)
+	outputs, err := ConvertToAircraft(filteredAircraft, config, true)
 	if err != nil {
 		log.Printf("Error creating aircraft output for API: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process aircraft data"})

@@ -24,7 +24,7 @@ type NtfyNotification struct {
 
 // SendNtfyMessage sends a ntfy message containing metadata of aircraft
 // Each aircraft will have its own separate notification
-func SendNtfyMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
+func SendNtfyMessage(aircraft []jetspotter.Aircraft, config configuration.Config) error {
 	// Send a separate message for each aircraft
 	for _, ac := range aircraft {
 		// Build a message for a single aircraft
@@ -58,7 +58,7 @@ func AddNtfyAction(label, url string) NtfyAction {
 	}
 }
 
-func buildNtfyMessage(aircraft jetspotter.AircraftOutput, config configuration.Config) (message NtfyNotification, err error) {
+func buildNtfyMessage(aircraft jetspotter.Aircraft, config configuration.Config) (message NtfyNotification, err error) {
 	message.Title = "An aircraft has been spotted!"
 	message.Topic = config.NtfyTopic
 	message.Tags = []string{"jetspotter"}

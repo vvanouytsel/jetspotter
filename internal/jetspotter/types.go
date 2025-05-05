@@ -3,17 +3,17 @@ package jetspotter
 // FlightData is a struct of the json received by the ADS-B api
 type FlightData struct {
 	// A slice of aircrafts
-	AC    []Aircraft `json:"ac"`
-	Msg   string     `json:"msg"`
-	Now   int64      `json:"now"`
-	Total int        `json:"total"`
-	Ctime int64      `json:"ctime"`
-	Ptime int        `json:"ptime"`
+	AC    []AircraftRaw `json:"ac"`
+	Msg   string        `json:"msg"`
+	Now   int64         `json:"now"`
+	Total int           `json:"total"`
+	Ctime int64         `json:"ctime"`
+	Ptime int           `json:"ptime"`
 }
 
-// Aircraft contains all the metadata of an aircraft as defined by the ADS-B
+// AircraftRaw contains all the metadata of an aircraft as defined by the ADS-B
 // https://www.adsbexchange.com/ads-b-data-field-explanations/
-type Aircraft struct {
+type AircraftRaw struct {
 	// Aircraft Type Designator number, basically the unique identifier of an aircraft
 	ICAO string `json:"hex"`
 	// Type of transponder used that received the data
@@ -85,8 +85,8 @@ type Aircraft struct {
 	Dir      float64       `json:"dir"`
 }
 
-// AircraftOutput contains all fields that we want to print, regardless of which medium is used
-type AircraftOutput struct {
+// Aircraft contains all fields that we want to print, regardless of which medium is used
+type Aircraft struct {
 	// Aircraft Type Designator number, basically the unique identifier of an aircraft
 	ICAO string
 

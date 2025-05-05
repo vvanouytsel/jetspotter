@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	jets = []Aircraft{
+	jets = []AircraftRaw{
 		{
 			ICAO:      "ABC",
 			Callsign:  "JACKAL51",
@@ -29,13 +29,13 @@ var (
 		},
 	}
 
-	jackal51Aircraft = Aircraft{
+	jackal51Aircraft = AircraftRaw{
 		ICAO:      "ABC",
 		Callsign:  "JACKAL51",
 		PlaneType: "F16",
 	}
 
-	planesWithAltitude = []Aircraft{
+	planesWithAltitude = []AircraftRaw{
 		{
 			Callsign: "KHARMA11",
 			AltBaro:  4000.0,
@@ -49,7 +49,7 @@ var (
 		},
 	}
 
-	planes = []Aircraft{
+	planes = []AircraftRaw{
 		{
 			Callsign:  "APEX11",
 			PlaneType: aircraft.F16.Identifier,
@@ -102,7 +102,7 @@ var (
 )
 
 func TestFilterAircraftByTypeF16(t *testing.T) {
-	expected := []Aircraft{
+	expected := []AircraftRaw{
 		{
 			Callsign:  "APEX11",
 			PlaneType: aircraft.F16.Identifier,
@@ -143,7 +143,7 @@ func TestFilterAircraftByTypeMilitary(t *testing.T) {
 	config := configuration.Config{
 		AircraftTypes: []string{aircraft.MILITARY.Identifier},
 	}
-	expected := []Aircraft{
+	expected := []AircraftRaw{
 		{
 			Callsign:  "APEX11",
 			PlaneType: aircraft.F16.Identifier,
@@ -176,7 +176,7 @@ func TestFilterAircraftByTypeMilitaryAndA320(t *testing.T) {
 		AircraftTypes: []string{aircraft.MILITARY.Identifier, aircraft.A320.Identifier},
 	}
 
-	expected := []Aircraft{
+	expected := []AircraftRaw{
 		{
 			Callsign:  "APEX11",
 			PlaneType: aircraft.F16.Identifier,
@@ -248,7 +248,7 @@ func TestCalculateDistance2(t *testing.T) {
 }
 
 func TestFilterAircraftByTypes(t *testing.T) {
-	expected := []Aircraft{
+	expected := []AircraftRaw{
 		{
 			Callsign:  "APEX11",
 			PlaneType: aircraft.F16.Identifier,
@@ -298,7 +298,7 @@ func TestConvertFeetToMeters(t *testing.T) {
 }
 
 func TestSortAircraftByDistance(t *testing.T) {
-	aircraft := []AircraftOutput{
+	aircraft := []Aircraft{
 		{
 			Callsign: "APEX11",
 			Distance: 120,
@@ -381,7 +381,7 @@ func TestCalculateBearing5(t *testing.T) {
 
 func TestNewlySpotted(t *testing.T) {
 
-	newAircaft := Aircraft{
+	newAircaft := AircraftRaw{
 		ICAO:     "ZYX",
 		Type:     "A400",
 		Callsign: "NEW11",
@@ -406,7 +406,7 @@ func TestAlreadySpotted(t *testing.T) {
 
 func TestAlreadySpottedAircraftAreFiltered(t *testing.T) {
 
-	aircraft := []Aircraft{
+	aircraft := []AircraftRaw{
 		{
 			ICAO:      "VVO",
 			Callsign:  "DEMON81",
@@ -424,7 +424,7 @@ func TestAlreadySpottedAircraftAreFiltered(t *testing.T) {
 		},
 	}
 
-	alreadySpottedAircraft := []Aircraft{
+	alreadySpottedAircraft := []AircraftRaw{
 		{
 			ICAO:      "DEF",
 			Callsign:  "LDS431",
@@ -437,7 +437,7 @@ func TestAlreadySpottedAircraftAreFiltered(t *testing.T) {
 		},
 	}
 
-	expectedNewlySpotted := []Aircraft{
+	expectedNewlySpotted := []AircraftRaw{
 		{
 			ICAO:      "VVO",
 			Callsign:  "DEMON81",
@@ -450,7 +450,7 @@ func TestAlreadySpottedAircraftAreFiltered(t *testing.T) {
 		},
 	}
 
-	expectedSpottedAircraft := []Aircraft{
+	expectedSpottedAircraft := []AircraftRaw{
 		{
 			ICAO:      "DEF",
 			Callsign:  "LDS431",
@@ -483,7 +483,7 @@ func TestAlreadySpottedAircraftAreFiltered(t *testing.T) {
 
 // TestCallsignStartsEmptySpace tests that the callsign is set to "UNKNOWN" when the callsign starts with empty spaces
 func TestCallsignStartsEmptySpace(t *testing.T) {
-	aircraft := Aircraft{
+	aircraft := AircraftRaw{
 		Callsign: "    ",
 	}
 
@@ -497,7 +497,7 @@ func TestCallsignStartsEmptySpace(t *testing.T) {
 
 // TestCallsignEndsEmptySpace that the callsign is not changed if it does not start with empty spaces
 func TestCallsignEndsEmptySpace(t *testing.T) {
-	aircraft := Aircraft{
+	aircraft := AircraftRaw{
 		Callsign: "x  x  ",
 	}
 
@@ -511,7 +511,7 @@ func TestCallsignEndsEmptySpace(t *testing.T) {
 
 // TestCallsignNoEmptySpace tests that the callsign is not changed if it does not start or end with empty spaces
 func TestCallsignNoEmptySpace(t *testing.T) {
-	aircraft := Aircraft{
+	aircraft := AircraftRaw{
 		Callsign: "x  x x",
 	}
 
@@ -540,7 +540,7 @@ func TestConvertKilometersToMiles(t *testing.T) {
 }
 
 func TestFilterAircraftByAltitude(t *testing.T) {
-	expected := []Aircraft{
+	expected := []AircraftRaw{
 		{
 			Callsign: "KHARMA11",
 			AltBaro:  4000.0,
@@ -559,7 +559,7 @@ func TestFilterAircraftByAltitude(t *testing.T) {
 
 // TestFilterAircraftByAltitudeWithGroundValue tests the handling of 'ground' string as altitude
 func TestFilterAircraftByAltitudeWithGroundValue(t *testing.T) {
-	aircraftWithGroundValues := []Aircraft{
+	aircraftWithGroundValues := []AircraftRaw{
 		{
 			Callsign: "KHARMA11",
 			AltBaro:  "ground", // String value "ground"
@@ -582,7 +582,7 @@ func TestFilterAircraftByAltitudeWithGroundValue(t *testing.T) {
 	filtered := filterAircraftByAltitude(aircraftWithGroundValues, maxAltitude)
 
 	// We expect 3 aircraft: the two with ground values and the one at 3000ft
-	expected := []Aircraft{
+	expected := []AircraftRaw{
 		{
 			Callsign: "KHARMA11",
 			AltBaro:  float64(0), // Converted from "ground" to float64(0)
@@ -623,7 +623,7 @@ func TestFilterAircraftByAltitudeWithGroundValue(t *testing.T) {
 
 // TestFilterAircraftByAltitudeWithUnhandledType tests the handling of unhandled types for altitude
 func TestFilterAircraftByAltitudeWithUnhandledType(t *testing.T) {
-	aircraftWithUnhandledType := []Aircraft{
+	aircraftWithUnhandledType := []AircraftRaw{
 		{
 			Callsign: "KHARMA11",
 			AltBaro:  "not a valid altitude", // Unhandled string value
@@ -638,7 +638,7 @@ func TestFilterAircraftByAltitudeWithUnhandledType(t *testing.T) {
 	filtered := filterAircraftByAltitude(aircraftWithUnhandledType, maxAltitude)
 
 	// We expect only the aircraft with valid altitude to be included
-	expected := []Aircraft{
+	expected := []AircraftRaw{
 		{
 			Callsign: "KHARMA12",
 			AltBaro:  float64(2000),
@@ -656,7 +656,7 @@ func TestFilterAircraftByAltitudeWithUnhandledType(t *testing.T) {
 
 func TestHandleAircraftWithScanRange(t *testing.T) {
 	// Create test aircraft at different distances
-	testAircraft := []Aircraft{
+	testAircraft := []AircraftRaw{
 		{
 			ICAO:     "TEST1",
 			Callsign: "NEAR1",
@@ -692,7 +692,7 @@ func TestHandleAircraftWithScanRange(t *testing.T) {
 	}
 
 	// Filter aircraft based on distance from the location
-	var aircraftInScanRange []Aircraft
+	var aircraftInScanRange []AircraftRaw
 	for _, ac := range testAircraft {
 		distance := CalculateDistance(config.Location, geodist.Coord{Lat: ac.Lat, Lon: ac.Lon})
 		if distance <= config.MaxScanRangeKilometers {
@@ -701,7 +701,7 @@ func TestHandleAircraftWithScanRange(t *testing.T) {
 	}
 
 	// Manually apply the same filtering logic as in HandleAircraft function
-	var aircraftInNotificationRange []Aircraft
+	var aircraftInNotificationRange []AircraftRaw
 	for _, ac := range aircraftInScanRange {
 		distance := CalculateDistance(config.Location, geodist.Coord{Lat: ac.Lat, Lon: ac.Lon})
 		if distance <= config.MaxRangeKilometers {
@@ -724,7 +724,7 @@ func TestHandleAircraftWithScanRange(t *testing.T) {
 
 	// Now test the actual distance-based filtering in the HandleAircraft function
 	// by simulating its behavior with our test data
-	var alreadySpottedAircraft []Aircraft
+	var alreadySpottedAircraft []AircraftRaw
 
 	// Simulate the main filtering logic from HandleAircraft
 	newlySpottedAircraft, updatedSpottedAircraft := validateAircraft(aircraftInNotificationRange, &alreadySpottedAircraft)
@@ -765,7 +765,7 @@ func TestIsAircraftInboundDirectly(t *testing.T) {
 	}
 	bearingToTarget := CalculateBearing(aircraftLocation, location)
 
-	aircraft := Aircraft{
+	aircraft := AircraftRaw{
 		Lat:   51.5,
 		Lon:   5.0,
 		Track: bearingToTarget, // Aircraft heading directly toward the location
@@ -813,7 +813,7 @@ func TestIsAircraftInboundSlightlyOff(t *testing.T) {
 	idealBearing := CalculateBearing(aircraftLocation, location)
 
 	// Aircraft is flying 5 degrees off from ideal bearing
-	aircraft := Aircraft{
+	aircraft := AircraftRaw{
 		Lat:   51.5,
 		Lon:   5.1,
 		Track: idealBearing - 5, // 5 degrees off from ideal bearing
@@ -858,7 +858,7 @@ func TestIsAircraftNotInbound(t *testing.T) {
 	}
 	idealBearing := CalculateBearing(perpAircraftLocation, perpLocation)
 
-	perpAircraft := Aircraft{
+	perpAircraft := AircraftRaw{
 		Lat:   51.0,
 		Lon:   6.0,
 		Track: math.Mod(idealBearing+90, 360), // Flying 90 degrees off from ideal bearing
@@ -876,7 +876,7 @@ func TestIsAircraftNotInbound(t *testing.T) {
 	}
 	idealBearingAway := CalculateBearing(awayAircraftLocation, awayLocation)
 
-	awayAircraft := Aircraft{
+	awayAircraft := AircraftRaw{
 		Lat:   50.5,
 		Lon:   5.0,
 		Track: math.Mod(idealBearingAway+180, 360), // Flying in the opposite direction
@@ -885,7 +885,7 @@ func TestIsAircraftNotInbound(t *testing.T) {
 	// Test both cases with different margins
 	testCases := []struct {
 		location    geodist.Coord
-		aircraft    Aircraft
+		aircraft    AircraftRaw
 		aircraftLoc geodist.Coord
 		margin      float64
 		expected    bool
@@ -924,14 +924,14 @@ func TestIsAircraftInboundRealWorld(t *testing.T) {
 	heathrowLocation := geodist.Coord{Lat: 51.470020, Lon: -0.454295}
 	heathrowToBrusselsBearing := CalculateBearing(heathrowLocation, brusselsLocation)
 
-	heathrowAircraft := Aircraft{
+	heathrowAircraft := AircraftRaw{
 		Lat:   51.470020,
 		Lon:   -0.454295,
 		Track: heathrowToBrusselsBearing, // Exact heading from Heathrow to Brussels
 	}
 
 	// Aircraft heading slightly off from Brussels
-	heathrowAircraftOffCourse := Aircraft{
+	heathrowAircraftOffCourse := AircraftRaw{
 		Lat:   51.470020,
 		Lon:   -0.454295,
 		Track: heathrowToBrusselsBearing + 12, // 12 degrees off
@@ -942,7 +942,7 @@ func TestIsAircraftInboundRealWorld(t *testing.T) {
 	jfkToBrusselsBearing := CalculateBearing(jfkLocation, brusselsLocation)
 
 	// JFK Aircraft heading towards Europe
-	jfkAircraft := Aircraft{
+	jfkAircraft := AircraftRaw{
 		Lat:   40.639751,
 		Lon:   -73.778925,
 		Track: jfkToBrusselsBearing, // Exact heading to Brussels
@@ -951,7 +951,7 @@ func TestIsAircraftInboundRealWorld(t *testing.T) {
 	// Test with existing locations from test file
 	elisabethToPisBearing := CalculateBearing(locationElisabethPark, locationMannekenPis)
 
-	elisabethParkAircraft := Aircraft{
+	elisabethParkAircraft := AircraftRaw{
 		Lat:   locationElisabethPark.Lat,
 		Lon:   locationElisabethPark.Lon,
 		Track: elisabethToPisBearing, // Exact heading to Manneken Pis
@@ -959,7 +959,7 @@ func TestIsAircraftInboundRealWorld(t *testing.T) {
 
 	testCases := []struct {
 		location geodist.Coord
-		aircraft Aircraft
+		aircraft AircraftRaw
 		margin   float64
 		expected bool
 		name     string
@@ -1020,13 +1020,14 @@ func TestIsAircraftInboundRealWorld(t *testing.T) {
 // TestAircraftOnGroundIsNeverInbound tests that an aircraft with altitude 0 is never marked as inbound
 func TestAircraftOnGroundIsNeverInbound(t *testing.T) {
 	// Create test aircraft and configuration
-	aircraftOnGround := Aircraft{
-		ICAO:     "TEST1",
-		Callsign: "GROUND1",
-		Lat:      51.18,
-		Lon:      5.46,
-		AltBaro:  float64(0), // Aircraft on the ground
-		Track:    45.0,       // Heading that would normally be considered inbound
+	aircraftOnGround := AircraftRaw{
+		ICAO:         "TEST1",
+		Callsign:     "GROUND1",
+		Registration: "ABC",
+		Lat:          51.18,
+		Lon:          5.46,
+		AltBaro:      float64(0), // Aircraft on the ground
+		Track:        45.0,       // Heading that would normally be considered inbound
 	}
 
 	config := configuration.Config{
@@ -1036,11 +1037,10 @@ func TestAircraftOnGroundIsNeverInbound(t *testing.T) {
 		},
 	}
 
-	// Prepare the aircraft slice for CreateAircraftOutput
-	aircraft := []Aircraft{aircraftOnGround}
+	aircraft := []AircraftRaw{aircraftOnGround}
 
 	// Process the aircraft
-	outputs, err := CreateAircraftOutput(aircraft, config, false)
+	outputs, err := ConvertToAircraft(aircraft, config, false)
 	if err != nil {
 		t.Fatalf("Error creating aircraft output: %v", err)
 	}
@@ -1058,5 +1058,41 @@ func TestAircraftOnGroundIsNeverInbound(t *testing.T) {
 	// Check that the aircraft is not marked as inbound (regardless of its heading)
 	if outputs[0].Inbound {
 		t.Error("Aircraft on the ground should never be marked as inbound, but was marked as inbound")
+	}
+}
+
+func TestAircraftWithoutRegistrationIsSkipped(t *testing.T) {
+	// Create test aircraft and configuration
+	aircraftWithoutRegistration := AircraftRaw{
+		ICAO:         "TEST9",
+		Callsign:     "REGI1",
+		Registration: "", // No registration
+		Lat:          51.18,
+		Lon:          5.46,
+	}
+
+	aircraftWithRegistration := AircraftRaw{
+		ICAO:         "TEST10",
+		Callsign:     "REGI1",
+		Registration: "ABC",
+		Lat:          51.18,
+		Lon:          5.46,
+	}
+
+	aircraft := []AircraftRaw{aircraftWithoutRegistration, aircraftWithRegistration}
+
+	// Process the aircraft
+	outputs, err := ConvertToAircraft(aircraft, configuration.Config{}, false)
+	if err != nil {
+		t.Fatalf("Error creating aircraft output: %v", err)
+	}
+
+	// Verify there's exactly one aircraft in the result
+	if len(outputs) != 1 {
+		t.Fatalf("Expected 1 aircraft in output, got %d", len(outputs))
+	}
+	// Check that the aircraft is the one with registration
+	if outputs[0].Registration != "ABC" {
+		t.Fatalf("Expected aircraft with registration 'ABC', got '%s'", outputs[0].Registration)
 	}
 }
