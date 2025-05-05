@@ -135,6 +135,11 @@ func (s *Server) setupRoutes() {
 	}
 	s.engine.StaticFS("/static", http.FS(staticFS))
 
+	// Add specific route for favicon.ico
+	s.engine.GET("/favicon.ico", func(c *gin.Context) {
+		c.FileFromFS("images/favicon.ico", http.FS(staticFS))
+	})
+
 	// Authentication routes
 	s.engine.GET("/login", s.handleLoginGet)
 	s.engine.POST("/login", s.handleLoginPost)
