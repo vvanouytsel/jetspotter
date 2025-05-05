@@ -21,7 +21,7 @@ func SendGotifyMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 		URL:     fmt.Sprintf("%s/message?token=%s", config.GotifyURL, config.GotifyToken),
 	}
 
-	err = SendMessage(aircraft, notification)
+	err = SendMessage(notification)
 	if err != nil {
 		return err
 	}

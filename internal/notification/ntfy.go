@@ -28,8 +28,8 @@ func SendNtfyMessage(aircraft []jetspotter.AircraftOutput, config configuration.
 	// Send a separate message for each aircraft
 	for _, ac := range aircraft {
 		// Build a message for a single aircraft
-		singleAircraftMessage, err := buildNtfyMessage([]jetspotter.AircraftOutput{ac}, config)
-		if (err != nil) {
+		singleAircraftMessage, err := buildNtfyMessage(ac, config)
+		if err != nil {
 			return err
 		}
 
@@ -39,7 +39,7 @@ func SendNtfyMessage(aircraft []jetspotter.AircraftOutput, config configuration.
 			URL:     config.NtfyServer,
 		}
 
-		err = SendMessage([]jetspotter.AircraftOutput{ac}, notification)
+		err = SendMessage(notification)
 		if err != nil {
 			return err
 		}
@@ -58,33 +58,31 @@ func AddNtfyAction(label, url string) NtfyAction {
 	}
 }
 
-func buildNtfyMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) (message NtfyNotification, err error) {
+func buildNtfyMessage(aircraft jetspotter.AircraftOutput, config configuration.Config) (message NtfyNotification, err error) {
 	message.Title = "An aircraft has been spotted!"
 	message.Topic = config.NtfyTopic
 	message.Tags = []string{"jetspotter"}
 	message.Markdown = true
 
-	for _, ac := range aircraft {
-		message.Message += fmt.Sprintf("Callsign:               %s\n", formatCallsign(ac, Markdown))
-		message.Message += fmt.Sprintf("Registration:           %s\n", formatRegistration(ac, Markdown))
-		message.Message += fmt.Sprintf("Country:                %s\n", ac.Country)
-		message.Message += fmt.Sprintf("Speed:                  %s\n", printSpeed(ac))
-		message.Message += fmt.Sprintf("Altitude:               %s\n", printAltitude(ac))
-		message.Message += fmt.Sprintf("Distance:               %s\n", printDistance(ac))
-		message.Message += fmt.Sprintf("Bearing from location:  %s\n", printBearingFromLocation(ac))
-		message.Message += fmt.Sprintf("Bearing to location:    %s\n", printBearingFromAircraft(ac))
-		message.Message += fmt.Sprintf("Heading:                %s\n", printHeading(ac))
-		message.Message += fmt.Sprintf("Cloud coverage:         %s\n", printCloudCoverage(ac))
-		message.Message += fmt.Sprintf("Inbound:                %s\n", getInboundStatus(ac))
-		message.Message += fmt.Sprintf("Type:                   %s\n", ac.Type)
-		message.Message += fmt.Sprintf("Origin:                 %s\n", printOriginName(ac))
-		message.Message += fmt.Sprintf("Destination:            %s\n", printDestinationName(ac))
-		message.Message += fmt.Sprintf("Airline:                %s\n", printAirlineName(ac))
-		message.Message += fmt.Sprintf("ImageURL:               %s\n", ac.ImageURL)
-		// Add Ntfy Actions
-		message.Actions = []NtfyAction{
-			AddNtfyAction("Track Aircraft", ac.TrackerURL),
-		}
+	message.Message += fmt.Sprintf("Callsign:               %s\n", formatCallsign(aircraft, Markdown))
+	message.Message += fmt.Sprintf("Registration:           %s\n", formatRegistration(aircraft, Markdown))
+	message.Message += fmt.Sprintf("Country:                %s\n", aircraft.Country)
+	message.Message += fmt.Sprintf("Speed:                  %s\n", printSpeed(aircraft))
+	message.Message += fmt.Sprintf("Altitude:               %s\n", printAltitude(aircraft))
+	message.Message += fmt.Sprintf("Distance:               %s\n", printDistance(aircraft))
+	message.Message += fmt.Sprintf("Bearing from location:  %s\n", printBearingFromLocation(aircraft))
+	message.Message += fmt.Sprintf("Bearing to location:    %s\n", printBearingFromAircraft(aircraft))
+	message.Message += fmt.Sprintf("Heading:                %s\n", printHeading(aircraft))
+	message.Message += fmt.Sprintf("Cloud coverage:         %s\n", printCloudCoverage(aircraft))
+	message.Message += fmt.Sprintf("Inbound:                %s\n", getInboundStatus(aircraft))
+	message.Message += fmt.Sprintf("Type:                   %s\n", aircraft.Type)
+	message.Message += fmt.Sprintf("Origin:                 %s\n", printOriginName(aircraft))
+	message.Message += fmt.Sprintf("Destination:            %s\n", printDestinationName(aircraft))
+	message.Message += fmt.Sprintf("Airline:                %s\n", printAirlineName(aircraft))
+	message.Message += fmt.Sprintf("ImageURL:               %s\n", aircraft.ImageURL)
+	// Add Ntfy Actions
+	message.Actions = []NtfyAction{
+		AddNtfyAction("Track Aircraft", aircraft.TrackerURL),
 	}
 
 	return message, nil

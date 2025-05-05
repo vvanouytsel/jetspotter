@@ -45,11 +45,6 @@ type Config struct {
 	// AIRCRAFT_TYPES MILITARY
 	AircraftTypes []string
 
-	// Maximum amount of aircraft to show in a single slack message.
-	// Note that a single slack message only supports up to 50 'blocks' and each aircraft that we display has multiple blocks.
-	// MAX_AIRCRAFT_SLACK_MESSAGE 8
-	MaxAircraftSlackMessage int
-
 	// Webhook used to send notifications to Slack. If not set, no messages will be sent to Slack.
 	// SLACK_WEBHOOK_URL ""
 	SlackWebHookURL string
@@ -101,25 +96,24 @@ type Config struct {
 
 // Environment variable names
 const (
-	SlackWebhookURL          = "SLACK_WEBHOOK_URL"
-	DiscordWebhookURL        = "DISCORD_WEBHOOK_URL"
-	DiscordColorAltitude     = "DISCORD_COLOR_ALTITUDE"
-	LocationLatitude         = "LOCATION_LATITUDE"
-	LocationLongitude        = "LOCATION_LONGITUDE"
-	MaxRangeKilometers       = "MAX_RANGE_KILOMETERS"
-	MaxScanRangeKilometers   = "MAX_SCAN_RANGE_KILOMETERS"
-	MaxAltitudeFeet          = "MAX_ALTITUDE_FEET"
-	MaxAircrfaftSlackMessage = "MAX_AIRCRAFT_SLACK_MESSAGE"
-	AircraftTypes            = "AIRCRAFT_TYPES"
-	FetchInterval            = "FETCH_INTERVAL"
-	GotifyURL                = "GOTIFY_URL"
-	NtfyTopic                = "NTFY_TOPIC"
-	NtfyServer               = "NTFY_SERVER"
-	GotifyToken              = "GOTIFY_TOKEN"
-	MetricsPort              = "METRICS_PORT"
-	APIPort                  = "API_PORT"
-	WebUIEnabled             = "WEB_UI_ENABLED"
-	WebUIPort                = "WEB_UI_PORT"
+	SlackWebhookURL        = "SLACK_WEBHOOK_URL"
+	DiscordWebhookURL      = "DISCORD_WEBHOOK_URL"
+	DiscordColorAltitude   = "DISCORD_COLOR_ALTITUDE"
+	LocationLatitude       = "LOCATION_LATITUDE"
+	LocationLongitude      = "LOCATION_LONGITUDE"
+	MaxRangeKilometers     = "MAX_RANGE_KILOMETERS"
+	MaxScanRangeKilometers = "MAX_SCAN_RANGE_KILOMETERS"
+	MaxAltitudeFeet        = "MAX_ALTITUDE_FEET"
+	AircraftTypes          = "AIRCRAFT_TYPES"
+	FetchInterval          = "FETCH_INTERVAL"
+	GotifyURL              = "GOTIFY_URL"
+	NtfyTopic              = "NTFY_TOPIC"
+	NtfyServer             = "NTFY_SERVER"
+	GotifyToken            = "GOTIFY_TOKEN"
+	MetricsPort            = "METRICS_PORT"
+	APIPort                = "API_PORT"
+	WebUIEnabled           = "WEB_UI_ENABLED"
+	WebUIPort              = "WEB_UI_PORT"
 )
 
 // getEnvVariable looks up a specified environment variable, if not set the specified default is used
@@ -186,11 +180,6 @@ func GetConfig() (config Config, err error) {
 	}
 
 	config.MaxAltitudeFeet, err = strconv.Atoi(getEnvVariable(MaxAltitudeFeet, "0"))
-	if err != nil {
-		return Config{}, err
-	}
-
-	config.MaxAircraftSlackMessage, err = strconv.Atoi(getEnvVariable(MaxAircrfaftSlackMessage, "8"))
 	if err != nil {
 		return Config{}, err
 	}

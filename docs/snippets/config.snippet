@@ -30,11 +30,6 @@ type Config struct {
 	// AIRCRAFT_TYPES MILITARY
 	AircraftTypes []string
 
-	// Maximum amount of aircraft to show in a single slack message.
-	// Note that a single slack message only supports up to 50 'blocks' and each aircraft that we display has multiple blocks.
-	// MAX_AIRCRAFT_SLACK_MESSAGE 8
-	MaxAircraftSlackMessage int
-
 	// Webhook used to send notifications to Slack. If not set, no messages will be sent to Slack.
 	// SLACK_WEBHOOK_URL ""
 	SlackWebHookURL string

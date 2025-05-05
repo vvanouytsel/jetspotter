@@ -33,7 +33,7 @@ type Field struct {
 	Text string `json:"text,omitempty"`
 }
 
-func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) (SlackMessage, error) {
+func buildSlackMessage(aircraft []jetspotter.AircraftOutput) (SlackMessage, error) {
 
 	var blocks []Block
 	blocks = append(blocks, Block{
@@ -46,11 +46,8 @@ func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 		},
 	})
 
-	for i, ac := range aircraft {
-		if i > config.MaxAircraftSlackMessage {
-			break
-		}
-
+	for _, ac := range aircraft {
+		// First section block with first 8 fields
 		blocks = append(blocks, Block{
 			Type: "section",
 			Fields: []Field{
@@ -86,6 +83,13 @@ func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 					Type: "mrkdwn",
 					Text: fmt.Sprintf("*Heading:* %s", printHeading(ac)),
 				},
+			},
+		})
+
+		// Second section block with remaining 7 fields
+		blocks = append(blocks, Block{
+			Type: "section",
+			Fields: []Field{
 				{
 					Type: "mrkdwn",
 					Text: fmt.Sprintf("*Bearing from aircraft:* %s", printBearingFromAircraft(ac)),
@@ -145,20 +149,33 @@ func buildSlackMessage(aircraft []jetspotter.AircraftOutput, config configuratio
 
 // SendSlackMessage sends a slack message containing metadata of a list of aircraft
 func SendSlackMessage(aircraft []jetspotter.AircraftOutput, config configuration.Config) error {
-	message, err := buildSlackMessage(aircraft, config)
-	if err != nil {
-		return err
+	// Split aircraft into chunks to stay within Slack's block limit (max 50 blocks per message)
+	// Each aircraft uses approximately 4 blocks (2 sections + image + divider)
+	const maxAircraftPerMessage = 10
+
+	for i := 0; i < len(aircraft); i += maxAircraftPerMessage {
+		end := i + maxAircraftPerMessage
+		if end > len(aircraft) {
+			end = len(aircraft)
+		}
+
+		chunk := aircraft[i:end]
+		message, err := buildSlackMessage(chunk)
+		if err != nil {
+			return err
+		}
+
+		notification := Notification{
+			Message: message,
+			Type:    Slack,
+			URL:     config.SlackWebHookURL,
+		}
+
+		err = SendMessage(notification)
+		if err != nil {
+			return fmt.Errorf("failed to send slack message: %w", err)
+		}
 	}
 
-	notification := Notification{
-		Message: message,
-		Type:    Slack,
-		URL:     config.SlackWebHookURL,
-	}
-
-	err = SendMessage(aircraft, notification)
-	if err != nil {
-		return err
-	}
 	return nil
 }

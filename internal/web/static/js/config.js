@@ -148,11 +148,6 @@ function displayConfigData(config) {
             config.DiscordColorAltitude === "true" ? "Yes" : "No";
     }
     
-    if (config.SlackWebHookURL) {
-        document.getElementById('slack-max-value').textContent = 
-            config.MaxAircraftSlackMessage || 'Default';
-    }
-    
     if (config.NtfyTopic) {
         document.getElementById('ntfy-topic-value').textContent = config.NtfyTopic;
     }

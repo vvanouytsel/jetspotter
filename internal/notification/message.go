@@ -68,7 +68,7 @@ func formatRegistration(ac jetspotter.AircraftOutput, notificationType string) s
 }
 
 // SendMessage sends a message to a notification platform
-func SendMessage(aircraft []jetspotter.AircraftOutput, notification Notification) error {
+func SendMessage(notification Notification) error {
 	data, err := json.Marshal(notification.Message)
 	if err != nil {
 		return err

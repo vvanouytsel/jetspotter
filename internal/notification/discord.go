@@ -45,7 +45,7 @@ func SendDiscordMessage(aircraft []jetspotter.AircraftOutput, config configurati
 			URL:     config.DiscordWebHookURL,
 		}
 
-		err = SendMessage(batch, notification)
+		err = SendMessage(notification)
 		if err != nil {
 			return err
 		}
