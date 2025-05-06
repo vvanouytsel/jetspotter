@@ -506,6 +506,7 @@ func GetCountryFromRegistration(registration string) string {
 		// A few examples from each region
 		// North America
 		"87-": "United States", // Lockheed C-5M
+		"08-": "United States", // Boeing C-17A
 		"N":   "United States",
 		"C-F": "Canada",
 		"C-G": "Canada",
