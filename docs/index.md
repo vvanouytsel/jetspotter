@@ -52,9 +52,10 @@ If the altitude color feature is disabled:
 
 [![Dashboard](images/jetspotter-grafana-1.png)](images/jetspotter-grafana-1.png)
 
-## User interface
+## web interface
 
-A user interface is available by default on port 8080. 
+A web interface is available on port 8080. 
+You can log in to access the configration page using the `admin` username and `jetspotter` password. 
 
 [![User interface](images/jetspotter-ui-1.png)](images/jetspotter-ui-1.png)
 
