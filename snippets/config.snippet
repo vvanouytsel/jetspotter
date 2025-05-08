@@ -1,0 +1,80 @@
+type Config struct {
+	// Latitude and Longitude coordinates of the location you want to use.
+	// LOCATION_LATITUDE 51.17348
+	// LOCATION_LONGITUDE 5.45921
+	Location geodist.Coord
+
+	// Maximum range in kilometers from the location that you want aircraft to be spotted.
+	// Note that this is an approximation due to roundings.
+	// MAX_RANGE_KILOMETERS 30
+	MaxRangeKilometers int
+
+	// Maximum range in kilometers from the location that you want to scan for aircraft.
+	// This is used to determine the area to query from the ADS-B API.
+	// If not set, MAX_RANGE_KILOMETERS will be used.
+	// MAX_SCAN_RANGE_KILOMETERS 30
+	MaxScanRangeKilometers int
+
+	// Maximum altitude in feet that you want to spot aircraft at.
+	// Set to 0 to disable the filter.
+	// MAX_ALTITUDE_FEET 0
+	MaxAltitudeFeet int
+
+	// A comma seperated list of types that you want to spot
+	// If not set, 'ALL' will be used, which will disable the filter and show all aircraft within range.
+	// Full list can be found at https://www.icao.int/publications/doc8643/pages/search.aspx in 'Type Designator' column.
+	// AIRCRAFT_TYPES ALL
+	// EXAMPLES
+	// AIRCRAFT_TYPES F16,F35
+	// To spot all military aircraft, you can use MILITARY.
+	// AIRCRAFT_TYPES MILITARY
+	AircraftTypes []string
+
+	// Webhook used to send notifications to Slack. If not set, no messages will be sent to Slack.
+	// SLACK_WEBHOOK_URL ""
+	SlackWebHookURL string
+
+	// Webhook used to send notifications to Discord. If not set, no messages will be sent to Discord.
+	// DISCORD_WEBHOOK_URL ""
+	DiscordWebHookURL string
+
+	// Discord notifications use an embed color based on the alitute of the aircraft.
+	// DISCORD_COLOR_ALTITUDE "true"
+	DiscordColorAltitude string
+
+	// Interval in seconds between fetching aircraft, minimum is 60 due to API rate limiting.
+	// FETCH_INTERVAL 60
+	FetchInterval int
+
+	// Token to authenticate with the gotify server.
+	// GOTIFY_TOKEN ""
+	GotifyToken string
+
+	// URL of the gotify server.
+	// GOTIFY_URL ""
+	GotifyURL string
+
+	// Port where metrics will be exposed on
+	// METRICS_PORT "7070"
+	MetricsPort string
+
+	// Port where API will be exposed on
+	// API_PORT "8085"
+	APIPort string
+
+	// Enable or disable the web UI
+	// WEB_UI_ENABLED "true"
+	WebUIEnabled bool
+
+	// Port where web UI will be exposed on
+	// WEB_UI_PORT "8080"
+	WebUIPort string
+
+	// Topic to publish message to
+	// NTFY_TOPIC ""
+	NtfyTopic string
+
+	// URL of the ntfy server.
+	// NTFY_SERVER "https://ntfy.sh"
+	NtfyServer string
+}
