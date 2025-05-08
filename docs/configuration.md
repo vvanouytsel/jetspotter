@@ -7,7 +7,7 @@ The supported parameters and their corresponding environment variables are liste
 // ENV_VARIABLE_NAME DEFAULT_VALUE
 ```
 
-In order to access the configuration web interface, you need to authenticate. By default the `admin` user and `jetspotter` are used. You can change the password by setting the `AUTH_PASSWORD` environment variable.
+In order to access the configuration web interface, you need to authenticate. By default the `admin` user and `jetspotter` password are used. You can change the password by setting the `AUTH_PASSWORD` environment variable.
 
 ```go
 {%
