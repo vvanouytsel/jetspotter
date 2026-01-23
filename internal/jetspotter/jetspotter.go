@@ -27,6 +27,63 @@ var (
 	baseInfoURL = "https://api.adsbdb.com/v0"
 )
 
+// checkAPIAvailability tests if an ADSB API endpoint is available
+func checkAPIAvailability(apiURL string) bool {
+	// Test with a simple endpoint
+	testEndpoint, err := url.JoinPath(apiURL, "point", "0", "0", "1")
+	if err != nil {
+		return false
+	}
+
+	req, err := http.NewRequest("GET", testEndpoint, nil)
+	if err != nil {
+		return false
+	}
+
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return false
+	}
+	defer res.Body.Close()
+
+	// Check if we get a successful response (2xx)
+	// 403/404/etc. means the API is blocking us or endpoint doesn't exist
+	if res.StatusCode >= 400 {
+		return false
+	}
+
+	// Also verify it returns JSON, not HTML
+	contentType := res.Header.Get("Content-Type")
+	return strings.Contains(contentType, "json")
+}
+
+// SelectBestAPI checks which ADSB API is available and sets it as the baseURL
+func SelectBestAPI() {
+	primaryAPI := "https://api.adsb.one/v2"
+	fallbackAPI := "https://api.adsb.lol/v2"
+
+	log.Printf("Checking primary ADSB API: %s", primaryAPI)
+	if checkAPIAvailability(primaryAPI) {
+		baseURL = primaryAPI
+		log.Printf("Using primary API: %s", primaryAPI)
+		return
+	}
+
+	log.Printf("Primary API unavailable, checking fallback: %s", fallbackAPI)
+	if checkAPIAvailability(fallbackAPI) {
+		baseURL = fallbackAPI
+		log.Printf("Using fallback API: %s", fallbackAPI)
+		return
+	}
+
+	log.Printf("Warning: Both ADSB APIs appear to be unavailable, will try primary anyway")
+	baseURL = primaryAPI
+}
+
 // CalculateDistance returns the rounded distance between two coordinates in kilometers
 func CalculateDistance(source geodist.Coord, destination geodist.Coord) int {
 	_, kilometers := geodist.HaversineDistance(source, destination)
@@ -106,10 +163,23 @@ func getAllAircrafRawInRange(location geodist.Coord, maxRangeKilometers int) (ai
 	}
 
 	defer res.Body.Close()
-	body, _ := io.ReadAll(res.Body)
+
+	// Check HTTP status code
+	if res.StatusCode >= 400 {
+		if res.StatusCode == 429 {
+			return nil, fmt.Errorf("API rate limit exceeded: %s", res.Status)
+		}
+		return nil, fmt.Errorf("API call to %s returned error: %s", endpoint, res.Status)
+	}
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
 	err = json.Unmarshal(body, &flightData)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse API response from %s: %w", baseURL, err)
 	}
 
 	return flightData.AC, nil
