@@ -175,6 +175,9 @@ func main() {
 		exitWithError(err)
 	}
 
+	// Select the best available ADSB API at startup
+	jetspotter.SelectBestAPI()
+
 	// Start services
 	HandleMetrics(config)
 	HandleAPI(config)
