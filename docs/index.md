@@ -52,7 +52,7 @@ If the altitude color feature is disabled:
 
 [![Dashboard](images/jetspotter-grafana-1.png)](images/jetspotter-grafana-1.png)
 
-## web interface
+## Web interface
 
 A web interface is available on port 8080. 
 You can log in to access the configration page using the `admin` username and `jetspotter` password. 
@@ -192,7 +192,7 @@ Helm charts are available in the oci registry.
 Configuration values can be found in the repository or via [artifact hub](https://artifacthub.io/packages/helm/jetspotter/jetspotter).
 
 ```bash
-helm install -n jetspotter --create-namespace oci://ghcr.io/vvanouytsel/jetspotter-chart/jetspotter
+helm install -n jetspotter jetspotter --create-namespace oci://ghcr.io/vvanouytsel/jetspotter-chart/jetspotter
 ```
 
 ## Releases
