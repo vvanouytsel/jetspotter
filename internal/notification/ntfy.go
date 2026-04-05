@@ -37,6 +37,7 @@ func SendNtfyMessage(aircraft []jetspotter.Aircraft, config configuration.Config
 			Message: singleAircraftMessage,
 			Type:    Ntfy,
 			URL:     config.NtfyServer,
+			Token:   config.NtfyToken,
 		}
 
 		err = SendMessage(notification)

@@ -92,6 +92,10 @@ type Config struct {
 	// URL of the ntfy server.
 	// NTFY_SERVER "https://ntfy.sh"
 	NtfyServer string
+
+	// Token for ntfy server authentication.
+	// NTFY_TOKEN ""
+	NtfyToken string
 }
 
 // Environment variable names
@@ -109,6 +113,7 @@ const (
 	GotifyURL              = "GOTIFY_URL"
 	NtfyTopic              = "NTFY_TOPIC"
 	NtfyServer             = "NTFY_SERVER"
+	NtfyToken              = "NTFY_TOKEN"
 	GotifyToken            = "GOTIFY_TOKEN"
 	MetricsPort            = "METRICS_PORT"
 	APIPort                = "API_PORT"
@@ -133,6 +138,7 @@ func GetConfig() (config Config, err error) {
 	config.GotifyURL = getEnvVariable(GotifyURL, "")
 	config.NtfyTopic = getEnvVariable(NtfyTopic, "")
 	config.NtfyServer = getEnvVariable(NtfyServer, "https://ntfy.sh")
+	config.NtfyToken = getEnvVariable(NtfyToken, "")
 	config.SlackWebHookURL = getEnvVariable(SlackWebhookURL, "")
 	config.DiscordWebHookURL = getEnvVariable(DiscordWebhookURL, "")
 	config.DiscordColorAltitude = getEnvVariable(DiscordColorAltitude, "true")
