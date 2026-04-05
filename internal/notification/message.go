@@ -14,6 +14,7 @@ type Notification struct {
 	Message interface{}
 	Type    string
 	URL     string
+	Token   string
 }
 
 const (
@@ -74,8 +75,17 @@ func SendMessage(notification Notification) error {
 		return err
 	}
 
-	resp, err := http.Post(notification.URL, "application/json",
-		bytes.NewReader(data))
+	req, err := http.NewRequest("POST", notification.URL, bytes.NewReader(data))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	if notification.Token != "" {
+		req.Header.Set("Authorization", "Bearer "+notification.Token)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
