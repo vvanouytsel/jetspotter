@@ -1,5 +1,7 @@
 package jetspotter
 
+import "time"
+
 // FlightData is a struct of the json received by the ADS-B api
 type FlightData struct {
 	// A slice of aircrafts
@@ -203,3 +205,60 @@ type Airport struct {
 	Municipality   string  `json:"municipality"`
 	Name           string  `json:"name"`
 }
+
+// OverheadCandidate represents an aircraft that is projected to fly within
+// the configured overhead radius of the target location. A candidate is
+// tracked by the confirmation sub-loop until it is confirmed (and a
+// notification is sent), abandoned (it deviated from its course), or it
+// passes its predicted closest point of approach.
+type OverheadCandidate struct {
+	// ICAO is the unique aircraft identifier (hex string).
+	ICAO string `json:"icao"`
+
+	// Aircraft is the most recent snapshot of the aircraft data. This is the
+	// same Aircraft struct used throughout the application, so the web UI and
+	// notification builders can reuse the same rendering code.
+	Aircraft Aircraft `json:"aircraft"`
+
+	// PredictedCPATime is the wall-clock time at which the aircraft is
+	// projected to be closest to the target location.
+	PredictedCPATime time.Time `json:"predictedCPATime"`
+
+	// CPADistanceKm is the predicted closest lateral distance in kilometers
+	// between the aircraft and the target location.
+	CPADistanceKm int `json:"cpaDistanceKm"`
+
+	// CompassWord is the aircraft's heading rendered as a compass word
+	// (N, NE, E, ...). Pre-computed so notification builders and the UI can
+	// display it without duplicating the conversion logic.
+	CompassWord string `json:"compassWord"`
+
+	// MinutesUntilOverhead is the rounded number of minutes from now until
+	// the predicted CPA time. Recomputed on each sample so the UI countdown
+	// is reasonably fresh even between main-loop fetches.
+	MinutesUntilOverhead int `json:"minutesUntilOverhead"`
+
+	// ConfirmationState is one of: "pending", "confirmed", "passed",
+	// "abandoned". See the constants below.
+	ConfirmationState string `json:"confirmationState"`
+
+	// ConsecutiveOnCourseSeconds accumulates the number of seconds the
+	// aircraft has remained on course and projected overhead across
+	// consecutive sub-loop samples. Reset to 0 on any off-course sample.
+	ConsecutiveOnCourseSeconds int `json:"consecutiveOnCourseSeconds"`
+
+	// LastSampleTime is the time of the most recent sub-loop sample.
+	LastSampleTime time.Time `json:"lastSampleTime"`
+
+	// Notified indicates whether the "look up in N minutes" notification has
+	// already been sent for this candidate. Prevents duplicate notifications.
+	Notified bool `json:"notified"`
+}
+
+// Candidate confirmation states.
+const (
+	CandidatePending    = "pending"
+	CandidateConfirmed  = "confirmed"
+	CandidatePassed     = "passed"
+	CandidateAbandoned  = "abandoned"
+)

@@ -17,6 +17,14 @@ var SpottedAircraft struct {
 	Aircraft []Aircraft
 }
 
+// OverheadCandidates keeps track of aircraft currently being tracked as
+// overhead-prediction candidates. Updated by the confirmation sub-loop and
+// read by the /api/overhead endpoint and the notification path.
+var OverheadCandidates struct {
+	sync.Mutex
+	Candidates []OverheadCandidate
+}
+
 // Config holds the application configuration for API access
 var Config configuration.Config
 
@@ -38,6 +46,7 @@ func SetupAPI(listenPort string, config configuration.Config) {
 
 	// API routes
 	router.GET("/api/aircraft", handleAircraftAPI)
+	router.GET("/api/overhead", handleOverheadAPI)
 
 	// Config API endpoint requires authentication
 	router.GET("/api/config", basicAuth.Middleware(), handleConfigAPI)
@@ -61,4 +70,12 @@ func handleAircraftAPI(c *gin.Context) {
 func handleConfigAPI(c *gin.Context) {
 	// This endpoint is now protected by the auth middleware
 	c.JSON(http.StatusOK, Config)
+}
+
+// handleOverheadAPI returns all currently tracked overhead-prediction
+// candidates as JSON. The list is consumed by the /overhead web UI page.
+func handleOverheadAPI(c *gin.Context) {
+	OverheadCandidates.Lock()
+	defer OverheadCandidates.Unlock()
+	c.JSON(http.StatusOK, OverheadCandidates.Candidates)
 }
