@@ -147,7 +147,9 @@ func (s *Server) setupRoutes() {
 
 	// Public routes
 	s.engine.GET("/", s.handleIndex)
+	s.engine.GET("/overhead", s.handleOverhead)
 	s.engine.GET("/api/aircraft", s.handleAPIProxy)
+	s.engine.GET("/api/overhead", s.handleOverheadAPIProxy)
 	s.engine.GET("/api/version", s.handleVersion)
 
 	// Protected routes using auth middleware
@@ -300,6 +302,75 @@ func (s *Server) serveLoadingPage(c *gin.Context) {
 	})
 }
 
+// handleOverhead serves the overhead prediction page
+func (s *Server) handleOverhead(c *gin.Context) {
+	// Check if data is ready
+	if !s.isDataReady && s.config.DataReadyChan != nil {
+		s.serveLoadingPage(c)
+		return
+	}
+
+	// Read configuration values for the page
+	var latitude, longitude float64
+	overheadEnabled := false
+	overheadRadiusKm := 3
+	overheadLookAheadMin := 10
+	if s.jetspotterConfig != nil {
+		latitude = s.jetspotterConfig.Location.Lat
+		longitude = s.jetspotterConfig.Location.Lon
+		overheadEnabled = s.jetspotterConfig.OverheadPredictionEnabled
+		overheadRadiusKm = s.jetspotterConfig.OverheadRadiusKilometers
+		overheadLookAheadMin = s.jetspotterConfig.OverheadLookAheadMinutes
+	}
+
+	// Check if user is logged in (same pattern as handleIndex)
+	isLoggedIn := false
+	var username string
+	session := sessions.Default(c)
+	user := session.Get("user")
+	if user != nil {
+		isLoggedIn = true
+		var ok bool
+		username, ok = user.(string)
+		if !ok {
+			log.Printf("Warning: user session value is not a string type")
+			session.Clear()
+			session.Save()
+			isLoggedIn = false
+		}
+	}
+
+	c.HTML(http.StatusOK, "overhead.html", gin.H{
+		"Title":                   "Jetspotter - Overhead Predictions",
+		"RefreshPeriod":           int(s.config.RefreshPeriod.Seconds()),
+		"IsLoggedIn":              isLoggedIn,
+		"Username":                username,
+		"Latitude":                latitude,
+		"Longitude":               longitude,
+		"OverheadEnabled":         overheadEnabled,
+		"OverheadRadiusKm":        overheadRadiusKm,
+		"OverheadLookAheadMin":    overheadLookAheadMin,
+	})
+}
+
+// handleOverheadAPIProxy proxies requests to the backend /api/overhead endpoint
+func (s *Server) handleOverheadAPIProxy(c *gin.Context) {
+	resp, err := http.Get(s.config.APIEndpoint + "/api/overhead")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch overhead data from API"})
+		return
+	}
+	defer resp.Body.Close()
+
+	var candidates interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&candidates); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse overhead API response"})
+		return
+	}
+
+	c.JSON(http.StatusOK, candidates)
+}
+
 // handleConfig serves the configuration page
 func (s *Server) handleConfig(c *gin.Context) {
 	// User is already authenticated by middleware
@@ -440,7 +511,7 @@ func newTemplateRenderer(templateFS fs.FS) (render.HTMLRender, error) {
 	}
 
 	// Load templates from the embedded filesystem
-	templateFiles := []string{"index.html", "config.html", "login.html", "loading.html"}
+	templateFiles := []string{"index.html", "overhead.html", "config.html", "login.html", "loading.html"}
 	for _, file := range templateFiles {
 		tmpl, err := template.ParseFS(templateFS, file)
 		if err != nil {

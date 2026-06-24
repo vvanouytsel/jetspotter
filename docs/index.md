@@ -59,6 +59,22 @@ You can log in to access the configration page using the `admin` username and `j
 
 [![User interface](images/jetspotter-ui-1.png)](images/jetspotter-ui-1.png)
 
+## Overhead prediction
+
+Overhead prediction is an opt-in feature that warns you before a plane flies directly overhead. When a plane is on course to pass within a small radius of your location, the application tracks it closely (polling every few seconds) and, once it stays on course for a configurable confirmation window, sends a "look up in N minutes" notification to every configured channel — e.g. *"In 3 min, look up — you'll see a B748 heading south."*
+
+Enable it with `OVERHEAD_PREDICTION_ENABLED=true`. See the [configuration](configuration.md) page for the full set of `OVERHEAD_*` environment variables (radius, look-ahead horizon, confirmation window, inbound margin).
+
+A dedicated `/overhead` page in the web UI shows all current candidates on a map (with their projected trajectory up to the predicted closest point of approach) and in a table sorted by time-to-overhead.
+
+```bash
+# Docker: enable overhead prediction with a 3 km radius and 10 min look-ahead
+docker run -e OVERHEAD_PREDICTION_ENABLED=true -e OVERHEAD_RADIUS_KILOMETERS=3 -e OVERHEAD_LOOK_AHEAD_MINUTES=10 -p 8080:8080 ghcr.io/vvanouytsel/jetspotter:latest
+
+# Binary
+OVERHEAD_PREDICTION_ENABLED=true OVERHEAD_RADIUS_KILOMETERS=3 OVERHEAD_LOOK_AHEAD_MINUTES=10 ./jetspotter
+```
+
 ## Getting started
 
 ### Windows
