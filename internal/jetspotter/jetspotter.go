@@ -25,6 +25,14 @@ import (
 var (
 	baseURL     string
 	baseInfoURL = "https://api.adsbdb.com/v0"
+
+	// defaultAPIURLs is the ordered list of ADSB API endpoints that SelectBestAPI
+	// tries when the user did not configure ADSB_API_URLS. The first reachable one
+	// is used.
+	defaultAPIURLs = []string{
+		"https://opendata.adsb.fi/api/v3",
+		"https://api.adsb.lol/v2",
+	}
 )
 
 // checkAPIAvailability tests if an ADSB API endpoint is available
@@ -61,27 +69,32 @@ func checkAPIAvailability(apiURL string) bool {
 	return strings.Contains(contentType, "json")
 }
 
-// SelectBestAPI checks which ADSB API is available and sets it as the baseURL
-func SelectBestAPI() {
-	primaryAPI := "https://opendata.adsb.fi/api/v3"
-	fallbackAPI := "https://api.adsb.lol/v2"
-
-	log.Printf("Checking primary ADSB API: %s", primaryAPI)
-	if checkAPIAvailability(primaryAPI) {
-		baseURL = primaryAPI
-		log.Printf("Using primary API: %s", primaryAPI)
-		return
+// SelectBestAPI checks which of the given ADSB API endpoints is available and
+// sets it as the baseURL. The endpoints are tried in order and the first one that
+// responds with JSON is used. When apiURLs is empty the built-in defaultAPIURLs
+// list is used. If none of the endpoints are reachable, the first endpoint is
+// used anyway so the regular request path can surface a meaningful error.
+func SelectBestAPI(apiURLs []string) {
+	if len(apiURLs) == 0 {
+		apiURLs = defaultAPIURLs
 	}
 
-	log.Printf("Primary API unavailable, checking fallback: %s", fallbackAPI)
-	if checkAPIAvailability(fallbackAPI) {
-		baseURL = fallbackAPI
-		log.Printf("Using fallback API: %s", fallbackAPI)
-		return
+	for i, apiURL := range apiURLs {
+		if i == 0 {
+			log.Printf("Checking ADSB API: %s", apiURL)
+		} else {
+			log.Printf("ADSB API unavailable, checking next: %s", apiURL)
+		}
+
+		if checkAPIAvailability(apiURL) {
+			baseURL = apiURL
+			log.Printf("Using ADSB API: %s", apiURL)
+			return
+		}
 	}
 
-	log.Printf("Warning: Both ADSB APIs appear to be unavailable, will try primary anyway")
-	baseURL = primaryAPI
+	log.Printf("Warning: none of the configured ADSB APIs appear to be available, will try %s anyway", apiURLs[0])
+	baseURL = apiURLs[0]
 }
 
 // CalculateDistance returns the rounded distance between two coordinates in kilometers

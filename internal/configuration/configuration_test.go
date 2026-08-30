@@ -2,6 +2,7 @@ package configuration
 
 import (
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -61,5 +62,39 @@ func TestScanRangeCanBeDifferentFromMaxRange(t *testing.T) {
 
 	if config.MaxScanRangeKilometers != 100 {
 		t.Fatalf("expected MaxScanRangeKilometers to be 100, got %d", config.MaxScanRangeKilometers)
+	}
+}
+
+// TestADSBAPIURLsDefaultsToEmpty tests that ADSBAPIURLs stays empty when
+// ADSB_API_URLS is not configured, so that jetspotter falls back to its built-in
+// default endpoint list.
+func TestADSBAPIURLsDefaultsToEmpty(t *testing.T) {
+	t.Setenv("MAX_RANGE_KILOMETERS", "30")
+	t.Setenv("ADSB_API_URLS", "")
+
+	config, err := GetConfig()
+	if err != nil {
+		t.Fatalf("Failed to get config: %v", err)
+	}
+
+	if len(config.ADSBAPIURLs) != 0 {
+		t.Fatalf("expected ADSBAPIURLs to be empty, got %v", config.ADSBAPIURLs)
+	}
+}
+
+// TestADSBAPIURLsParsedAsOrderedList tests that ADSB_API_URLS is parsed into an
+// ordered slice, trimming whitespace and trailing slashes and dropping empty entries.
+func TestADSBAPIURLsParsedAsOrderedList(t *testing.T) {
+	t.Setenv("MAX_RANGE_KILOMETERS", "30")
+	t.Setenv("ADSB_API_URLS", " https://api.adsb.lol/v2 , https://opendata.adsb.fi/api/v3/ ,")
+
+	config, err := GetConfig()
+	if err != nil {
+		t.Fatalf("Failed to get config: %v", err)
+	}
+
+	expected := []string{"https://api.adsb.lol/v2", "https://opendata.adsb.fi/api/v3"}
+	if !reflect.DeepEqual(config.ADSBAPIURLs, expected) {
+		t.Fatalf("expected %v, got %v", expected, config.ADSBAPIURLs)
 	}
 }
