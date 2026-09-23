@@ -4,6 +4,8 @@ import (
 	"jetspotter/internal/aircraft"
 	"jetspotter/internal/configuration"
 	"math"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 
@@ -1013,5 +1015,32 @@ func TestAircraftWithoutRegistrationIsSkipped(t *testing.T) {
 	// Check that the aircraft is the one with registration
 	if outputs[0].Registration != "ABC" {
 		t.Fatalf("Expected aircraft with registration 'ABC', got '%s'", outputs[0].Registration)
+	}
+}
+
+func TestGetAllAircraftRawInRangeQueriesLatLonDistPath(t *testing.T) {
+	var requestedPath string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requestedPath = r.URL.Path
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"ac":[{"hex":"4ca770","flight":"EIN63N  "}]}`))
+	}))
+	defer server.Close()
+
+	originalBaseURL := baseURL
+	baseURL = server.URL + "/v2"
+	defer func() { baseURL = originalBaseURL }()
+
+	aircraft, err := getAllAircrafRawInRange(geodist.Coord{Lat: 51.17, Lon: -4.5}, 30)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedPath := "/v2/lat/51.17/lon/-4.5/dist/16"
+	if requestedPath != expectedPath {
+		t.Fatalf("expected '%v' to be the same as '%v'", expectedPath, requestedPath)
+	}
+	if len(aircraft) != 1 || aircraft[0].ICAO != "4ca770" {
+		t.Fatalf("expected one aircraft with ICAO '4ca770', got %+v", aircraft)
 	}
 }

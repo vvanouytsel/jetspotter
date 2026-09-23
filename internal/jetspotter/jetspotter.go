@@ -23,14 +23,14 @@ import (
 
 // Vars
 var (
-	baseURL     = "https://api.adsb.one/v2"
+	baseURL     string
 	baseInfoURL = "https://api.adsbdb.com/v0"
 )
 
 // checkAPIAvailability tests if an ADSB API endpoint is available
 func checkAPIAvailability(apiURL string) bool {
 	// Test with a simple endpoint
-	testEndpoint, err := url.JoinPath(apiURL, "point", "0", "0", "1")
+	testEndpoint, err := url.JoinPath(apiURL, "lat", "0", "lon", "0", "dist", "1")
 	if err != nil {
 		return false
 	}
@@ -63,7 +63,7 @@ func checkAPIAvailability(apiURL string) bool {
 
 // SelectBestAPI checks which ADSB API is available and sets it as the baseURL
 func SelectBestAPI() {
-	primaryAPI := "https://api.adsb.one/v2"
+	primaryAPI := "https://opendata.adsb.fi/api/v3"
 	fallbackAPI := "https://api.adsb.lol/v2"
 
 	log.Printf("Checking primary ADSB API: %s", primaryAPI)
@@ -144,10 +144,10 @@ func getFlightRoute(callsign string) (route *FlightRoute, err error) {
 func getAllAircrafRawInRange(location geodist.Coord, maxRangeKilometers int) (aircraft []AircraftRaw, err error) {
 	var flightData FlightData
 	miles := convertKilometersToNauticalMiles(float64(maxRangeKilometers))
-	endpoint, err := url.JoinPath(baseURL, "point",
-		strconv.FormatFloat(location.Lat, 'f', -1, 64),
-		strconv.FormatFloat(location.Lon, 'f', -1, 64),
-		strconv.Itoa(miles))
+	endpoint, err := url.JoinPath(baseURL,
+		"lat", strconv.FormatFloat(location.Lat, 'f', -1, 64),
+		"lon", strconv.FormatFloat(location.Lon, 'f', -1, 64),
+		"dist", strconv.Itoa(miles))
 	if err != nil {
 		return nil, err
 	}
