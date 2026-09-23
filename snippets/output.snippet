@@ -1,0 +1,77 @@
+type Aircraft struct {
+	// Aircraft Type Designator number, basically the unique identifier of an aircraft
+	ICAO string
+
+	// Callsign or flight name of the aircraft, if not set 'NONE' is used
+	Callsign string
+
+	// Description of the aircraft
+	Description string
+
+	// Type of the aircraft
+	Type string
+
+	// Latitude of the aircraft in decimal degrees
+	Latitude float64
+
+	// Longitude of the aircraft in decimal degrees
+	Longitude float64
+
+	// Registration number of the aircraft
+	Registration string
+
+	// Country of the aircraft based on the registration prefix
+	Country string
+
+	// Alitude of the aircraft in feet
+	Altitude float64
+
+	// Speed in knots
+	Speed int
+
+	// Distance between the specified location and the location of the aircraft in kilometers
+	// Height is not taken into consideration
+	Distance int
+
+	// TrackerURL is to URL track the aircraft using the ADS-B website
+	TrackerURL string
+
+	// ImageThumbnailURL is the URL for the thumbnail of the aircraft
+	ImageThumbnailURL string
+
+	// ImageURL is the URL showing more images of the aircraft
+	ImageURL string
+
+	// Specifies the photographer of the image
+	Photographer string
+
+	// Percentage of cloud coverage, lower cloud coverage means that you have more chance to spot the aircraft
+	CloudCoverage int
+
+	// Bearing from your location to the aircraft
+	BearingFromLocation float64
+
+	// Bearing from the aircraft to your location
+	BearingFromAircraft float64
+
+	// Heading of the aircraft
+	Heading float64
+
+	// Specifies if it is a military type aircraft or not
+	Military bool
+
+	// Specifies if the aircraft is traveling towards your location or not
+	Inbound bool
+
+	// Specifies if the aircraft is on the ground
+	OnGround bool
+
+	// Airline of the aircraft
+	Airline Airline
+
+	// Origin of the flight
+	Origin Airport
+
+	// Destination of the flight
+	Destination Airport
+}
