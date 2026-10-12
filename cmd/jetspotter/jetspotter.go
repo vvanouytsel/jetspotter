@@ -65,6 +65,45 @@ func sendNotifications(aircraft []jetspotter.Aircraft, config configuration.Conf
 	return nil
 }
 
+// sendOverheadNotifications routes a confirmed overhead prediction to every
+// notification channel the user has configured. It is the overhead
+// counterpart of sendNotifications and lives here to avoid an import cycle
+// between the jetspotter and notification packages.
+func sendOverheadNotifications(confirmed []jetspotter.OverheadCandidate, config configuration.Config) {
+	for _, c := range confirmed {
+		// Terminal (always)
+		notification.SendOverheadTerminalMessage(c, config)
+
+		// Slack
+		if config.SlackWebHookURL != "" {
+			if err := notification.SendOverheadSlackMessage(c, config); err != nil {
+				log.Printf("Failed to send overhead Slack message: %v", err)
+			}
+		}
+
+		// Discord
+		if config.DiscordWebHookURL != "" {
+			if err := notification.SendOverheadDiscordMessage(c, config); err != nil {
+				log.Printf("Failed to send overhead Discord message: %v", err)
+			}
+		}
+
+		// Gotify
+		if config.GotifyURL != "" && config.GotifyToken != "" {
+			if err := notification.SendOverheadGotifyMessage(c, config); err != nil {
+				log.Printf("Failed to send overhead Gotify message: %v", err)
+			}
+		}
+
+		// Ntfy
+		if config.NtfyTopic != "" {
+			if err := notification.SendOverheadNtfyMessage(c, config); err != nil {
+				log.Printf("Failed to send overhead Ntfy message: %v", err)
+			}
+		}
+	}
+}
+
 func jetspotterHandler(alreadySpottedAircraft *[]jetspotter.Aircraft, config configuration.Config, isFirstRun bool) {
 	aircraft, err := jetspotter.HandleAircraft(alreadySpottedAircraft, config)
 	if err != nil {
@@ -74,6 +113,17 @@ func jetspotterHandler(alreadySpottedAircraft *[]jetspotter.Aircraft, config con
 	err = sendNotifications(aircraft, config)
 	if err != nil {
 		exitWithError(err)
+	}
+
+	// Overhead trajectory prediction (opt-in). Runs after HandleAircraft so
+	// it can reuse the full in-range aircraft list stored in
+	// jetspotter.SpottedAircraft.
+	if config.OverheadPredictionEnabled {
+		jetspotter.SpottedAircraft.Lock()
+		allInRange := make([]jetspotter.Aircraft, len(jetspotter.SpottedAircraft.Aircraft))
+		copy(allInRange, jetspotter.SpottedAircraft.Aircraft)
+		jetspotter.SpottedAircraft.Unlock()
+		jetspotter.HandleOverheadPrediction(allInRange, config)
 	}
 
 	// If this is the first successful data fetch, signal that data is ready
@@ -99,6 +149,12 @@ func HandleJetspotter(config configuration.Config) {
 
 	if config.MaxAltitudeFeet > 0 {
 		log.Printf("Only showing aircraft at or below %d feet.", config.MaxAltitudeFeet)
+	}
+
+	if config.OverheadPredictionEnabled {
+		log.Printf("Overhead prediction enabled: radius=%dkm, look-ahead=%dmin, confirm=%ds, margin=%d°",
+			config.OverheadRadiusKilometers, config.OverheadLookAheadMinutes,
+			config.OverheadConfirmSeconds, config.OverheadInboundMarginDegrees)
 	}
 
 	var alreadySpottedAircraft []jetspotter.Aircraft
@@ -177,6 +233,11 @@ func main() {
 
 	// Select the best available ADSB API at startup
 	jetspotter.SelectBestAPI()
+
+	// Register the overhead prediction notifier callback so the jetspotter
+	// package can route confirmed predictions to configured notification
+	// channels without importing the notification package directly.
+	jetspotter.OverheadNotifier = sendOverheadNotifications
 
 	// Start services
 	HandleMetrics(config)

@@ -2136,3 +2136,207 @@ header h1 {
         font-size: 1.4rem;
     }
 }
+
+/* ===== Overhead Predictions page ===== */
+.overhead-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.overhead-summary {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.overhead-stat {
+    flex: 1;
+    min-width: 120px;
+    background-color: var(--card-color);
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.overhead-stat .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--secondary-color);
+}
+
+[data-theme="dark"] .overhead-stat .stat-value {
+    color: var(--primary-color);
+}
+
+.overhead-stat .stat-label {
+    font-size: 0.95rem;
+    color: #666;
+}
+
+[data-theme="dark"] .overhead-stat .stat-label {
+    color: #aaa;
+}
+
+.overhead-content {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.overhead-map-container {
+    flex: 2;
+    min-width: 320px;
+}
+
+.overhead-table-container {
+    flex: 1;
+    min-width: 320px;
+    background-color: var(--card-color);
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+#overhead-map {
+    height: 500px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.overhead-legend {
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: var(--card-color);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.overhead-legend .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.legend-site { background: #2563eb; }
+.legend-radius { background: #888; opacity: 0.6; }
+.legend-pending { background: #f59e0b; }
+.legend-confirmed { background: #22c55e; }
+.legend-passed { background: #6b7280; }
+.legend-cpa { background: #2563eb; }
+
+/* Site marker on the map */
+.site-marker-inner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #2563eb;
+    border: 2px solid #fff;
+    box-shadow: 0 0 6px rgba(0,0,0,0.4);
+}
+
+.cpa-marker-inner {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #2563eb;
+    border: 2px solid #fff;
+    box-shadow: 0 0 4px rgba(0,0,0,0.4);
+}
+
+/* Overhead table */
+.overhead-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.overhead-table th {
+    text-align: left;
+    padding: 8px 6px;
+    border-bottom: 2px solid rgba(0,0,0,0.1);
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+[data-theme="dark"] .overhead-table th {
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+    color: var(--primary-color);
+}
+
+.overhead-table td {
+    padding: 8px 6px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+[data-theme="dark"] .overhead-table td {
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.overhead-table tr.conf-confirmed td { background-color: rgba(34, 197, 94, 0.08); }
+.overhead-table tr.conf-pending td { background-color: rgba(245, 158, 11, 0.08); }
+.overhead-table tr.conf-passed td { opacity: 0.6; }
+.overhead-table tr.conf-abandoned td { opacity: 0.5; }
+
+.state-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.state-badge.conf-confirmed { background: #22c55e; }
+.state-badge.conf-pending { background: #f59e0b; }
+.state-badge.conf-passed { background: #6b7280; }
+.state-badge.conf-abandoned { background: #ef4444; }
+
+.overhead-disabled-banner {
+    padding: 12px 16px;
+    border-radius: 8px;
+    background-color: rgba(245, 158, 11, 0.15);
+    color: #92400e;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+}
+
+[data-theme="dark"] .overhead-disabled-banner {
+    color: #fbbf24;
+}
+
+.overhead-disabled-banner code {
+    background-color: rgba(0,0,0,0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+[data-theme="dark"] .overhead-disabled-banner code {
+    background-color: rgba(255,255,255,0.1);
+}
+
+@media (max-width: 768px) {
+    .overhead-content {
+        flex-direction: column;
+    }
+    #overhead-map {
+        height: 350px;
+    }
+}
+

@@ -96,6 +96,43 @@ type Config struct {
 	// Token for ntfy server authentication.
 	// NTFY_TOKEN ""
 	NtfyToken string
+
+	// Enable overhead trajectory prediction. When enabled, the application
+	// predicts aircraft that are on course to fly directly overhead and sends
+	// a "look up in N minutes" notification after a confirmation window.
+	// OVERHEAD_PREDICTION_ENABLED "false"
+	OverheadPredictionEnabled bool
+
+	// Lateral radius in kilometers from the location that defines "overhead".
+	// An aircraft whose predicted closest point of approach is within this
+	// radius (and that stays on course for the confirmation window) triggers
+	// a predictive notification.
+	// OVERHEAD_RADIUS_KILOMETERS 3
+	OverheadRadiusKilometers int
+
+	// Look-ahead horizon in minutes. Only aircraft whose predicted closest
+	// point of approach occurs within this many minutes from now are
+	// considered candidates. Larger values give more warning but produce more
+	// (eventually abandoned) candidates.
+	// OVERHEAD_LOOK_AHEAD_MINUTES 10
+	OverheadLookAheadMinutes int
+
+	// Confirmation window in seconds. A candidate must remain on course and
+	// projected overhead for this many seconds of consecutive sub-loop samples
+	// before a notification is sent.
+	// OVERHEAD_CONFIRM_SECONDS 5
+	OverheadConfirmSeconds int
+
+	// Polling interval in seconds for the per-candidate confirmation sub-loop.
+	// Each candidate is polled at this cadence until confirmed or abandoned.
+	// OVERHEAD_SUBLOOP_POLL_SECONDS 5
+	OverheadSubloopPollSeconds int
+
+	// Inbound margin in degrees. An aircraft is considered "on course" for
+	// overhead prediction when its heading differs from the bearing to the
+	// target location by at most this many degrees. Smaller is stricter.
+	// OVERHEAD_INBOUND_MARGIN_DEGREES 10
+	OverheadInboundMarginDegrees int
 }
 
 // Environment variable names
@@ -119,6 +156,12 @@ const (
 	APIPort                = "API_PORT"
 	WebUIEnabled           = "WEB_UI_ENABLED"
 	WebUIPort              = "WEB_UI_PORT"
+	OverheadPredictionEnabled  = "OVERHEAD_PREDICTION_ENABLED"
+	OverheadRadiusKilometers   = "OVERHEAD_RADIUS_KILOMETERS"
+	OverheadLookAheadMinutes   = "OVERHEAD_LOOK_AHEAD_MINUTES"
+	OverheadConfirmSeconds    = "OVERHEAD_CONFIRM_SECONDS"
+	OverheadSubloopPollSeconds = "OVERHEAD_SUBLOOP_POLL_SECONDS"
+	OverheadInboundMarginDeg   = "OVERHEAD_INBOUND_MARGIN_DEGREES"
 )
 
 // getEnvVariable looks up a specified environment variable, if not set the specified default is used
@@ -191,5 +234,42 @@ func GetConfig() (config Config, err error) {
 	}
 
 	config.AircraftTypes = strings.Split(strings.ToUpper(strings.ReplaceAll(getEnvVariable(AircraftTypes, "ALL"), " ", "")), ",")
+
+	config.OverheadPredictionEnabled, err = strconv.ParseBool(getEnvVariable(OverheadPredictionEnabled, "false"))
+	if err != nil {
+		log.Printf("Invalid value for OVERHEAD_PREDICTION_ENABLED: %s, using default: false", getEnvVariable(OverheadPredictionEnabled, "false"))
+		config.OverheadPredictionEnabled = false
+	}
+
+	config.OverheadRadiusKilometers, err = strconv.Atoi(getEnvVariable(OverheadRadiusKilometers, "3"))
+	if err != nil {
+		log.Printf("Invalid value for OVERHEAD_RADIUS_KILOMETERS: %s, using default: 3", getEnvVariable(OverheadRadiusKilometers, "3"))
+		config.OverheadRadiusKilometers = 3
+	}
+
+	config.OverheadLookAheadMinutes, err = strconv.Atoi(getEnvVariable(OverheadLookAheadMinutes, "10"))
+	if err != nil {
+		log.Printf("Invalid value for OVERHEAD_LOOK_AHEAD_MINUTES: %s, using default: 10", getEnvVariable(OverheadLookAheadMinutes, "10"))
+		config.OverheadLookAheadMinutes = 10
+	}
+
+	config.OverheadConfirmSeconds, err = strconv.Atoi(getEnvVariable(OverheadConfirmSeconds, "5"))
+	if err != nil || config.OverheadConfirmSeconds < 1 {
+		log.Printf("Invalid value for OVERHEAD_CONFIRM_SECONDS: %s, using default: 5", getEnvVariable(OverheadConfirmSeconds, "5"))
+		config.OverheadConfirmSeconds = 5
+	}
+
+	config.OverheadSubloopPollSeconds, err = strconv.Atoi(getEnvVariable(OverheadSubloopPollSeconds, "5"))
+	if err != nil || config.OverheadSubloopPollSeconds < 1 {
+		log.Printf("Invalid value for OVERHEAD_SUBLOOP_POLL_SECONDS: %s, using default: 5", getEnvVariable(OverheadSubloopPollSeconds, "5"))
+		config.OverheadSubloopPollSeconds = 5
+	}
+
+	config.OverheadInboundMarginDegrees, err = strconv.Atoi(getEnvVariable(OverheadInboundMarginDeg, "10"))
+	if err != nil || config.OverheadInboundMarginDegrees < 1 || config.OverheadInboundMarginDegrees > 180 {
+		log.Printf("Invalid value for OVERHEAD_INBOUND_MARGIN_DEGREES: %s, using default: 10", getEnvVariable(OverheadInboundMarginDeg, "10"))
+		config.OverheadInboundMarginDegrees = 10
+	}
+
 	return config, nil
 }
