@@ -1,6 +1,10 @@
 name: 'PR flow'
 on:
   pull_request:
+  # Also test (and build, without publishing) everything that lands on main
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:

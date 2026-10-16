@@ -2,11 +2,10 @@ name: 'Release'
 permissions:
   contents: write
   packages: write
+# Releases only happen when this workflow is started by hand (Actions tab > Release > Run workflow).
+# Merging to main does not release anything.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 jobs:
   test:
@@ -162,5 +161,5 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
           curl -X POST -H 'Content-Type: application/json' -d '{
-            "content": "Build failed for Jetspotter. Commit message: ${{ github.event.head_commit.message }}. View the failed job at ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
+            "content": "Release failed for Jetspotter (started by ${{ github.actor }} on ${{ github.ref_name }}). View the failed job at ${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}"
           }' $DISCORD_WEBHOOK
