@@ -1,0 +1,19 @@
+{{define "styles"}}
+<link rel="stylesheet" href="/static/css/auth.css">
+<!-- The server shows the dashboard as soon as the first aircraft data is in -->
+<meta http-equiv="refresh" content="5">
+{{end}}
+
+{{define "content"}}
+<main class="centered-card-page">
+    <div class="centered-card">
+        <div class="radar" role="status" aria-label="Loading"></div>
+        <h1>Jetspotter is starting</h1>
+        <p>Waiting for the first aircraft data. This page refreshes every 5 seconds.</p>
+    </div>
+</main>
+{{end}}
+
+{{define "scripts"}}
+<script type="module" src="/static/js/pages/basic.js"></script>
+{{end}}

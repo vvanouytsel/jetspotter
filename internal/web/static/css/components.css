@@ -1,0 +1,446 @@
+/* ==========================================================================
+   components.css - pieces used on more than one page:
+   app header, buttons, chips, badges, form controls, footer, radar loader,
+   empty state and dialog.
+   ========================================================================== */
+
+/* App header ------------------------------------------------------------- */
+
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--glass);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border-bottom: 1px solid var(--border);
+}
+
+.app-header__inner {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--text);
+    font-size: 1.2rem;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+}
+
+.brand__mark {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    background: var(--accent-gradient);
+    color: #fff;
+    box-shadow: 0 6px 18px -6px var(--accent);
+}
+
+.brand__mark .icon {
+    width: 20px;
+    height: 20px;
+}
+
+.app-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.nav-link:hover {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.nav-link[aria-current="page"] {
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+/* The theme toggle shows the icon of the theme you would switch to */
+.theme-toggle .icon-sun {
+    display: none;
+}
+
+:root[data-theme="dark"] .theme-toggle .icon-sun {
+    display: block;
+}
+
+:root[data-theme="dark"] .theme-toggle .icon-moon {
+    display: none;
+}
+
+/* Refresh countdown in the header */
+.countdown {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-right: var(--space-2);
+    padding: 5px var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.countdown::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 25%, transparent);
+}
+
+.countdown[data-state="refreshing"]::before {
+    background: var(--inbound);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--inbound) 25%, transparent);
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    50% {
+        opacity: 0.35;
+    }
+}
+
+/* Phones: keep the whole header on one line */
+@media (max-width: 640px) {
+    .app-header__inner {
+        padding-inline: var(--space-3);
+        gap: var(--space-2);
+    }
+
+    .nav-link {
+        padding: var(--space-2);
+    }
+
+    .nav-link__label {
+        display: none;
+    }
+
+    .countdown {
+        padding: 0;
+        border: 0;
+        background: none;
+        margin-right: var(--space-1);
+    }
+}
+
+/* Buttons ---------------------------------------------------------------- */
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: 9px var(--space-4);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 650;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s, filter 0.15s;
+}
+
+.button:hover {
+    background: var(--surface-2);
+}
+
+.button:active {
+    transform: translateY(1px);
+}
+
+.button--primary {
+    border-color: transparent;
+    background: var(--accent-gradient);
+    color: #fff;
+    box-shadow: 0 6px 16px -6px var(--accent);
+}
+
+.button--primary:hover {
+    background: var(--accent-gradient);
+    filter: brightness(1.1);
+}
+
+.button--small {
+    padding: 6px var(--space-3);
+    font-size: 0.8rem;
+}
+
+.button--icon {
+    padding: 0;
+    width: 40px;
+    height: 40px;
+}
+
+.icon-button {
+    display: inline-grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.icon-button:hover {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+/* Chips: small toggle buttons used for filters */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 8px var(--space-3);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.chip:hover {
+    color: var(--text);
+    border-color: var(--text-muted);
+}
+
+.chip[aria-pressed="true"] {
+    border-color: transparent;
+    background: var(--accent-soft);
+    color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+/* Badges ----------------------------------------------------------------- */
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 750;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.badge--military {
+    background: var(--military-soft);
+    color: var(--military);
+}
+
+.badge--inbound {
+    background: var(--inbound-soft);
+    color: var(--inbound);
+}
+
+/* Form controls ---------------------------------------------------------- */
+
+.field {
+    display: grid;
+    gap: var(--space-1);
+}
+
+.field__label {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.input,
+.select {
+    width: 100%;
+    padding: 9px var(--space-3);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input:focus-visible,
+.select:focus-visible {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    outline: none;
+}
+
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon .icon {
+    position: absolute;
+    top: 50%;
+    left: var(--space-3);
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.input-with-icon .input {
+    padding-left: 38px;
+}
+
+/* Footer ----------------------------------------------------------------- */
+
+.app-footer {
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.app-footer__inner {
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: var(--space-4);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.app-footer a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: inherit;
+    text-decoration: none;
+}
+
+.app-footer a:hover {
+    color: var(--text);
+}
+
+.app-footer__links {
+    display: flex;
+    gap: var(--space-5);
+}
+
+/* Radar loader: used while waiting for aircraft -------------------------- */
+
+.radar {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle, transparent 28%, var(--accent-soft) 29%, transparent 31%),
+        radial-gradient(circle, transparent 58%, var(--accent-soft) 59%, transparent 61%);
+}
+
+.radar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--accent) 0deg, transparent 70deg);
+    opacity: 0.55;
+    animation: sweep 2.4s linear infinite;
+}
+
+@keyframes sweep {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty / waiting state shown inside a grid */
+
+.empty-state {
+    grid-column: 1 / -1;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-4);
+    padding: var(--space-6) var(--space-4);
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.empty-state strong {
+    display: block;
+    color: var(--text);
+    font-size: 1.1rem;
+}
+
+/* Dialog ----------------------------------------------------------------- */
+
+.dialog {
+    margin: auto; /* the reset in base.css would otherwise pin it to the top left */
+    width: min(660px, calc(100vw - 2 * var(--space-4)));
+    max-height: calc(100vh - 2 * var(--space-4));
+    padding: 0;
+    overflow: auto;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-lg);
+}
+
+.dialog::backdrop {
+    background: rgba(3, 6, 14, 0.65);
+    backdrop-filter: blur(6px);
+}
+
+.dialog[open] {
+    animation: dialog-in 0.18s ease-out;
+}
+
+@keyframes dialog-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+}

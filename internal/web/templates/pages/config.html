@@ -1,0 +1,23 @@
+{{define "styles"}}
+<link rel="stylesheet" href="/static/css/config.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+{{end}}
+
+{{define "content"}}
+<main class="page config-page" id="config" data-lat="{{.Latitude}}" data-lon="{{.Longitude}}">
+    <div>
+        <h1 class="page-title">Configuration</h1>
+        <p class="page-subtitle">What Jetspotter is currently using. Settings are changed with environment variables, so this page is read only.</p>
+    </div>
+
+    <!-- Filled in by static/js/pages/config.js -->
+    <div id="config-content" class="config-page">
+        <div class="empty-state"><div class="radar" role="status" aria-label="Loading"></div></div>
+    </div>
+</main>
+{{end}}
+
+{{define "scripts"}}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script type="module" src="/static/js/pages/config.js"></script>
+{{end}}

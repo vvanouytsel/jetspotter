@@ -1,0 +1,34 @@
+{{define "styles"}}
+<link rel="stylesheet" href="/static/css/auth.css">
+{{end}}
+
+{{define "content"}}
+<main class="centered-card-page">
+    <div class="centered-card">
+        <h1>Log in</h1>
+        <p>Log in to see the configuration of this Jetspotter.</p>
+
+        {{if .LoginFailed}}
+        <div class="login-error" role="alert">Wrong username or password.</div>
+        {{end}}
+
+        <form class="login-form" action="/login" method="POST">
+            <label class="field">
+                <span class="field__label">Username</span>
+                <input class="input" type="text" name="username" required autocomplete="username" autofocus>
+            </label>
+            <label class="field">
+                <span class="field__label">Password</span>
+                <input class="input" type="password" name="password" required autocomplete="current-password">
+            </label>
+            <button class="button button--primary" type="submit">Log in</button>
+        </form>
+
+        <a class="login-back" href="/">Back to the dashboard</a>
+    </div>
+</main>
+{{end}}
+
+{{define "scripts"}}
+<script type="module" src="/static/js/pages/basic.js"></script>
+{{end}}

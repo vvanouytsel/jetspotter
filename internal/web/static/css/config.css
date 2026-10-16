@@ -1,0 +1,170 @@
+/* ==========================================================================
+   config.css - the (read only) configuration page.
+   ========================================================================== */
+
+.config-page {
+    display: grid;
+    gap: var(--space-5);
+}
+
+.page-title {
+    font-size: 1.6rem;
+    letter-spacing: -0.01em;
+}
+
+.page-subtitle {
+    margin-top: var(--space-1);
+    color: var(--text-muted);
+}
+
+.panel {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.panel__title {
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--border);
+    font-size: 1.05rem;
+}
+
+.panel__body {
+    padding: var(--space-5);
+}
+
+/* A list of "name, value, explanation" rows */
+.settings {
+    display: grid;
+    align-content: start;
+    gap: var(--space-4);
+}
+
+.setting {
+    display: grid;
+    grid-template-columns: minmax(150px, 220px) 1fr;
+    gap: var(--space-1) var(--space-4);
+}
+
+.setting dt {
+    font-weight: 600;
+}
+
+.setting dd {
+    font-variant-numeric: tabular-nums;
+}
+
+.setting__hint {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+    .setting {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Map ------------------------------------------------------------------- */
+
+.location {
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) 2fr;
+    gap: var(--space-5);
+}
+
+@media (max-width: 800px) {
+    .location {
+        grid-template-columns: 1fr;
+    }
+}
+
+.map {
+    height: 340px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-top: var(--space-3);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.legend__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.legend__swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--swatch);
+}
+
+/* Notification services --------------------------------------------------- */
+
+.services {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--space-3);
+}
+
+.service {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+}
+
+.service__name {
+    font-weight: 600;
+}
+
+.service__status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.service__status::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--alt-none);
+}
+
+.service[data-active] .service__status {
+    color: var(--ok);
+}
+
+.service[data-active] .service__status::before {
+    background: var(--ok);
+}
+
+.service__detail {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    overflow-wrap: anywhere;
+}
+
+.notice {
+    padding: var(--space-4);
+    border-radius: var(--radius-sm);
+    background: var(--military-soft);
+    color: var(--danger);
+}
