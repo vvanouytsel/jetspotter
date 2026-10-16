@@ -1,0 +1,44 @@
+{{define "header"}}
+<header class="app-header">
+    <div class="app-header__inner">
+        <a class="brand" href="/">
+            <span class="brand__mark"><svg class="icon"><use href="#i-plane"></use></svg></span>
+            Jetspotter
+        </a>
+
+        <nav class="app-nav" aria-label="Main">
+            {{if eq .Page "dashboard"}}
+            <span class="countdown" id="countdown" title="Time until the next refresh">-</span>
+            {{end}}
+
+            <a class="nav-link" href="/" {{if eq .Page "dashboard"}}aria-current="page"{{end}} title="Dashboard">
+                <svg class="icon"><use href="#i-grid"></use></svg>
+                <span class="nav-link__label">Dashboard</span>
+            </a>
+            <a class="nav-link" href="{{.MapURL}}" target="_blank" rel="noopener" title="Open the live map on airplanes.live">
+                <svg class="icon"><use href="#i-map"></use></svg>
+                <span class="nav-link__label">Live map</span>
+            </a>
+            {{if .IsLoggedIn}}
+            <a class="nav-link" href="/config" {{if eq .Page "config"}}aria-current="page"{{end}} title="Configuration">
+                <svg class="icon"><use href="#i-sliders"></use></svg>
+                <span class="nav-link__label">Config</span>
+            </a>
+            <a class="nav-link" href="/logout" title="Log out {{.Username}}">
+                <svg class="icon"><use href="#i-log-out"></use></svg>
+                <span class="nav-link__label">Log out</span>
+            </a>
+            {{else if ne .Page "login"}}
+            <a class="nav-link" href="/login" title="Log in">
+                <svg class="icon"><use href="#i-log-in"></use></svg>
+                <span class="nav-link__label">Log in</span>
+            </a>
+            {{end}}
+            <button class="icon-button theme-toggle" id="theme-toggle" type="button" aria-label="Switch between light and dark theme">
+                <svg class="icon icon-moon"><use href="#i-moon"></use></svg>
+                <svg class="icon icon-sun"><use href="#i-sun"></use></svg>
+            </button>
+        </nav>
+    </div>
+</header>
+{{end}}

@@ -1,0 +1,210 @@
+/* ==========================================================================
+   base.css - design tokens, reset and basic typography.
+   Everything visual (colors, spacing, radius) is defined here once as a
+   variable. Change a value here and it changes everywhere.
+   ========================================================================== */
+
+:root {
+    /* Surfaces - light theme */
+    --bg: #eef2fa;
+    --bg-glow-1: rgba(59, 130, 246, 0.14);
+    --bg-glow-2: rgba(139, 92, 246, 0.10);
+    --surface: #ffffff;
+    --surface-2: #f1f5fb;
+    --surface-3: #e4ebf6;
+    --border: rgba(15, 27, 51, 0.09);
+    --border-strong: rgba(15, 27, 51, 0.18);
+    --glass: rgba(255, 255, 255, 0.72);
+
+    /* Text */
+    --text: #0b1530;
+    --text-muted: #5a6a8a;
+
+    /* Accent */
+    --accent: #2563eb;
+    --accent-2: #7c3aed;
+    --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-2));
+    --accent-contrast: #ffffff;
+    --accent-soft: rgba(37, 99, 235, 0.10);
+
+    /* Status */
+    --military: #dc2f1a;
+    --military-soft: rgba(220, 47, 26, 0.11);
+    --inbound: #b45f00;
+    --inbound-soft: rgba(245, 158, 11, 0.16);
+    --ok: #12985f;
+    --danger: #c0392b;
+
+    /* Shadows */
+    --shadow: 0 1px 2px rgba(15, 27, 51, 0.05), 0 8px 24px -8px rgba(15, 27, 51, 0.12);
+    --shadow-lg: 0 24px 60px -20px rgba(15, 27, 51, 0.35);
+
+    /* Altitude colors, from low (orange) to high (purple) */
+    --alt-none: #8190ad;
+    --alt-1: #f0742e;
+    --alt-2: #d9a400;
+    --alt-3: #2fa84f;
+    --alt-4: #0e9f9b;
+    --alt-5: #2e74e0;
+    --alt-6: #8a3fd4;
+
+    /* Shape and spacing */
+    --radius-sm: 10px;
+    --radius: 18px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --page-width: 1280px;
+
+    /* Typography */
+    --font: "Inter", "Segoe UI Variable Text", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+
+    color-scheme: light;
+}
+
+/* Dark theme. theme-init.js sets data-theme before the page is drawn (saved choice, or the system preference) */
+:root[data-theme="dark"] {
+    --bg: #060a13;
+    --bg-glow-1: rgba(56, 140, 255, 0.16);
+    --bg-glow-2: rgba(139, 92, 246, 0.13);
+    --surface: #0d1423;
+    --surface-2: #131c31;
+    --surface-3: #1b2744;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --glass: rgba(10, 16, 30, 0.7);
+
+    --text: #eaf0ff;
+    --text-muted: #8b9ab8;
+
+    --accent: #5cc8ff;
+    --accent-2: #9b8cff;
+    --accent-contrast: #04182b;
+    --accent-soft: rgba(92, 200, 255, 0.12);
+
+    --military: #ff7a66;
+    --military-soft: rgba(255, 122, 102, 0.15);
+    --inbound: #ffbe3d;
+    --inbound-soft: rgba(255, 190, 61, 0.15);
+    --ok: #3ddc97;
+    --danger: #ff6b5e;
+
+    --shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 12px 32px -10px rgba(0, 0, 0, 0.6);
+    --shadow-lg: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+
+    --alt-none: #6c7a99;
+    --alt-1: #ff8f4d;
+    --alt-2: #f2c926;
+    --alt-3: #5cd04f;
+    --alt-4: #2fd0cb;
+    --alt-5: #5aa2ff;
+    --alt-6: #b778f0;
+
+    color-scheme: dark;
+}
+
+/* Reset ------------------------------------------------------------------ */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+* {
+    margin: 0;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background:
+        radial-gradient(900px 500px at 8% -10%, var(--bg-glow-1), transparent 60%),
+        radial-gradient(800px 500px at 100% 0%, var(--bg-glow-2), transparent 60%),
+        var(--bg);
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+button,
+input,
+select {
+    font: inherit;
+    color: inherit;
+}
+
+a {
+    color: var(--accent);
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+/* Small helpers ---------------------------------------------------------- */
+
+.page {
+    flex: 1;
+    width: 100%;
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-4) var(--space-6);
+}
+
+.icon {
+    width: 1.25em;
+    height: 1.25em;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.mono {
+    font-family: var(--font-mono);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}

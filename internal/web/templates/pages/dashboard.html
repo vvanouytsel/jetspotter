@@ -1,0 +1,76 @@
+{{define "styles"}}
+<link rel="stylesheet" href="/static/css/dashboard.css">
+{{end}}
+
+{{define "content"}}
+<main class="page" id="dashboard" data-refresh-seconds="{{.RefreshSeconds}}" data-lat="{{.Latitude}}" data-lon="{{.Longitude}}">
+    <!-- The tiles double as quick filters -->
+    <section class="summary" aria-label="Summary">
+        <button class="tile" type="button" id="tile-total" aria-pressed="false">
+            <span class="tile__icon"><svg class="icon"><use href="#i-plane"></use></svg></span>
+            <span class="tile__value" id="count-total">0</span>
+            <span class="tile__label">Aircraft</span>
+            <span class="tile__hint">within {{.ScanRadius}} km</span>
+        </button>
+        <button class="tile" type="button" id="tile-inbound" aria-pressed="false" data-filter="inbound">
+            <span class="tile__icon"><svg class="icon"><use href="#i-inbound"></use></svg></span>
+            <span class="tile__value" id="count-inbound">0</span>
+            <span class="tile__label">Inbound</span>
+            <span class="tile__hint">heading towards you</span>
+        </button>
+        <button class="tile" type="button" id="tile-military" aria-pressed="false" data-filter="military">
+            <span class="tile__icon"><svg class="icon"><use href="#i-shield"></use></svg></span>
+            <span class="tile__value" id="count-military">0</span>
+            <span class="tile__label">Military</span>
+            <span class="tile__hint">military aircraft</span>
+        </button>
+    </section>
+
+    <section class="toolbar" aria-label="Filters and sorting">
+        <label class="field toolbar__search">
+            <span class="field__label">Search</span>
+            <span class="input-with-icon">
+                <svg class="icon"><use href="#i-search"></use></svg>
+                <input class="input" type="search" id="search" placeholder="Callsign, registration, ICAO…" autocomplete="off">
+            </span>
+        </label>
+
+        <label class="field toolbar__type">
+            <span class="field__label">Aircraft type</span>
+            <select class="select" id="filter-type">
+                <option value="">All types</option>
+            </select>
+        </label>
+
+        <div class="toolbar__chips" role="group" aria-label="Status filters">
+            <button class="chip" type="button" aria-pressed="false" data-filter="inbound">Inbound</button>
+            <button class="chip" type="button" aria-pressed="false" data-filter="military">Military</button>
+            <button class="chip" type="button" aria-pressed="false" data-filter="hideGround">Hide on ground</button>
+        </div>
+
+        <div class="toolbar__sort">
+            <label class="field">
+                <span class="field__label">Sort by</span>
+                <select class="select" id="sort-by">
+                    <option value="distance">Distance</option>
+                    <option value="altitude">Altitude</option>
+                    <option value="speed">Speed</option>
+                    <option value="type">Aircraft type</option>
+                </select>
+            </label>
+            <button class="button button--icon sort-direction" id="sort-direction" type="button" data-direction="asc" aria-label="Sort direction: ascending" title="Change sort direction">
+                <svg class="icon"><use href="#i-arrow-up"></use></svg>
+            </button>
+        </div>
+    </section>
+
+    <p class="result-count" id="result-count" aria-live="polite"></p>
+    <section class="aircraft-grid" id="aircraft-grid" aria-label="Aircraft"></section>
+</main>
+
+<dialog class="dialog" id="details-dialog" aria-label="Flight details"></dialog>
+{{end}}
+
+{{define "scripts"}}
+<script type="module" src="/static/js/pages/dashboard.js"></script>
+{{end}}

@@ -1,0 +1,58 @@
+/* ==========================================================================
+   auth.css - the login page and the "starting up" page.
+   Both are a single centered card.
+   ========================================================================== */
+
+.centered-card-page {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    padding: var(--space-5) var(--space-4);
+}
+
+.centered-card {
+    width: 100%;
+    max-width: 400px;
+    padding: var(--space-6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+.centered-card h1 {
+    margin-top: var(--space-4);
+    font-size: 1.5rem;
+}
+
+.centered-card p {
+    margin-top: var(--space-2);
+    color: var(--text-muted);
+}
+
+.centered-card .radar {
+    margin: 0 auto;
+}
+
+.login-form {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-5);
+    text-align: left;
+}
+
+.login-error {
+    margin-top: var(--space-4);
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    background: var(--military-soft);
+    color: var(--danger);
+    font-size: 0.9rem;
+}
+
+.login-back {
+    display: inline-block;
+    margin-top: var(--space-4);
+    font-size: 0.9rem;
+}

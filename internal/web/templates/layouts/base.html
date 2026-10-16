@@ -1,0 +1,31 @@
+{{/*
+  The shared frame around every page: <head>, header, footer.
+  A page fills in these blocks (all optional):
+    "styles"  extra <link> tags for CSS that only this page needs
+    "content" the main part of the page
+    "scripts" the <script> tags for this page
+*/}}
+{{define "base"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{.Title}}</title>
+    <link rel="icon" href="/favicon.ico">
+    <!-- Sets the light/dark theme before the page is drawn, so there is no flash -->
+    <script src="/static/js/theme-init.js"></script>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    {{block "styles" .}}{{end}}
+</head>
+<body data-page="{{.Page}}">
+    {{template "icons"}}
+    {{template "header" .}}
+
+    {{block "content" .}}{{end}}
+
+    {{template "footer" .}}
+    {{block "scripts" .}}{{end}}
+</body>
+</html>
+{{end}}
