@@ -30,6 +30,17 @@ type Config struct {
 	// AIRCRAFT_TYPES MILITARY
 	AircraftTypes []string
 
+	// A comma separated, ordered list of ADS-B API base URLs used to fetch aircraft.
+	// The endpoints are tried in order at startup and the first reachable one is used.
+	// Every URL must expose the adsb.fi / adsb.lol compatible
+	// "/lat/LAT/lon/LON/dist/RADIUS" endpoint (e.g. opendata.adsb.fi/api/v3, api.adsb.lol/v2).
+	// If not set, the built-in defaults are used: https://opendata.adsb.fi/api/v3,https://api.adsb.lol/v2
+	// ADSB_API_URLS ""
+	// EXAMPLES
+	// ADSB_API_URLS https://api.adsb.lol/v2
+	// ADSB_API_URLS https://api.adsb.lol/v2,https://opendata.adsb.fi/api/v3
+	ADSBAPIURLs []string
+
 	// Webhook used to send notifications to Slack. If not set, no messages will be sent to Slack.
 	// SLACK_WEBHOOK_URL ""
 	SlackWebHookURL string
@@ -77,4 +88,8 @@ type Config struct {
 	// URL of the ntfy server.
 	// NTFY_SERVER "https://ntfy.sh"
 	NtfyServer string
+
+	// Token for ntfy server authentication.
+	// NTFY_TOKEN ""
+	NtfyToken string
 }

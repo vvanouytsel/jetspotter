@@ -45,6 +45,17 @@ type Config struct {
 	// AIRCRAFT_TYPES MILITARY
 	AircraftTypes []string
 
+	// A comma separated, ordered list of ADS-B API base URLs used to fetch aircraft.
+	// The endpoints are tried in order at startup and the first reachable one is used.
+	// Every URL must expose the adsb.fi / adsb.lol compatible
+	// "/lat/LAT/lon/LON/dist/RADIUS" endpoint (e.g. opendata.adsb.fi/api/v3, api.adsb.lol/v2).
+	// If not set, the built-in defaults are used: https://opendata.adsb.fi/api/v3,https://api.adsb.lol/v2
+	// ADSB_API_URLS ""
+	// EXAMPLES
+	// ADSB_API_URLS https://api.adsb.lol/v2
+	// ADSB_API_URLS https://api.adsb.lol/v2,https://opendata.adsb.fi/api/v3
+	ADSBAPIURLs []string
+
 	// Webhook used to send notifications to Slack. If not set, no messages will be sent to Slack.
 	// SLACK_WEBHOOK_URL ""
 	SlackWebHookURL string
@@ -109,6 +120,7 @@ const (
 	MaxScanRangeKilometers = "MAX_SCAN_RANGE_KILOMETERS"
 	MaxAltitudeFeet        = "MAX_ALTITUDE_FEET"
 	AircraftTypes          = "AIRCRAFT_TYPES"
+	ADSBAPIURLs            = "ADSB_API_URLS"
 	FetchInterval          = "FETCH_INTERVAL"
 	GotifyURL              = "GOTIFY_URL"
 	NtfyTopic              = "NTFY_TOPIC"
@@ -191,5 +203,15 @@ func GetConfig() (config Config, err error) {
 	}
 
 	config.AircraftTypes = strings.Split(strings.ToUpper(strings.ReplaceAll(getEnvVariable(AircraftTypes, "ALL"), " ", "")), ",")
+
+	// Parse the optional ADS-B API URL override. When unset, jetspotter falls back
+	// to its built-in default endpoint list (see internal/jetspotter).
+	for _, apiURL := range strings.Split(getEnvVariable(ADSBAPIURLs, ""), ",") {
+		apiURL = strings.TrimRight(strings.TrimSpace(apiURL), "/")
+		if apiURL != "" {
+			config.ADSBAPIURLs = append(config.ADSBAPIURLs, apiURL)
+		}
+	}
+
 	return config, nil
 }

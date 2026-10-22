@@ -176,7 +176,7 @@ func main() {
 	}
 
 	// Select the best available ADSB API at startup
-	jetspotter.SelectBestAPI()
+	jetspotter.SelectBestAPI(config.ADSBAPIURLs)
 
 	// Start services
 	HandleMetrics(config)
